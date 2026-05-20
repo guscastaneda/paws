@@ -1,3 +1,10 @@
 name = "winter-river-a9da"
 main = "index.js"
 compatibility_date = "2026-01-01"
+
+[assets]
+directory = "./portal/dist"
+binding = "ASSETS"
+
+[build]
+command = "cd portal && npm run build"

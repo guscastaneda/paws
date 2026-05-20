@@ -1,0 +1,9 @@
+{
+  "name": "paws-portal",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "cd portal && npm run dev",
+    "build": "cd portal && npm run build",
+    "deploy": "cd portal && npm run build && cd .. && wrangler deploy"
+  }
+}
