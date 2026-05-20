@@ -12,8 +12,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install portal deps
-        run: cd portal && npm install
+      - name: Install dependencies
+        run: |
+          npm install
+          cd portal && npm install && cd ..
+          npm install -g wrangler
       - name: Deploy
         run: npm run deploy
         env:
