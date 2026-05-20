@@ -1,3 +1,5 @@
+import { buildPetCards, buildNewPetView, wireNewPetForm, openEditPetForm } from './views/pets.js';
+
 // ── CONFIG ──────────────────────────────────────────────────────────────────
 const WORKER_URL = "";
 
@@ -116,6 +118,10 @@ async function init() {
   const firstName = clientData.firstName || 'there';
   document.getElementById('ob-first-name').textContent = firstName;
 
+  // Inject new pet form HTML
+  const newPetCard = document.getElementById('new-pet-card');
+  if (newPetCard) newPetCard.innerHTML = buildNewPetView();
+
   // Calc step completion
   const steps    = calcOnboardingSteps(clientData);
   const complete = updateProgressUI(steps);
@@ -142,6 +148,10 @@ async function init() {
 
 // ── NAVIGATION ───────────────────────────────────────────────────────────────
 async function goHome() {
+  // Hide all secondary cards
+  const newPetCard = document.getElementById('new-pet-card');
+  if (newPetCard) newPetCard.style.display = 'none';
+
   // Always re-fetch client data so compliance status is fresh
   try {
     const res = await fetch(WORKER_URL + '/client?token=' + encodeURIComponent(clientToken));
@@ -164,6 +174,24 @@ let uploadContext = { petId: null, petName: null, docType: null };
 let lastBooking = {};
 
 function goToStep(step) {
+  if (step === 'new-pet') {
+    // New pet is in its own card
+    const mainCard    = document.querySelector('.card');
+    const bookingCard = document.getElementById('booking-card');
+    const newPetCard  = document.getElementById('new-pet-card');
+    const bsCard      = document.getElementById('booking-success-card');
+    if (mainCard)    mainCard.style.display    = 'none';
+    if (bookingCard) bookingCard.style.display = 'none';
+    if (bsCard)      bsCard.style.display      = 'none';
+    if (newPetCard) {
+      newPetCard.style.display = 'block';
+      document.getElementById('view-new-pet').style.display        = 'block';
+      document.getElementById('view-new-pet-success').style.display = 'none';
+      wireNewPetForm(clientData, goHome, WORKER_URL, clientToken);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
   showView('view-' + step);
   if (step === 'docs')    buildDocCards();
   if (step === 'booking') buildBookingPetPills();
@@ -439,295 +467,13 @@ function buildDashboard() {
   }
 
   // ── Pet cards with doc detail ──
-  const container = document.getElementById('dash-pet-cards');
-  container.innerHTML = '';
-  const fmtDate = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '';
-  const REQUIRED_DOCS = ['Rabies Certificate', 'Town License', 'Vaccination Record'];
+  buildPetCards(clientData, goToStep, WORKER_URL, clientToken);
 
-  (clientData.pets || []).forEach(pet => {
-    const docs = pet.docs || [];
-
-    // Build doc rows — one per required doc type, pick best (non-expired) record
-    const docRows = REQUIRED_DOCS.map(type => {
-      const validDoc   = docs.find(d => d.type === type && !d.expired);
-      const expiredDoc = docs.find(d => d.type === type &&  d.expired);
-      const doc = validDoc || expiredDoc;
-      const ok  = !!validDoc;
-
-      let expiryText = '';
-      if (doc?.expiryDate) {
-        expiryText = ok
-          ? 'Expires ' + fmtDate(doc.expiryDate)
-          : 'Expired ' + fmtDate(doc.expiryDate);
-      }
-
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid var(--brand-stone-light);">' +
-        '<div style="display:flex;align-items:center;gap:0.5rem;">' +
-          '<span style="font-size:0.85rem;">' + (ok ? '✅' : '⚠️') + '</span>' +
-          '<span style="font-size:0.82rem;font-weight:' + (ok ? '400' : '500') + ';color:' + (ok ? 'var(--brand-bark)' : 'var(--brand-warning)') + ';">' + type + '</span>' +
-        '</div>' +
-        '<span style="font-size:0.75rem;color:' + (ok ? 'var(--brand-stone)' : 'var(--brand-warning)') + ';font-weight:300;">' + (expiryText || (ok ? 'On file' : 'Missing')) + '</span>' +
-      '</div>';
-    }).join('');
-
-    container.innerHTML +=
-      '<div class="pet-card" style="flex-direction:column;align-items:stretch;gap:0;">' +
-        '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">' +
-          '<div class="pet-avatar">🐶</div>' +
-          '<div class="pet-name">' + pet.name + '</div>' +
-        '</div>' +
-        '<div style="border-top:1px solid var(--brand-stone-light);padding-top:0.5rem;">' +
-          docRows.replace(/border-bottom[^;]+;[^"]*"[^>]*>(?=[^<]*<\/div><\/div>$)/, '') +
-        '</div>' +
-        '<button style="margin-top:0.75rem;padding:0.4rem 0.85rem;background:transparent;color:var(--brand-primary);border:1.5px solid var(--brand-primary);border-radius:999px;font-family:var(--font-body);font-size:0.78rem;font-weight:500;cursor:pointer;" id="pet-docs-upload-btn">Upload / Update Docs</button>' +
-      '</div>';
-  });
-}
-
-
-
-// ── FILE HANDLING ─────────────────────────────────────────────────────────────
-function handleFile(file) {
-  if (!file) return;
-  selectedDocFile = file;
-  document.getElementById('docs-file-name').textContent = file.name;
-  document.getElementById('docs-file-drop').classList.add('has-file');
-  document.getElementById('docs-file-error').classList.remove('visible');
-}
-
-document.getElementById('docs-file-input').addEventListener('change', function() { handleFile(this.files[0]); });
-document.getElementById('docs-file-drop').addEventListener('dragover',  e => { e.preventDefault(); e.currentTarget.classList.add('drag-over'); });
-document.getElementById('docs-file-drop').addEventListener('dragleave', e => e.currentTarget.classList.remove('drag-over'));
-document.getElementById('docs-file-drop').addEventListener('drop', e => {
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
-  handleFile(e.dataTransfer.files[0]);
-});
-
-// ── SUBMIT: CONTACT ───────────────────────────────────────────────────────────
-async function submitContact() {
-  let valid = true;
-  const name  = document.getElementById('c-name').value.trim();
-  const phone = document.getElementById('c-phone').value.trim();
-  const email = document.getElementById('c-email').value.trim();
-
-  const show = (id, msg) => {
-    const el = document.getElementById(id);
-    el.textContent = msg;
-    el.classList.add('visible');
-    valid = false;
-  };
-  const hide = id => document.getElementById(id).classList.remove('visible');
-
-  if (!name)  show('c-name-error',  'Please enter your name.');  else hide('c-name-error');
-  if (!phone) show('c-phone-error', 'Please enter a phone number.'); else hide('c-phone-error');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) show('c-email-error', 'Please enter a valid email.'); else hide('c-email-error');
-  if (!valid) return;
-
-  const btn = document.getElementById('c-submit');
-  btn.disabled = true; btn.classList.add('loading');
-  document.getElementById('c-form-error').classList.remove('visible');
-
-  const payload = {
-    token: clientToken, clientId: clientData.clientId,
-    updates: [
-      { field: 'Client Name',                current: clientData.name  || '', proposed: name },
-      { field: 'Phone Number',               current: clientData.phone || '', proposed: phone },
-      { field: 'Email Address',              current: clientData.email || '', proposed: email },
-      { field: 'Address',                    current: clientData.address  || '', proposed: document.getElementById('c-address').value.trim() },
-      { field: 'Additional Owner Name',      current: clientData.addName  || '', proposed: document.getElementById('c-add-name').value.trim() },
-      { field: 'Additional Owner Phone',     current: clientData.addPhone || '', proposed: document.getElementById('c-add-phone').value.trim() },
-      { field: 'Additional Owner Email',     current: clientData.addEmail || '', proposed: document.getElementById('c-add-email').value.trim() },
-    ].filter(u => u.proposed !== u.current && (u.proposed || u.current)),
-    markEmailConfirmed: true,
-  };
-
-  try {
-    const res = await fetch(WORKER_URL + '/profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || 'Server error');
-    }
-    clientData.emailConfirmed = true;
-    clientData.email = email;
-    clientData.name  = name;
-    clientData.phone = phone;
-    showView('view-contact-success');
-  } catch (err) {
-    document.getElementById('c-form-error').textContent = 'Error: ' + err.message;
-    document.getElementById('c-form-error').classList.add('visible');
-    btn.disabled = false; btn.classList.remove('loading');
-  }
-}
-
-// ── SUBMIT: EMERGENCY ─────────────────────────────────────────────────────────
-async function submitEmergency() {
-  let valid = true;
-  const name = document.getElementById('e-name').value.trim();
-  const phone = document.getElementById('e-phone').value.trim();
-  const rel   = document.getElementById('e-relationship').value.trim();
-
-  if (!name)  { document.getElementById('e-name-error').classList.add('visible');  valid = false; }
-  else          document.getElementById('e-name-error').classList.remove('visible');
-  if (!phone) { document.getElementById('e-phone-error').classList.add('visible'); valid = false; }
-  else          document.getElementById('e-phone-error').classList.remove('visible');
-  if (!rel)   { document.getElementById('e-rel-error').classList.add('visible');   valid = false; }
-  else          document.getElementById('e-rel-error').classList.remove('visible');
-  if (!valid) return;
-
-  const btn = document.getElementById('e-submit');
-  btn.disabled = true; btn.classList.add('loading');
-  document.getElementById('e-form-error').classList.remove('visible');
-
-  const payload = {
-    token: clientToken, clientId: clientData.clientId,
-    directFields: {
-      "Emergency Contact Name":         name,
-      "Emergency Contact Phone":        phone,
-      "Emergency Contact Relationship": rel,
-    },
-  };
-
-  try {
-    const res = await fetch(WORKER_URL + '/profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || 'Server error');
-    }
-    clientData.emergencyName         = name;
-    clientData.emergencyPhone        = phone;
-    clientData.emergencyRelationship = rel;
-    showView('view-contact-success');
-  } catch (err) {
-    document.getElementById('e-form-error').textContent = 'Error: ' + err.message;
-    document.getElementById('e-form-error').classList.add('visible');
-    btn.disabled = false; btn.classList.remove('loading');
-  }
-}
-
-// ── SUBMIT: DOC ───────────────────────────────────────────────────────────────
-async function submitDoc() {
-  if (!selectedDocFile) {
-    document.getElementById('docs-file-error').classList.add('visible');
-    return;
-  }
-  document.getElementById('docs-file-error').classList.remove('visible');
-
-  const btn = document.getElementById('docs-submit');
-  btn.disabled = true; btn.classList.add('loading');
-  document.getElementById('docs-upload-form-error').classList.remove('visible');
-
-  let fileBase64, fileType;
-  try {
-    fileBase64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload  = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(selectedDocFile);
-    });
-    fileType = selectedDocFile.type || 'application/octet-stream';
-  } catch {
-    document.getElementById('docs-upload-form-error').textContent = 'Could not read the file. Please try again.';
-    document.getElementById('docs-upload-form-error').classList.add('visible');
-    btn.disabled = false; btn.classList.remove('loading');
-    return;
-  }
-
-  try {
-    const res = await fetch(WORKER_URL + '/compliance', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token: clientToken,
-        clientId: clientData.clientId,
-        petId: uploadContext.petId,
-        documentType: uploadContext.docType,
-        expirationDate: document.getElementById('docs-expiry').value || null,
-        fileName: selectedDocFile.name,
-        fileBase64, fileType,
-      }),
-    });
-    if (!res.ok) throw new Error();
-
-    // Optimistically update clientData so card refreshes immediately
-    const pet = clientData.pets.find(p => p.id === uploadContext.petId);
-    if (pet) {
-      pet.docs = pet.docs || [];
-      pet.docs.push({ type: uploadContext.docType, expired: false });
-    }
-
-    // Return to cards view with updated optimistic status
-    showView('view-docs');
-    buildDocCards();
-    updateProgressUI(calcOnboardingSteps(clientData));
-
-    // Re-fetch in background — merge carefully to preserve optimistic updates
-    fetch(WORKER_URL + '/client?token=' + encodeURIComponent(clientToken))
-      .then(r => r.ok ? r.json() : null)
-      .then(fresh => {
-        if (!fresh) return;
-        // Merge: keep any optimistic docs that fresh data might not have yet
-        if (fresh.pets && clientData.pets) {
-          fresh.pets.forEach(freshPet => {
-            const localPet = clientData.pets.find(p => p.id === freshPet.id);
-            if (localPet) {
-              // Add any local optimistic docs not yet in fresh data
-              const freshTypes = (freshPet.docs || []).map(d => d.type);
-              (localPet.docs || []).forEach(localDoc => {
-                if (!freshTypes.includes(localDoc.type)) {
-                  freshPet.docs = freshPet.docs || [];
-                  freshPet.docs.push(localDoc);
-                }
-              });
-            }
-          });
-        }
-        clientData = fresh;
-        buildDocCards();
-        updateProgressUI(calcOnboardingSteps(clientData));
-      })
-      .catch(() => {});
-
-  } catch {
-    document.getElementById('docs-upload-form-error').textContent = 'Upload failed. Please try again or email the document directly.';
-    document.getElementById('docs-upload-form-error').classList.add('visible');
-    btn.disabled = false; btn.classList.remove('loading');
-  }
-}
-
-// ── AGREEMENT ─────────────────────────────────────────────────────────────────
-function toggleAgreeBtn() {
-  document.getElementById('ag-submit').disabled =
-    !document.getElementById('agree-check').checked;
-}
-
-async function submitAgreement() {
-  const btn = document.getElementById('ag-submit');
-  btn.disabled = true; btn.classList.add('loading');
-  document.getElementById('ag-form-error').classList.remove('visible');
-
-  try {
-    const res = await fetch(WORKER_URL + '/agreement', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: clientToken, clientId: clientData.clientId }),
-    });
-    if (!res.ok) throw new Error();
-    clientData.agreementSigned = true;
-    showView('view-contact-success');
-  } catch {
-    document.getElementById('ag-form-error').textContent = 'Something went wrong. Please try again.';
-    document.getElementById('ag-form-error').classList.add('visible');
-    btn.disabled = false; btn.classList.remove('loading');
-  }
+  // Wire buttons after innerHTML is set
+  setTimeout(() => {
+    const bookBtn = document.getElementById('dash-book-btn');
+    if (bookBtn && !bookBtn.disabled) bookBtn.onclick = () => goToStep('booking');
+  }, 0);
 }
 
 // ── BOOKING ───────────────────────────────────────────────────────────────────

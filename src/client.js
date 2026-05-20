@@ -1,6 +1,8 @@
 import { cors, errRes, jsonRes, atFetch } from "./helpers.js";
 import { BASE_ID, CLIENTS_TABLE, PETS_TABLE, COMPLIANCE_TABLE, PENDING_UPDATES_TABLE, APPOINTMENTS_TABLE, BOARDING_SERVICE_ID, FIELDS, AT } from "./constants.js";
 
+const VETS_TABLE = "tblUC3XRDQnNCwTri";
+
 // ── GET /client ───────────────────────────────────────────────────────────────
 async function handleGetClient(req, env) {
   const token = new URL(req.url).searchParams.get("token");
@@ -65,11 +67,72 @@ async function handleGetClient(req, env) {
         const hasTown   = petDocs.some(d => d.type === "Town License"       && !d.expired);
         const hasVax    = petDocs.some(d => d.type === "Vaccination Record" && !d.expired);
 
+        // Fetch vet info for this pet
+        const vetRefs = p.fields["Veterinarians"] || [];
+        const vetIds  = vetRefs.map(r => typeof r === "object" ? r.id : r).filter(Boolean);
+        let vets = [];
+        if (vetIds.length > 0) {
+          const vetFilter = encodeURIComponent(
+            `OR(${vetIds.map(id => `RECORD_ID()="${id}"`).join(",")})`
+          );
+          const vetsRes = await atFetch(env, `/${VETS_TABLE}?filterByFormula=${vetFilter}`);
+          if (vetsRes.ok) {
+            const vetsData = await vetsRes.json();
+            vets = (vetsData.records || []).map(v => ({
+              id:      v.id,
+              clinic:  v.fields["Clinic Name"]      || "",
+              phone:   v.fields["Phone Number"]     || "",
+              email:   v.fields["Email Address"]    || "",
+              address: v.fields["Practice Address"] || "",
+              url:     v.fields["URL"]              || "",
+            }));
+          }
+        }
+
+        // Get photo URL if available
+        const photoField = p.fields["Photo"] || [];
+        const photoUrl   = photoField.length > 0 ? (photoField[0].thumbnails?.large?.url || photoField[0].url || "") : "";
+
+        // Calculate age from DOB
+        const dob = p.fields["Date of Birth"] || "";
+        let age = "";
+        if (dob) {
+          const dobDate = new Date(dob + "T12:00:00");
+          const now     = new Date();
+          const years   = now.getFullYear() - dobDate.getFullYear();
+          const months  = now.getMonth()   - dobDate.getMonth();
+          const totalMonths = years * 12 + months;
+          const y = Math.floor(totalMonths / 12);
+          const m = totalMonths % 12;
+          age = y + (m > 0 ? "." + m : "") + " yrs";
+        }
+
+        // Breeds is a linked field — names come through as {id, name} objects
+        const breedRefs = p.fields["Breeds"] || [];
+        const breed = breedRefs.map(b => {
+          if (typeof b === "object" && b.name) return b.name;
+          return null;
+        }).filter(Boolean).join(", ");
+
         pets.push({
-          id:   p.id,
-          name: p.fields["Pet Name"] || "",
-          docs: petDocs,
-          docsComplete: hasRabies && hasTown && hasVax,
+          id:            p.id,
+          name:          p.fields["Pet Name"]    || "",
+          breed,
+          dob,
+          age,
+          gender:        (p.fields["Gender"] || {}).name || "",
+          spayedNeutered: p.fields["Spayed/Neutered"] === true,
+          microchip:     p.fields["Microchip Number"]    || "",
+          allergies:     p.fields["Allergies"]           || "",
+          medications:   p.fields["Current Medications"] || "",
+          feeding:       p.fields["Feeding Schedule"]    || "",
+          fears:         p.fields["Fears & Triggers"]    || "",
+          temperament:   p.fields["Temperament"]         || "",
+          notes:         p.fields["Pet Notes"]   || "",
+          photoUrl,
+          vets,
+          docs:          petDocs,
+          docsComplete:  hasRabies && hasTown && hasVax,
         });
       }
     }

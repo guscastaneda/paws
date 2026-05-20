@@ -839,3 +839,16 @@
       .form-row { grid-template-columns: 1fr; }
       .quick-actions { grid-template-columns: 1fr 1fr; }
     }
+/* ── PET PROFILE CARDS ── */
+.pet-profile-card {
+  border: 1.5px solid var(--brand-stone-light);
+  border-radius: 14px;
+  padding: 1rem;
+  background: #fff;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.2s;
+}
+
+.pet-profile-card:hover {
+  border-color: var(--brand-sage);
+}
