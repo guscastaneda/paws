@@ -507,8 +507,7 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
 
         <!-- Error + Submit -->
         <div id="ep-error" style="color:var(--brand-error);font-size:0.8rem;margin-bottom:0.75rem;display:none;"></div>
-        <button id="ep-submit-btn" style="width:100%;padding:0.85rem;background:var(--brand-primary);color:#fff;border:none;border-radius:12px;font-family:var(--font-body);font-size:0.95rem;font-weight:500;cursor:pointer;"
-          onclick="submitEditPet('${pet.id}', '${pet.name}', '${clientData.clientId}', '${clientToken}', '${WORKER_URL}')">
+        <button id="ep-submit-btn" style="width:100%;padding:0.85rem;background:var(--brand-primary);color:#fff;border:none;border-radius:12px;font-family:var(--font-body);font-size:0.95rem;font-weight:500;cursor:pointer;">
           Submit Updates
         </button>
       </div>
@@ -516,24 +515,20 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
 
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  // Wire submit via closure — avoids string interpolation issues
+  setTimeout(() => {
+    const submitBtn = document.getElementById('ep-submit-btn');
+    if (submitBtn) {
+      submitBtn.onclick = () => submitEditPetClosure(pet.id, pet.name, clientData.clientId, clientToken, WORKER_URL);
+    }
+  }, 0);
 }
 
-window.switchEditPetTab = function(tab) {
-  ['basic','health','vet'].forEach(t => {
-    const panel = document.getElementById('edit-tab-' + t);
-    const btn   = document.querySelector(`.edit-pet-tab[data-tab="${t}"]`);
-    if (panel) panel.style.display = t === tab ? 'block' : 'none';
-    if (btn) {
-      btn.style.borderBottomColor = t === tab ? 'var(--brand-primary)' : 'transparent';
-      btn.style.color             = t === tab ? 'var(--brand-primary)' : 'var(--brand-stone)';
-      btn.style.fontWeight        = t === tab ? '500' : '400';
-    }
-  });
-};
-
-window.submitEditPet = async function(petId, petName, clientId, clientToken, WORKER_URL) {
+async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKER_URL) {
   const btn   = document.getElementById('ep-submit-btn');
   const errEl = document.getElementById('ep-error');
+  if (!btn) return;
   btn.disabled = true;
   btn.textContent = 'Submitting…';
   errEl.style.display = 'none';
@@ -562,10 +557,9 @@ window.submitEditPet = async function(petId, petName, clientId, clientToken, WOR
       body: JSON.stringify({ token: clientToken, clientId, petId, petName, fields }),
     });
     if (!res.ok) throw new Error('Server error');
-
     document.getElementById('edit-pet-modal').remove();
     const toast = document.createElement('div');
-    toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--brand-success);color:#fff;padding:0.75rem 1.5rem;border-radius:999px;font-size:0.875rem;font-weight:500;z-index:200;animation:rise 0.3s ease;';
+    toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--brand-success);color:#fff;padding:0.75rem 1.5rem;border-radius:999px;font-size:0.875rem;font-weight:500;z-index:200;';
     toast.textContent = 'Updates submitted for review ✓';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
@@ -575,4 +569,17 @@ window.submitEditPet = async function(petId, petName, clientId, clientToken, WOR
     btn.disabled = false;
     btn.textContent = 'Submit Updates';
   }
+}
+
+window.switchEditPetTab = function(tab) {
+  ['basic','health','vet'].forEach(t => {
+    const panel = document.getElementById('edit-tab-' + t);
+    const btn   = document.querySelector(`.edit-pet-tab[data-tab="${t}"]`);
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
+    if (btn) {
+      btn.style.borderBottomColor = t === tab ? 'var(--brand-primary)' : 'transparent';
+      btn.style.color             = t === tab ? 'var(--brand-primary)' : 'var(--brand-stone)';
+      btn.style.fontWeight        = t === tab ? '500' : '400';
+    }
+  });
 };
