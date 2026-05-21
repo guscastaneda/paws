@@ -107,12 +107,15 @@ async function handleGetClient(req, env) {
           age = y + (m > 0 ? "." + m : "") + " yrs";
         }
 
-        // Breeds is a linked field — names come through as {id, name} objects
+        // Breed (Text) is the client-submitted plain text field
+        // Breeds is the linked field with curated breed records
+        const breedText = p.fields["Breed (Text)"] || "";
         const breedRefs = p.fields["Breeds"] || [];
-        const breed = breedRefs.map(b => {
+        const breedLinked = breedRefs.map(b => {
           if (typeof b === "object" && b.name) return b.name;
           return null;
         }).filter(Boolean).join(", ");
+        const breed = breedLinked || breedText;
 
         pets.push({
           id:            p.id,

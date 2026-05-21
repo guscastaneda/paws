@@ -129,7 +129,8 @@ export async function handlePostVet(req, env) {
 }
 
 // ── POST /pet-update ──────────────────────────────────────────────────────────
-// Submits pet profile updates to Pending Updates for review
+// Writes basic pet info directly to the Pet record.
+// Vet changes go to Pending Updates for manual linking.
 export async function handlePostPetUpdate(req, env) {
   let body;
   try { body = await req.json(); } catch { return errRes("Invalid JSON"); }
@@ -137,51 +138,66 @@ export async function handlePostPetUpdate(req, env) {
   const { token, clientId, petId, petName, fields } = body;
   if (!token || !clientId || !petId || !fields) return errRes("Missing required fields");
 
-  const now = new Date().toISOString();
-  const updates = [];
+  // ── Direct writes to Pet record ───────────────────────────────────────────
+  const directFields = {};
 
-  // Create one Pending Update per changed field
-  const fieldMap = {
-    'Breed':               'Breed',
-    'Date of Birth':       'Date of Birth',
-    'Gender':              'Gender',
-    'Spayed/Neutered':     'Spayed/Neutered',
-    'Microchip Number':    'Microchip Number',
-    'Allergies':           'Allergies',
-    'Current Medications': 'Current Medications',
-    'Feeding Schedule':    'Feeding Schedule',
-    'Fears & Triggers':    'Fears & Triggers',
-    'Temperament':         'Temperament',
-  };
+  if (fields["Date of Birth"])       directFields["Date of Birth"]       = fields["Date of Birth"];
+  if (fields["Gender"])              directFields["Gender"]              = fields["Gender"];
+  if (fields["Microchip Number"])    directFields["Microchip Number"]    = fields["Microchip Number"];
+  if (fields["Allergies"])           directFields["Allergies"]           = fields["Allergies"];
+  if (fields["Current Medications"]) directFields["Current Medications"] = fields["Current Medications"];
+  if (fields["Feeding Schedule"])    directFields["Feeding Schedule"]    = fields["Feeding Schedule"];
+  if (fields["Fears & Triggers"])    directFields["Fears & Triggers"]    = fields["Fears & Triggers"];
+  if (fields["Temperament"])         directFields["Temperament"]         = fields["Temperament"];
 
-  // Regular pet fields
-  for (const [fieldName, airtableField] of Object.entries(fieldMap)) {
-    const val = fields[fieldName];
-    if (val && val.trim()) {
-      updates.push({
-        fields: {
-          [FIELDS.PU_CLIENT]:    [clientId],
-          [FIELDS.PU_SUBMITTED]: now,
-          [FIELDS.PU_STATUS]:    "Pending 🟡",
-          [FIELDS.PU_FIELD]:     `${petName} — ${airtableField}`,
-          [FIELDS.PU_CURRENT]:   "",
-          [FIELDS.PU_NEW]:       val.trim(),
-          [FIELDS.PU_NOTES]:     `Pet ID: ${petId}`,
-        }
-      });
+  // Spayed/Neutered is a checkbox
+  if (fields["Spayed/Neutered"] === "Yes") directFields["Spayed/Neutered"] = true;
+  else if (fields["Spayed/Neutered"] === "No") directFields["Spayed/Neutered"] = false;
+
+  // Breed — write to plain text field directly
+  if (fields["Breed"]?.trim()) directFields["Breed (Text)"] = fields["Breed"].trim();
+  const breedVal = null; // no longer needed for pending updates
+
+  if (Object.keys(directFields).length > 0) {
+    const patchRes = await atFetch(env, `/${PETS_TABLE}/${petId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ fields: directFields, typecast: true }),
+    });
+    if (!patchRes.ok) {
+      const err = await patchRes.json().catch(() => ({}));
+      return errRes("Failed to update pet: " + JSON.stringify(err), 502);
     }
   }
 
-  // Vet fields grouped into one update
+  // ── Pending Updates for things requiring manual linking ───────────────────
+  const now = new Date().toISOString();
+  const pendingUpdates = [];
+
+  // Breed requires manual linking (linked field)
+  if (breedVal) {
+    pendingUpdates.push({
+      fields: {
+        [FIELDS.PU_CLIENT]:    [clientId],
+        [FIELDS.PU_SUBMITTED]: now,
+        [FIELDS.PU_STATUS]:    "Pending 🟡",
+        [FIELDS.PU_FIELD]:     `${petName} — Breed`,
+        [FIELDS.PU_CURRENT]:   "",
+        [FIELDS.PU_NEW]:       breedVal,
+        [FIELDS.PU_NOTES]:     `Pet ID: ${petId} — please link breed in Airtable`,
+      }
+    });
+  }
+
+  // Vet info requires manual linking
   const vetParts = [
-    fields['Vet Clinic']  ? `Clinic: ${fields['Vet Clinic']}`   : '',
-    fields['Vet Phone']   ? `Phone: ${fields['Vet Phone']}`     : '',
-    fields['Vet Email']   ? `Email: ${fields['Vet Email']}`     : '',
-    fields['Vet Address'] ? `Address: ${fields['Vet Address']}` : '',
+    fields["Vet Clinic"]  ? `Clinic: ${fields["Vet Clinic"]}`   : "",
+    fields["Vet Phone"]   ? `Phone: ${fields["Vet Phone"]}`     : "",
+    fields["Vet Email"]   ? `Email: ${fields["Vet Email"]}`     : "",
+    fields["Vet Address"] ? `Address: ${fields["Vet Address"]}` : "",
   ].filter(Boolean);
 
   if (vetParts.length > 0) {
-    updates.push({
+    pendingUpdates.push({
       fields: {
         [FIELDS.PU_CLIENT]:    [clientId],
         [FIELDS.PU_SUBMITTED]: now,
@@ -194,22 +210,20 @@ export async function handlePostPetUpdate(req, env) {
     });
   }
 
-  if (updates.length === 0) {
-    return jsonRes({ success: true, updatesSubmitted: 0 });
-  }
-
-  // Batch in groups of 10
-  for (let i = 0; i < updates.length; i += 10) {
-    const batch = updates.slice(i, i + 10);
-    const res = await atFetch(env, `/${PENDING_UPDATES_TABLE}`, {
+  if (pendingUpdates.length > 0) {
+    const puRes = await atFetch(env, `/${PENDING_UPDATES_TABLE}`, {
       method: "POST",
-      body: JSON.stringify({ records: batch }),
+      body: JSON.stringify({ records: pendingUpdates }),
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      return errRes("Failed to submit updates: " + JSON.stringify(err), 502);
+    if (!puRes.ok) {
+      const err = await puRes.json().catch(() => ({}));
+      return errRes("Failed to create pending updates: " + JSON.stringify(err), 502);
     }
   }
 
-  return jsonRes({ success: true, updatesSubmitted: updates.length });
+  return jsonRes({
+    success: true,
+    directUpdates: Object.keys(directFields).length,
+    pendingUpdates: pendingUpdates.length,
+  });
 }
