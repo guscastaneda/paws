@@ -394,10 +394,10 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
 
   const modal = document.createElement('div');
   modal.id = 'edit-pet-modal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(44,31,20,0.4);z-index:100;display:flex;align-items:flex-end;justify-content:center;padding:0;';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(44,31,20,0.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(2px);';
 
   modal.innerHTML = `
-    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;">
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(44,31,20,0.15);">
       <!-- Header -->
       <div style="position:sticky;top:0;background:#fff;padding:1.25rem 1.5rem 0.75rem;border-bottom:1px solid var(--brand-stone-light);z-index:1;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
@@ -556,15 +556,17 @@ async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKE
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: clientToken, clientId, petId, petName, fields }),
     });
-    if (!res.ok) throw new Error('Server error');
-    document.getElementById('edit-pet-modal').remove();
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) throw new Error(data.error || 'Server error ' + res.status);
+    const modal = document.getElementById('edit-pet-modal');
+    if (modal) modal.remove();
     const toast = document.createElement('div');
     toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--brand-success);color:#fff;padding:0.75rem 1.5rem;border-radius:999px;font-size:0.875rem;font-weight:500;z-index:200;';
     toast.textContent = 'Updates submitted for review ✓';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
-  } catch {
-    errEl.textContent = 'Something went wrong. Please try again.';
+  } catch (err) {
+    errEl.textContent = 'Error: ' + (err.message || 'Something went wrong.');
     errEl.style.display = 'block';
     btn.disabled = false;
     btn.textContent = 'Submit Updates';
