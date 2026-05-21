@@ -35,6 +35,7 @@ export default {
     if (path === "/booking"    && method === "POST") return handlePostBooking(req, env);
     if (path === "/pet"        && method === "POST") return handlePostPet(req, env);
     if (path === "/vet"        && method === "POST") return handlePostVet(req, env);
+    if (path === "/pet-update" && method === "POST") return handlePostPetUpdate(req, env);
 
     return errRes("Not found", 404);
   },
