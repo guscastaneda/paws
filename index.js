@@ -7,6 +7,7 @@ import { handlePostProfile }         from "./src/profile.js";
 import { handlePostAgreement }       from "./src/agreement.js";
 import { handlePostCompliance }      from "./src/compliance.js";
 import { handlePostBooking }         from "./src/booking.js";
+import { handleGetAdminClients }     from "./src/admin.js";
 import { handlePostPet, handlePostVet, handlePostPetUpdate } from "./src/pet.js";
 
 export default {
@@ -27,7 +28,7 @@ export default {
     if (path === "/pet"        && method === "POST") return handlePostPet(req, env);
     if (path === "/vet"        && method === "POST") return handlePostVet(req, env);
     if (path === "/pet-update" && method === "POST") return handlePostPetUpdate(req, env);
-
+    if (path === "/admin/clients" && method === "GET") return handleGetAdminClients(req, env);
     return env.ASSETS.fetch(req);
   },
 };
