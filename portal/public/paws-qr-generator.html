@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paws on Longmeadow — QR Code Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --brand-primary: #4A6741;
+    --brand-primary-light: #6B9162;
+    --brand-sage: #C8D8B8;
+    --brand-sage-light: #EBF2E4;
+    --brand-cream: #FAF7F2;
+    --brand-bark: #2C1F14;
+    --brand-stone: #8C7B6B;
+    --brand-stone-light: #E8E0D8;
+    --brand-gold: #C4922A;
+    --brand-gold-light: #F5E6C8;
+    --brand-error: #C0392B;
+    --brand-error-light: #FDECEA;
+    --brand-success: #2E7D32;
+    --brand-success-light: #E8F5E9;
+    --brand-warning-light: #FEF3C7;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-body); background: var(--brand-cream); color: var(--brand-bark); min-height: 100vh; }
+
+  /* SETUP */
+  #setup-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+  #setup-screen::before { content:''; position:fixed; inset:0; background: radial-gradient(ellipse at 15% 10%, rgba(74,103,65,0.08) 0%, transparent 55%), radial-gradient(ellipse at 85% 85%, rgba(196,146,42,0.06) 0%, transparent 50%); pointer-events:none; }
+  .setup-card { background:#fff; border-radius:20px; padding:2.5rem 2rem; max-width:460px; width:100%; box-shadow:0 1px 3px rgba(44,31,20,0.06),0 8px 32px rgba(44,31,20,0.08),0 0 0 1px rgba(44,31,20,0.04); position:relative; z-index:1; animation:rise 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+  @keyframes rise { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+  .setup-logo { font-size:2.5rem; text-align:center; margin-bottom:0.5rem; animation:float 4s ease-in-out infinite; display:block; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+  .setup-title { font-family:var(--font-display); font-size:1.6rem; font-weight:600; text-align:center; color:var(--brand-primary); letter-spacing:0.04em; margin-bottom:0.25rem; }
+  .setup-sub { font-size:0.8rem; font-weight:300; color:var(--brand-stone); text-align:center; margin-bottom:2rem; }
+  .setup-label { display:block; font-size:0.72rem; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; color:var(--brand-stone); margin-bottom:0.45rem; }
+  .setup-input { width:100%; padding:0.75rem 1rem; border:1.5px solid var(--brand-stone-light); border-radius:10px; font-family:var(--font-body); font-size:0.9rem; color:var(--brand-bark); background:#fff; outline:none; transition:border-color 0.2s,box-shadow 0.2s; margin-bottom:1.25rem; appearance:none; }
+  .setup-input:focus { border-color:var(--brand-primary); box-shadow:0 0 0 3px rgba(74,103,65,0.1); }
+  .setup-info { background:var(--brand-gold-light); border-left:3px solid var(--brand-gold); border-radius:0 8px 8px 0; padding:0.7rem 0.9rem; font-size:0.78rem; color:var(--brand-bark); font-weight:300; line-height:1.5; margin-bottom:1.5rem; }
+  .setup-info code { font-size:0.72rem; background:rgba(196,146,42,0.15); padding:0.1rem 0.3rem; border-radius:4px; font-family:monospace; }
+  .btn-generate { width:100%; padding:0.9rem; background:var(--brand-primary); color:#fff; border:none; border-radius:12px; font-family:var(--font-body); font-size:0.95rem; font-weight:500; cursor:pointer; transition:background 0.2s,transform 0.15s,box-shadow 0.2s; box-shadow:0 4px 12px rgba(74,103,65,0.25); }
+  .btn-generate:hover { background:var(--brand-primary-light); transform:translateY(-1px); box-shadow:0 6px 18px rgba(74,103,65,0.3); }
+  .btn-generate:disabled { opacity:0.55; cursor:not-allowed; transform:none; }
+  .setup-error { background:var(--brand-error-light); border:1px solid rgba(192,57,43,0.2); border-radius:10px; padding:0.75rem 1rem; font-size:0.83rem; color:var(--brand-error); margin-top:1rem; display:none; }
+
+  /* LOADING */
+  .loading-overlay { position:fixed; inset:0; background:rgba(250,247,242,0.95); display:none; flex-direction:column; align-items:center; justify-content:center; z-index:200; gap:1rem; }
+  .loading-overlay.visible { display:flex; }
+  .spinner { width:40px; height:40px; border:3px solid var(--brand-stone-light); border-top-color:var(--brand-primary); border-radius:50%; animation:spin 0.75s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .loading-text { font-family:var(--font-display); font-size:1.2rem; color:var(--brand-primary); font-weight:400; }
+  .loading-sub { font-size:0.8rem; color:var(--brand-stone); font-weight:300; }
+
+  /* PRINT SCREEN */
+  #print-screen { display:none; }
+  .print-toolbar { background:var(--brand-primary); color:#fff; padding:0.85rem 2rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; position:sticky; top:0; z-index:100; }
+  .print-toolbar-left { display:flex; align-items:center; gap:0.75rem; font-size:0.95rem; font-weight:500; }
+  .print-toolbar-right { display:flex; align-items:center; gap:0.75rem; }
+  .btn-toolbar { padding:0.5rem 1.25rem; border-radius:999px; font-family:var(--font-body); font-size:0.85rem; font-weight:500; cursor:pointer; transition:all 0.2s; border:none; }
+  .btn-print { background:#fff; color:var(--brand-primary); }
+  .btn-print:hover { background:var(--brand-sage-light); }
+  .btn-back { background:rgba(255,255,255,0.15); color:#fff; border:1.5px solid rgba(255,255,255,0.3) !important; }
+  .btn-back:hover { background:rgba(255,255,255,0.25); }
+  .client-count { font-size:0.8rem; opacity:0.8; }
+
+  /* QR GRID */
+  .qr-page { padding:1.5rem 2rem 2rem; max-width:1100px; margin:0 auto; }
+  .qr-page-header { text-align:center; padding:1.5rem 0 1.25rem; border-bottom:1px solid var(--brand-stone-light); margin-bottom:1.75rem; }
+  .qr-page-header .logo { font-size:1.75rem; margin-bottom:0.35rem; }
+  .qr-page-header h1 { font-family:var(--font-display); font-size:1.5rem; font-weight:600; color:var(--brand-primary); letter-spacing:0.04em; }
+  .qr-page-header p { font-size:0.75rem; color:var(--brand-stone); font-weight:300; margin-top:0.2rem; }
+  .qr-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:1.25rem; }
+  .qr-card { background:#fff; border:1.5px solid var(--brand-stone-light); border-radius:14px; padding:1.1rem 1rem 1rem; display:flex; flex-direction:column; align-items:center; gap:0.6rem; transition:border-color 0.2s,box-shadow 0.2s; position:relative; overflow:hidden; }
+  .qr-card::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; background:linear-gradient(90deg,var(--brand-primary),var(--brand-primary-light)); }
+  .qr-card:hover { border-color:var(--brand-sage); box-shadow:0 4px 16px rgba(74,103,65,0.12); }
+  .qr-code-wrap { width:140px; height:140px; display:flex; align-items:center; justify-content:center; }
+  .qr-code-wrap canvas, .qr-code-wrap img { width:140px !important; height:140px !important; }
+  .qr-client-name { font-family:var(--font-display); font-size:1rem; font-weight:600; color:var(--brand-bark); text-align:center; line-height:1.2; }
+  .qr-pets { font-size:0.7rem; color:var(--brand-stone); font-weight:300; text-align:center; }
+  .qr-status { font-size:0.65rem; font-weight:500; padding:0.2rem 0.55rem; border-radius:999px; letter-spacing:0.02em; }
+  .qr-status.complete { background:var(--brand-success-light); color:var(--brand-success); }
+  .qr-status.incomplete { background:var(--brand-warning-light); color:#B45309; }
+  .qr-url { font-size:0.6rem; color:var(--brand-stone); font-weight:300; text-align:center; word-break:break-all; line-height:1.4; opacity:0.7; }
+
+  /* PRINT */
+  @media print {
+    .print-toolbar { display:none !important; }
+    body { background:#fff; }
+    .qr-page { padding:0.5rem 1rem; }
+    .qr-page-header { padding:0.75rem 0; margin-bottom:1rem; }
+    .qr-grid { grid-template-columns:repeat(4,1fr); gap:0.75rem; }
+    .qr-card { break-inside:avoid; border:1px solid #ddd; border-radius:8px; padding:0.75rem 0.5rem 0.6rem; }
+    .qr-card::before { display:none; }
+    .qr-code-wrap, .qr-code-wrap canvas, .qr-code-wrap img { width:120px !important; height:120px !important; }
+    .qr-url { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading-overlay">
+  <div style="font-size:2.5rem;animation:float 4s ease-in-out infinite;">🐾</div>
+  <div class="loading-text">Fetching clients…</div>
+  <div class="spinner"></div>
+  <div class="loading-sub" id="loading-sub">Connecting to Worker</div>
+</div>
+
+<div id="setup-screen">
+  <div class="setup-card">
+    <span class="setup-logo">🐾</span>
+    <div class="setup-title">Paws on Longmeadow</div>
+    <div class="setup-sub">QR Code Generator — Client Portal Cards</div>
+
+    <label class="setup-label" for="admin-secret">Admin Secret</label>
+    <input class="setup-input" type="password" id="admin-secret" placeholder="paws-admin-2026" autocomplete="off" />
+
+    <div class="setup-info">
+      This is the <code>ADMIN_SECRET</code> you set in your Cloudflare Worker environment variables. It never leaves your browser except to call your own Worker.
+    </div>
+
+    <label class="setup-label" for="filter-status">Filter</label>
+    <select class="setup-input" id="filter-status">
+      <option value="all">All clients</option>
+      <option value="incomplete">⚠️ Incomplete only</option>
+      <option value="complete">✅ Complete only</option>
+    </select>
+
+    <button class="btn-generate" id="btn-generate" onclick="generate()">Generate QR Codes →</button>
+    <div class="setup-error" id="setup-error"></div>
+  </div>
+</div>
+
+<div id="print-screen">
+  <div class="print-toolbar">
+    <div class="print-toolbar-left">
+      <span>🐾</span>
+      Paws on Longmeadow — Client QR Codes
+      <span class="client-count" id="client-count"></span>
+    </div>
+    <div class="print-toolbar-right">
+      <button class="btn-toolbar btn-back" onclick="goBack()">← Back</button>
+      <button class="btn-toolbar btn-print" onclick="window.print()">🖨 Print / Save PDF</button>
+    </div>
+  </div>
+  <div class="qr-page">
+    <div class="qr-page-header">
+      <div class="logo">🐾</div>
+      <h1>Paws on Longmeadow</h1>
+      <p>Client Portal Access Cards · Generated <span id="gen-date"></span></p>
+    </div>
+    <div class="qr-grid" id="qr-grid"></div>
+  </div>
+</div>
+
+<script>
+  const WORKER_URL = 'https://client.pawsonlongmeadow.com';
+  const PORTAL_BASE = 'https://client.pawsonlongmeadow.com';
+
+  function showError(msg) {
+    const el = document.getElementById('setup-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+    document.getElementById('btn-generate').disabled = false;
+  }
+
+  async function generate() {
+    const secret = document.getElementById('admin-secret').value.trim();
+    const filter = document.getElementById('filter-status').value;
+
+    if (!secret) { showError('Please enter the admin secret.'); return; }
+
+    document.getElementById('btn-generate').disabled = true;
+    document.getElementById('setup-error').style.display = 'none';
+    document.getElementById('loading-overlay').classList.add('visible');
+    document.getElementById('loading-sub').textContent = 'Connecting to Worker…';
+
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/clients?secret=${encodeURIComponent(secret)}&filter=${filter}`);
+
+      if (res.status === 401) throw new Error('Wrong admin secret — check your Cloudflare env variable.');
+      if (!res.ok) throw new Error(`Worker error: ${res.status}`);
+
+      const { clients } = await res.json();
+
+      if (!clients || clients.length === 0) {
+        document.getElementById('loading-overlay').classList.remove('visible');
+        showError('No clients returned. Check the filter or Worker logs.');
+        return;
+      }
+
+      document.getElementById('loading-sub').textContent = `Building ${clients.length} QR codes…`;
+
+      // Switch screens
+      document.getElementById('setup-screen').style.display = 'none';
+      document.getElementById('print-screen').style.display = 'block';
+      document.getElementById('client-count').textContent = `${clients.length} clients`;
+      document.getElementById('gen-date').textContent = new Date().toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+
+      const grid = document.getElementById('qr-grid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < clients.length; i++) {
+        const c = clients[i];
+        const url = c.token ? `${PORTAL_BASE}?client=${c.token}` : null;
+
+        const card = document.createElement('div');
+        card.className = 'qr-card';
+
+        // Name
+        const nameEl = document.createElement('div');
+        nameEl.className = 'qr-client-name';
+        nameEl.textContent = c.name || 'Unknown';
+        card.appendChild(nameEl);
+
+        // QR
+        const qrWrap = document.createElement('div');
+        qrWrap.className = 'qr-code-wrap';
+        card.appendChild(qrWrap);
+
+        if (url) {
+          new QRCode(qrWrap, {
+            text: url,
+            width: 140, height: 140,
+            colorDark: '#2C1F14',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M,
+          });
+        } else {
+          qrWrap.innerHTML = '<div style="width:140px;height:140px;display:flex;align-items:center;justify-content:center;background:#f5f5f5;border-radius:8px;font-size:0.72rem;color:#999;text-align:center;padding:1rem;">No token</div>';
+        }
+
+        // Status badge
+        if (c.status) {
+          const isComplete = c.status.includes('Complete') && !c.status.includes('Incomplete');
+          const statusEl = document.createElement('div');
+          statusEl.className = `qr-status ${isComplete ? 'complete' : 'incomplete'}`;
+          statusEl.textContent = isComplete ? '✅ Complete' : '⚠️ Incomplete';
+          card.appendChild(statusEl);
+        }
+
+        // URL (screen only)
+        if (url) {
+          const urlEl = document.createElement('div');
+          urlEl.className = 'qr-url';
+          urlEl.textContent = url;
+          card.appendChild(urlEl);
+        }
+
+        grid.appendChild(card);
+
+        // Yield every 10 to stay responsive
+        if (i % 10 === 9) await new Promise(r => setTimeout(r, 0));
+      }
+
+      document.getElementById('loading-overlay').classList.remove('visible');
+
+    } catch (err) {
+      document.getElementById('loading-overlay').classList.remove('visible');
+      showError(err.message || 'Something went wrong.');
+    }
+  }
+
+  function goBack() {
+    document.getElementById('print-screen').style.display = 'none';
+    document.getElementById('setup-screen').style.display = 'flex';
+    document.getElementById('btn-generate').disabled = false;
+    document.getElementById('qr-grid').innerHTML = '';
+  }
+
+  document.getElementById('admin-secret').addEventListener('keydown', e => {
+    if (e.key === 'Enter') generate();
+  });
+</script>
+</body>
+</html>

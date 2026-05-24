@@ -5,6 +5,7 @@ compatibility_date = "2026-01-01"
 [assets]
 directory = "./portal/dist"
 binding = "ASSETS"
+not_found_handling = "none"
 
 [build]
 command = "cd portal && npm run build"
