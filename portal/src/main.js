@@ -544,8 +544,10 @@ async function submitBooking() {
     }
 
     // Store booking details for summary
-    const selectedPetNames = Array.from(document.querySelectorAll('input[name="booking-pet"]:checked'))
-      .map(el => el.closest('.pet-pills')?.querySelector('label[for="' + el.id + '"]')?.textContent || el.value);
+    const selectedPetNames = selectedPets.map(id => {
+      const pet = clientData.pets.find(p => p.id === id);
+      return pet ? pet.name : id;
+    });
     lastBooking = { startDate, startTime, endDate, endTime, transport, pets: selectedPetNames };
 
     // Populate summary
