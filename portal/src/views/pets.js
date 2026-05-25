@@ -557,7 +557,6 @@ async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKE
       body: JSON.stringify({ token: clientToken, clientId, petId, petName, fields }),
     });
     const text = await res.text();
-    console.log('pet-update response:', res.status, text);
     const data = JSON.parse(text || '{}');
     if (!res.ok || data.error) throw new Error(data.error || 'Server error ' + res.status);
     const modal = document.getElementById('edit-pet-modal');
