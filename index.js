@@ -8,6 +8,7 @@ import { handlePostAgreement }       from "./src/agreement.js";
 import { handlePostCompliance }      from "./src/compliance.js";
 import { handlePostBooking }         from "./src/booking.js";
 import { handleGetAdminClients }     from "./src/admin.js";
+import { handleSetupClient }         from './src/setup-client.js';
 import { handlePostPet, handlePostVet, handlePostPetUpdate } from "./src/pet.js";
 
 export default {
@@ -29,6 +30,7 @@ export default {
     if (path === "/vet"        && method === "POST") return handlePostVet(req, env);
     if (path === "/pet-update" && method === "POST") return handlePostPetUpdate(req, env);
     if (path === "/admin/clients" && method === "GET") return handleGetAdminClients(req, env);
+    if (path === '/setup-client') return handleSetupClient(request, env);
     return env.ASSETS.fetch(req);
   },
 };
