@@ -34,7 +34,7 @@ async function handleGetClient(req, env) {
       const petsData = await petsRes.json();
 
       for (const p of petsData.records || []) {
-          const isActive = p.fields["Active"] !== false;
+          const isActive = p.fields["Active"] === true;
         const petDocs = [];
 
         // Fetch compliance docs for this pet
