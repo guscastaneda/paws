@@ -35,7 +35,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
         <span style="font-size:0.7rem;font-weight:500;padding:0.2rem 0.65rem;border-radius:999px;background:var(--brand-stone-light);color:var(--brand-stone);">Inactive</span>
       </div>
       <div style="margin-top:0.75rem;padding:0.6rem 0.85rem;background:var(--brand-sage-light);border-radius:10px;display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:0.8rem;color:var(--brand-bark);font-weight:300;">Need to reactivate ${pet.name}?</span>
+        <span style="font-size:0.8rem;color:var(--brand-bark);font-weight:300;line-height:1.4;">It's been a while since ${pet.name}'s last stay. We'd love to do a trial daycare to make sure we're still a great fit!</span>
         <button onclick="window.location='mai'+'lto:'+'hello'+'@'+'pawsonlongmeadow.com'+'?subject=Reactivate ${encodeURIComponent(pet.name)}'" style="font-size:0.75rem;font-weight:500;color:var(--brand-primary);background:transparent;text-decoration:none;padding:0.25rem 0.65rem;border:1.5px solid var(--brand-primary);border-radius:999px;cursor:pointer;font-family:var(--font-body);">Send us a message</button>
       </div>
     </div>`;
