@@ -196,6 +196,8 @@ async function handleGetClient(req, env) {
 
   return jsonRes({
     clientId:             c.id,
+    debug_linkedPets:     linkedPets,
+    debug_petIdList:      petIdList,
     firstName:            clientName.split(" ")[0],
     name:                 clientName,
     phone:                f["Phone Number"]                  || "",
