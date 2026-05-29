@@ -663,8 +663,8 @@ function buildDocCards() {
         btn.className = 'btn-upload-small ok';
         btn.textContent = '✓ On file';
       } else if (expiredDoc) {
-        btn.className = 'btn-upload-small';
-        btn.style.cssText = 'color:var(--brand-warning);border-color:var(--brand-warning);font-size:0.72rem;';
+        btn.className = '';
+        btn.style.cssText = 'color:var(--brand-warning);border:1.5px solid var(--brand-warning);border-radius:999px;padding:0.35rem 0.75rem;background:transparent;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;';
         btn.textContent = '⚠️ Expired' + (expiredDoc.expiryDate ? ' · ' + fmtD(expiredDoc.expiryDate) : '');
         btn.onclick = () => openUploadModal(pet.id, pet.name, type);
       } else {
