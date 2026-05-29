@@ -297,7 +297,8 @@
 
     <div class="form-group" style="margin-bottom:1rem;">
       <label>Type your full name to sign <span class="req">*</span></label>
-      <input type="text" id="agree-name" placeholder="Your full legal name" style="border-radius:10px;"/>
+      <input type="text" id="agree-name" placeholder="Your full legal name" style="border-radius:10px;" minlength="3"/>
+      <div class="info-box" style="margin-top:0.35rem;">Enter your name as your legal signature — minimum 3 characters.</div>
       <div class="field-error" id="agree-name-error">Please enter your full name to sign.</div>
     </div>
 
@@ -1106,11 +1107,9 @@ async function submitDoc() {
 }
 
 // ── AGREEMENT ─────────────────────────────────────────────────────────────────
-function toggleAgreeBtn() {
-  const name = document.getElementById('agree-name').value.trim();
+const name = document.getElementById('agree-name').value.trim();
   const checked = document.getElementById('agree-check').checked;
-  document.getElementById('ag-submit').disabled = !(name && checked);
-}
+  document.getElementById('ag-submit').disabled = !(name.length >= 3 && checked);
 
 document.getElementById('agree-name').addEventListener('input', toggleAgreeBtn);
 
