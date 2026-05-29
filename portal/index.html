@@ -863,51 +863,7 @@ function buildDashboard() {
   } else {
     apptSection.style.display = 'none';
   }
-
-  // ── Pet cards with doc detail ──
-  const container = document.getElementById('dash-pet-cards');
-  container.innerHTML = '';
-  const fmtDate = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '';
-  const REQUIRED_DOCS = ['Rabies Certificate', 'Town License', 'Vaccination Record'];
-
-  (clientData.pets || []).forEach(pet => {
-    const docs = pet.docs || [];
-
-    // Build doc rows — one per required doc type, pick best (non-expired) record
-    const docRows = REQUIRED_DOCS.map(type => {
-      const validDoc   = docs.find(d => d.type === type && !d.expired);
-      const expiredDoc = docs.find(d => d.type === type &&  d.expired);
-      const doc = validDoc || expiredDoc;
-      const ok  = !!validDoc;
-
-      let expiryText = '';
-      if (doc?.expiryDate) {
-        expiryText = ok
-          ? 'Expires ' + fmtDate(doc.expiryDate)
-          : 'Expired ' + fmtDate(doc.expiryDate);
-      }
-
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid var(--brand-stone-light);">' +
-        '<div style="display:flex;align-items:center;gap:0.5rem;">' +
-          '<span style="font-size:0.85rem;">' + (ok ? '✅' : '⚠️') + '</span>' +
-          '<span style="font-size:0.82rem;font-weight:' + (ok ? '400' : '500') + ';color:' + (ok ? 'var(--brand-bark)' : 'var(--brand-warning)') + ';">' + type + '</span>' +
-        '</div>' +
-        '<span style="font-size:0.75rem;color:' + (ok ? 'var(--brand-stone)' : 'var(--brand-warning)') + ';font-weight:300;">' + (expiryText || (ok ? 'On file' : 'Missing')) + '</span>' +
-      '</div>';
-    }).join('');
-
-    container.innerHTML +=
-      '<div class="pet-card" style="flex-direction:column;align-items:stretch;gap:0;">' +
-        '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">' +
-          '<div class="pet-avatar">🐶</div>' +
-          '<div class="pet-name">' + pet.name + '</div>' +
-        '</div>' +
-        '<div style="border-top:1px solid var(--brand-stone-light);padding-top:0.5rem;">' +
-          docRows.replace(/border-bottom[^;]+;[^"]*"[^>]*>(?=[^<]*<\/div><\/div>$)/, '') +
-        '</div>' +
-        '<button style="margin-top:0.75rem;padding:0.4rem 0.85rem;background:transparent;color:var(--brand-primary);border:1.5px solid var(--brand-primary);border-radius:999px;font-family:var(--font-body);font-size:0.78rem;font-weight:500;cursor:pointer;" id="pet-docs-upload-btn">Upload / Update Docs</button>' +
-      '</div>';
-  });
+  
 }
 
 
