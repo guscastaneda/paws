@@ -36,7 +36,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
       </div>
       <div style="margin-top:0.75rem;padding:0.6rem 0.85rem;background:var(--brand-sage-light);border-radius:10px;display:flex;align-items:center;justify-content:space-between;">
         <span style="font-size:0.8rem;color:var(--brand-bark);font-weight:300;">Need to reactivate ${pet.name}?</span>
-        <a href="mailto:hello@pawsonlongmeadow.com?subject=Reactivate ${encodeURIComponent(pet.name)}" style="font-size:0.75rem;font-weight:500;color:var(--brand-primary);text-decoration:none;padding:0.25rem 0.65rem;border:1.5px solid var(--brand-primary);border-radius:999px;">Send us a message</a>
+        <button onclick="window.location='mai'+'lto:'+'hello'+'@'+'pawsonlongmeadow.com'+'?subject=Reactivate ${encodeURIComponent(pet.name)}'" style="font-size:0.75rem;font-weight:500;color:var(--brand-primary);background:transparent;text-decoration:none;padding:0.25rem 0.65rem;border:1.5px solid var(--brand-primary);border-radius:999px;cursor:pointer;font-family:var(--font-body);">Send us a message</button>
       </div>
     </div>`;
       container.appendChild(card);
