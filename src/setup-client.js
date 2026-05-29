@@ -4,7 +4,7 @@
 // Generates a unique token + SVG QR code and writes both back to the record.
 
 import { cors, errRes, jsonRes, atFetch } from './helpers.js';
-import { CLIENTS_TABLE, CLIENT_TOKEN_FIELD, QR_CODE_FIELD } from './constants.js';
+import { CLIENTS_TABLE, FIELDS, QR_CODE_FIELD } from './constants.js';
 
 // ── QR Code Generator (pure JS, no dependencies) ─────────────────────────────
 
@@ -262,7 +262,7 @@ export async function handleSetupClient(request, env) {
   // 1. Write token to Airtable
   const tokenRes = await atFetch(env, `/${CLIENTS_TABLE}/${recordId}`, 'PATCH', {
     fields: {
-      [CLIENT_TOKEN_FIELD]: token,
+      [FIELDS.CLIENT_TOKEN]: token,
     }
   });
   if (!tokenRes.ok) {
