@@ -30,7 +30,7 @@ export default {
     if (path === "/vet"        && method === "POST") return handlePostVet(req, env);
     if (path === "/pet-update" && method === "POST") return handlePostPetUpdate(req, env);
     if (path === "/admin/clients" && method === "GET") return handleGetAdminClients(req, env);
-    if (path === '/setup-client') return handleSetupClient(request, env);
+    if (path === '/setup-client') return handleSetupClient(req, env);
     return env.ASSETS.fetch(req);
   },
 };
