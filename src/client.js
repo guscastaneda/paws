@@ -34,7 +34,7 @@ async function handleGetClient(req, env) {
       const petsData = await petsRes.json();
 
       for (const p of petsData.records || []) {
-          if (p.fields["Active"] === false) continue;
+          const isActive = p.fields["Active"] !== false;
         const petDocs = [];
 
         // Fetch compliance docs for this pet
@@ -119,6 +119,7 @@ async function handleGetClient(req, env) {
 
         pets.push({
           id:            p.id,
+          active:        isActive,
           name:          p.fields["Pet Name"]    || "",
           breed,
           dob,

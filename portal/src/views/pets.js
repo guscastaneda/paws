@@ -23,6 +23,25 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
     const card = document.createElement('div');
     card.className = 'pet-profile-card';
     card.id = 'pet-card-' + pet.id;
+    if (!pet.active) {
+      card.innerHTML = `
+    <div class="pet-card" style="flex-direction:column;align-items:stretch;gap:0;opacity:0.75;">
+      <div style="display:flex;align-items:center;gap:0.85rem;">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--brand-stone-light);border:2px solid var(--brand-stone-light);display:flex;align-items:center;justify-content:center;font-size:1.5rem;filter:grayscale(1);">🐶</div>
+        <div style="flex:1;">
+          <div style="font-size:1rem;font-weight:500;color:var(--brand-stone);">${pet.name}</div>
+          <div style="font-size:0.78rem;color:var(--brand-stone);font-weight:300;">${[pet.breed, pet.age].filter(Boolean).join(' · ')}</div>
+        </div>
+        <span style="font-size:0.7rem;font-weight:500;padding:0.2rem 0.65rem;border-radius:999px;background:var(--brand-stone-light);color:var(--brand-stone);">Inactive</span>
+      </div>
+      <div style="margin-top:0.75rem;padding:0.6rem 0.85rem;background:var(--brand-sage-light);border-radius:10px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:0.8rem;color:var(--brand-bark);font-weight:300;">Need to reactivate ${pet.name}?</span>
+        <a href="mailto:hello@pawsonlongmeadow.com?subject=Reactivate ${encodeURIComponent(pet.name)}" style="font-size:0.75rem;font-weight:500;color:var(--brand-primary);text-decoration:none;padding:0.25rem 0.65rem;border:1.5px solid var(--brand-primary);border-radius:999px;">Send us a message</a>
+      </div>
+    </div>`;
+      container.appendChild(card);
+      return;
+    }
 
     // ── Header ──
     const photoHtml = pet.photoUrl
@@ -36,13 +55,13 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
 
     // ── Doc rows ──
     const REQUIRED_DOCS = ['Rabies Certificate', 'Town License', 'Vaccination Record'];
-    const fmtDate = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '';
+    const fmtDate = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
 
     const docRows = REQUIRED_DOCS.map(type => {
-      const validDoc   = (pet.docs || []).find(d => d.type === type && !d.expired);
-      const expiredDoc = (pet.docs || []).find(d => d.type === type &&  d.expired);
+      const validDoc = (pet.docs || []).find(d => d.type === type && !d.expired);
+      const expiredDoc = (pet.docs || []).find(d => d.type === type && d.expired);
       const doc = validDoc || expiredDoc;
-      const ok  = !!validDoc;
+      const ok = !!validDoc;
       const expiryText = doc?.expiryDate
         ? (ok ? 'Expires ' : 'Expired ') + fmtDate(doc.expiryDate)
         : (ok ? 'On file' : 'Missing');
@@ -137,7 +156,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
 }
 
 // ── Toggle pet detail ─────────────────────────────────────────────────────────
-window.togglePetCard = function(petId) {
+window.togglePetCard = function (petId) {
   const detail = document.getElementById('pet-detail-' + petId);
   const toggle = document.getElementById('pet-toggle-' + petId);
   if (!detail) return;
@@ -196,13 +215,13 @@ function openVetForm(pet, vetType, clientData, WORKER_URL, clientToken) {
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
 
-window.submitVetForm = async function(petId, petName, vetType, clientId, clientToken, WORKER_URL) {
-  const clinic  = document.getElementById('vet-clinic')?.value.trim();
-  const phone   = document.getElementById('vet-phone')?.value.trim();
+window.submitVetForm = async function (petId, petName, vetType, clientId, clientToken, WORKER_URL) {
+  const clinic = document.getElementById('vet-clinic')?.value.trim();
+  const phone = document.getElementById('vet-phone')?.value.trim();
   const address = document.getElementById('vet-address')?.value.trim();
-  const email   = document.getElementById('vet-email')?.value.trim();
-  const errEl   = document.getElementById('vet-error');
-  const btn     = document.getElementById('vet-submit-btn');
+  const email = document.getElementById('vet-email')?.value.trim();
+  const errEl = document.getElementById('vet-error');
+  const btn = document.getElementById('vet-submit-btn');
 
   if (!clinic) {
     errEl.textContent = 'Please enter the clinic name.';
@@ -343,13 +362,13 @@ export function wireNewPetForm(clientData, goHome, WORKER_URL, clientToken) {
 
   submit.onclick = async () => {
     let valid = true;
-    const name    = document.getElementById('np-name')?.value.trim();
+    const name = document.getElementById('np-name')?.value.trim();
     const species = document.getElementById('np-species')?.value;
 
-    if (!name)    { document.getElementById('np-name-error').classList.add('visible');    valid = false; }
-    else            document.getElementById('np-name-error').classList.remove('visible');
+    if (!name) { document.getElementById('np-name-error').classList.add('visible'); valid = false; }
+    else document.getElementById('np-name-error').classList.remove('visible');
     if (!species) { document.getElementById('np-species-error').classList.add('visible'); valid = false; }
-    else            document.getElementById('np-species-error').classList.remove('visible');
+    else document.getElementById('np-species-error').classList.remove('visible');
     if (!valid) return;
 
     submit.disabled = true;
@@ -361,22 +380,22 @@ export function wireNewPetForm(clientData, goHome, WORKER_URL, clientToken) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          token:          clientToken,
-          clientId:       clientData.clientId,
-          petName:        name,
+          token: clientToken,
+          clientId: clientData.clientId,
+          petName: name,
           species,
-          breed:          document.getElementById('np-breed')?.value.trim()      || '',
-          dob:            document.getElementById('np-dob')?.value                || '',
-          gender:         document.getElementById('np-gender')?.value             || '',
-          spayedNeutered: document.getElementById('np-spayed')?.checked           || false,
-          notes:          document.getElementById('np-notes')?.value.trim()      || '',
-          vetClinic:      document.getElementById('np-vet-clinic')?.value.trim() || '',
-          vetPhone:       document.getElementById('np-vet-phone')?.value.trim()  || '',
-          vetAddress:     document.getElementById('np-vet-address')?.value.trim()|| '',
+          breed: document.getElementById('np-breed')?.value.trim() || '',
+          dob: document.getElementById('np-dob')?.value || '',
+          gender: document.getElementById('np-gender')?.value || '',
+          spayedNeutered: document.getElementById('np-spayed')?.checked || false,
+          notes: document.getElementById('np-notes')?.value.trim() || '',
+          vetClinic: document.getElementById('np-vet-clinic')?.value.trim() || '',
+          vetPhone: document.getElementById('np-vet-phone')?.value.trim() || '',
+          vetAddress: document.getElementById('np-vet-address')?.value.trim() || '',
         }),
       });
       if (!res.ok) throw new Error('Server error');
-      document.getElementById('view-new-pet').style.display       = 'none';
+      document.getElementById('view-new-pet').style.display = 'none';
       document.getElementById('view-new-pet-success').style.display = 'block';
     } catch {
       document.getElementById('np-form-error').textContent = 'Something went wrong. Please try again.';
@@ -526,7 +545,7 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
 }
 
 async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKER_URL) {
-  const btn   = document.getElementById('ep-submit-btn');
+  const btn = document.getElementById('ep-submit-btn');
   const errEl = document.getElementById('ep-error');
   if (!btn) return;
   btn.disabled = true;
@@ -534,20 +553,20 @@ async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKE
   errEl.style.display = 'none';
 
   const fields = {
-    'Breed':               document.getElementById('ep-breed')?.value.trim()        || '',
-    'Date of Birth':       document.getElementById('ep-dob')?.value                 || '',
-    'Gender':              document.getElementById('ep-gender')?.value              || '',
-    'Spayed/Neutered':     document.getElementById('ep-spayed')?.checked ? 'Yes' : 'No',
-    'Microchip Number':    document.getElementById('ep-microchip')?.value.trim()    || '',
-    'Allergies':           document.getElementById('ep-allergies')?.value.trim()    || '',
-    'Current Medications': document.getElementById('ep-medications')?.value.trim()  || '',
-    'Feeding Schedule':    document.getElementById('ep-feeding')?.value.trim()      || '',
-    'Fears & Triggers':    document.getElementById('ep-fears')?.value.trim()        || '',
-    'Temperament':         document.getElementById('ep-temperament')?.value.trim()  || '',
-    'Vet Clinic':          document.getElementById('ep-vet-clinic')?.value.trim()   || '',
-    'Vet Phone':           document.getElementById('ep-vet-phone')?.value.trim()    || '',
-    'Vet Email':           document.getElementById('ep-vet-email')?.value.trim()    || '',
-    'Vet Address':         document.getElementById('ep-vet-address')?.value.trim()  || '',
+    'Breed': document.getElementById('ep-breed')?.value.trim() || '',
+    'Date of Birth': document.getElementById('ep-dob')?.value || '',
+    'Gender': document.getElementById('ep-gender')?.value || '',
+    'Spayed/Neutered': document.getElementById('ep-spayed')?.checked ? 'Yes' : 'No',
+    'Microchip Number': document.getElementById('ep-microchip')?.value.trim() || '',
+    'Allergies': document.getElementById('ep-allergies')?.value.trim() || '',
+    'Current Medications': document.getElementById('ep-medications')?.value.trim() || '',
+    'Feeding Schedule': document.getElementById('ep-feeding')?.value.trim() || '',
+    'Fears & Triggers': document.getElementById('ep-fears')?.value.trim() || '',
+    'Temperament': document.getElementById('ep-temperament')?.value.trim() || '',
+    'Vet Clinic': document.getElementById('ep-vet-clinic')?.value.trim() || '',
+    'Vet Phone': document.getElementById('ep-vet-phone')?.value.trim() || '',
+    'Vet Email': document.getElementById('ep-vet-email')?.value.trim() || '',
+    'Vet Address': document.getElementById('ep-vet-address')?.value.trim() || '',
   };
 
   try {
@@ -574,15 +593,15 @@ async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKE
   }
 }
 
-window.switchEditPetTab = function(tab) {
-  ['basic','health','vet'].forEach(t => {
+window.switchEditPetTab = function (tab) {
+  ['basic', 'health', 'vet'].forEach(t => {
     const panel = document.getElementById('edit-tab-' + t);
-    const btn   = document.querySelector(`.edit-pet-tab[data-tab="${t}"]`);
+    const btn = document.querySelector(`.edit-pet-tab[data-tab="${t}"]`);
     if (panel) panel.style.display = t === tab ? 'block' : 'none';
     if (btn) {
       btn.style.borderBottomColor = t === tab ? 'var(--brand-primary)' : 'transparent';
-      btn.style.color             = t === tab ? 'var(--brand-primary)' : 'var(--brand-stone)';
-      btn.style.fontWeight        = t === tab ? '500' : '400';
+      btn.style.color = t === tab ? 'var(--brand-primary)' : 'var(--brand-stone)';
+      btn.style.fontWeight = t === tab ? '500' : '400';
     }
   });
 };
