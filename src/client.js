@@ -35,6 +35,7 @@ async function handleGetClient(req, env) {
 
       for (const p of petsData.records || []) {
         console.log("pet fields:", JSON.stringify(p.fields));
+        console.log("active field value:", JSON.stringify(p.fields["Active"]), "all keys:", Object.keys(p.fields).join(", "));
           // if (p.fields["Active"] !== true) continue;
         const petDocs = [];
 
