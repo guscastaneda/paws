@@ -34,8 +34,6 @@ async function handleGetClient(req, env) {
       const petsData = await petsRes.json();
 
       for (const p of petsData.records || []) {
-        console.log("pet fields:", JSON.stringify(p.fields));
-        console.log("active field value:", JSON.stringify(p.fields["Active"]), "all keys:", Object.keys(p.fields).join(", "));
           if (p.fields["Active"] === false) continue;
         const petDocs = [];
 
@@ -197,8 +195,6 @@ async function handleGetClient(req, env) {
 
   return jsonRes({
     clientId:             c.id,
-    debug_linkedPets:     linkedPets,
-    debug_petIdList:      petIdList,
     firstName:            clientName.split(" ")[0],
     name:                 clientName,
     phone:                f["Phone Number"]                  || "",
