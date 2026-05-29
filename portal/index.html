@@ -650,18 +650,26 @@ function buildDocCards() {
 
     clientData.pets.forEach(pet => {
       const docs = pet.docs || [];
-      const hasDoc = docs.some(d => d.type === type && !d.expired);
+      const hasValid = docs.some(d => d.type === type && !d.expired);
+      const expiredDoc = docs.find(d => d.type === type && d.expired);
+      const fmtD = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
 
       const row = document.createElement('div');
       row.className = 'doc-card-pet';
-      row.innerHTML =
-        '<div class="doc-card-pet-name">🐾 ' + pet.name + '</div>';
+      row.innerHTML = '<div class="doc-card-pet-name">🐾 ' + pet.name + '</div>';
 
       const btn = document.createElement('button');
-      btn.className = 'btn-upload-small' + (hasDoc ? ' ok' : '');
-      btn.textContent = hasDoc ? '✓ On file' : 'Upload';
-
-      if (!hasDoc) {
+      if (hasValid) {
+        btn.className = 'btn-upload-small ok';
+        btn.textContent = '✓ On file';
+      } else if (expiredDoc) {
+        btn.className = 'btn-upload-small';
+        btn.style.cssText = 'color:var(--brand-warning);border-color:var(--brand-warning);font-size:0.72rem;';
+        btn.textContent = '⚠️ Expired' + (expiredDoc.expiryDate ? ' · ' + fmtD(expiredDoc.expiryDate) : '');
+        btn.onclick = () => openUploadModal(pet.id, pet.name, type);
+      } else {
+        btn.className = 'btn-upload-small';
+        btn.textContent = 'Upload';
         btn.onclick = () => openUploadModal(pet.id, pet.name, type);
       }
 
@@ -1002,7 +1010,13 @@ async function submitDoc() {
     return;
   }
   document.getElementById('docs-file-error').classList.remove('visible');
-
+// Validate expiry date isn't in the past
+  const expiry = document.getElementById('docs-expiry').value;
+  if (expiry && expiry < new Date().toISOString().split('T')[0]) {
+    document.getElementById('docs-upload-form-error').textContent = 'The expiration date cannot be in the past. Please check the date and try again.';
+    document.getElementById('docs-upload-form-error').classList.add('visible');
+    return;
+  }
   const btn = document.getElementById('docs-submit');
   btn.disabled = true; btn.classList.add('loading');
   document.getElementById('docs-upload-form-error').classList.remove('visible');
@@ -1143,6 +1157,18 @@ async function submitBooking() {
   const transport  = document.querySelector('input[name="booking-transport"]:checked')?.value;
   const notes      = document.getElementById('booking-notes').value.trim();
 
+  // Block booking if any active pet has expired or missing required docs
+  const REQUIRED_DOCS = ['Rabies Certificate', 'Town License', 'Vaccination Record'];
+  const blockedPets = (clientData.pets || []).filter(pet => {
+    if (!pet.active) return false;
+    return REQUIRED_DOCS.some(type => !( pet.docs || []).some(d => d.type === type && !d.expired));
+  });
+  if (blockedPets.length > 0) {
+    const names = blockedPets.map(p => p.name).join(', ');
+    document.getElementById('booking-form-error').textContent = 'Please update expired or missing documents for ' + names + ' before requesting a stay.';
+    document.getElementById('booking-form-error').classList.add('visible');
+    return;
+  }
   const showErr = (id, msg) => { const el = document.getElementById(id); el.textContent = msg; el.classList.add('visible'); valid = false; };
   const hideErr = id => document.getElementById(id).classList.remove('visible');
 
