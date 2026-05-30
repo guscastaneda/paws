@@ -331,7 +331,7 @@
   <div id="view-booking">
     <div class="step-header">
       <button class="step-back" onclick="goHome()">← Back</button>
-      <div class="step-title">Book a <em>Boarding Stay</em></div>
+      <div class="step-title" id="booking-title">Book a <em>Boarding Stay</em></div>
       <p class="step-desc">Fill out the details below. We will confirm your dates within 24 hours.</p>
     </div>
     <div class="form-group">
@@ -411,7 +411,7 @@
 
     <div class="form-error" id="booking-form-error"></div>
     <button class="btn-primary" id="booking-submit" onclick="submitBooking()">
-      <span class="btn-text">Request Boarding Stay</span>
+      <span class="btn-text" id="booking-btn-text">Request Boarding Stay</span>
       <span class="btn-loading">Sending request...</span>
     </button>
   </div>
@@ -423,7 +423,7 @@
     <div class="success-wrap">
       <div class="success-circle">🐾</div>
       <h2>Request sent!</h2>
-      <p style="margin-top:0.5rem;">Your boarding request has been received. We will confirm your dates within 24 hours via text or email.</p>
+      <p style="margin-top:0.5rem;" id="booking-success-msg">Your boarding request has been received. We will confirm your dates within 24 hours via text or email.</p>
     </div>
 
     <!-- Booking summary injected by JS -->
@@ -573,6 +573,8 @@ async function init() {
     radio.addEventListener('change', function() {
       const isDaycare = this.value === 'daycare';
       document.getElementById('booking-pickup-row').style.display = isDaycare ? 'none' : '';
+      document.getElementById('booking-title').innerHTML = isDaycare ? 'Request <em>Daycare</em>' : 'Book a <em>Boarding Stay</em>';
+      document.getElementById('booking-btn-text').textContent = isDaycare ? 'Request Daycare' : 'Request Boarding Stay';
       document.getElementById('booking-price-info').textContent = isDaycare
         ? 'Daycare is $65/session. Pricing is confirmed when we review your request.'
         : 'Boarding is $85/night. Pricing is confirmed when we review your request.';
@@ -1249,12 +1251,19 @@ if (!isDaycare && !endDate) showErr('booking-end-date-error', 'Please select a p
     const fmt = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
     const summary = document.getElementById('booking-summary');
     if (summary) {
+      const pricingNote = isDaycare
+        ? '💰 Pricing confirmed when we review your request.'
+        : '💰 Pricing starts at $85/night — final total confirmed within 24 hrs';
+      const dateLines = isDaycare
+        ? '📅 Date: ' + fmt(startDate) + ' · ' + startTime + '<br>'
+        : '📅 Drop-off: ' + fmt(startDate) + ' · ' + startTime + '<br>' +
+          '📅 Pick-up: ' + fmt(endDate) + ' · ' + endTime + '<br>';
       summary.innerHTML =
-        '<strong>🐾 ' + (lastBooking.pets.join(', ') || 'Your pet') + '</strong><br>' +
-        '📅 Drop-off: ' + fmt(startDate) + ' · ' + startTime + '<br>' +
-        '📅 Pick-up: '  + fmt(endDate)   + ' · ' + endTime   + '<br>' +
+        '<strong>' + (isDaycare ? '☀️' : '🐾') + ' ' + (lastBooking.pets.join(', ') || 'Your pet') + '</strong><br>' +
+        '<strong>' + (isDaycare ? 'Daycare' : 'Boarding') + '</strong><br>' +
+        dateLines +
         '🚗 Transport: ' + transport + '<br>' +
-        '💰 Pricing starts at $85/night — final total confirmed within 24 hrs';
+        pricingNote;
     }
 
     // Refresh client data in background
@@ -1262,7 +1271,9 @@ if (!isDaycare && !endDate) showErr('booking-end-date-error', 'Please select a p
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d) clientData = d; })
       .catch(() => {});
-
+    document.getElementById('booking-success-msg').textContent = isDaycare
+          ? 'Your daycare request has been received. We will confirm within 24 hours via text or email.'
+          : 'Your boarding request has been received. We will confirm your dates within 24 hours via text or email.';
     showView('view-booking-success');
   } catch (err) {
     document.getElementById('booking-form-error').textContent = 'Something went wrong: ' + err.message;
