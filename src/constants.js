@@ -13,6 +13,7 @@ const PETS_TABLE           = "tbl6FYNs5D3LLxCdd";
 const COMPLIANCE_TABLE     = "tblRuPAAVBeMjeWSa";
 const PENDING_UPDATES_TABLE = "tblte5MYEXmlJ4FvF";
 
+
 const FIELDS = {
   // Clients
   CLIENT_NAME:               "fld65O8M2r0KPgF9l",
@@ -76,3 +77,4 @@ const APPOINTMENTS_TABLE  = "tbl9BGXYbTXh2Gwv1";
 export { BASE_ID, CLIENTS_TABLE, PETS_TABLE, COMPLIANCE_TABLE, PENDING_UPDATES_TABLE, APPOINTMENTS_TABLE, BOARDING_SERVICE_ID, FIELDS, AT };
 export const QR_CODE_FIELD    = 'fldGrSSkcmh9de1su';
 export const AIRTABLE_BASE_ID = 'appvQb876VInNJlnB';
+export const DAYCARE_SERVICE_ID = 'rec99cemJqkCezIRN';

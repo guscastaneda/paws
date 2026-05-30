@@ -334,7 +334,15 @@
       <div class="step-title">Book a <em>Boarding Stay</em></div>
       <p class="step-desc">Fill out the details below. We will confirm your dates within 24 hours.</p>
     </div>
-
+    <div class="form-group">
+      <label>Service <span class="req">*</span></label>
+      <div class="doc-pills" id="booking-service-pills">
+        <input type="radio" name="booking-service" class="doc-pill-input" id="bs-boarding" value="boarding" checked/>
+        <label for="bs-boarding">🏡 Boarding</label>
+        <input type="radio" name="booking-service" class="doc-pill-input" id="bs-daycare" value="daycare"/>
+        <label for="bs-daycare">☀️ Daycare</label>
+      </div>
+    </div>
     <div class="form-group">
       <label>Which pet(s)? <span class="req">*</span></label>
       <div class="pet-pills" id="booking-pet-pills"></div>
@@ -359,6 +367,7 @@
       </div>
     </div>
 
+    <div id="booking-pickup-row">
     <div class="form-row">
       <div class="form-group">
         <label>Pick-up Date <span class="req">*</span></label>
@@ -375,6 +384,7 @@
         </select>
         <div class="field-error" id="booking-end-time-error">Please select a time.</div>
       </div>
+    </div>
     </div>
 
     <div class="form-group">
@@ -397,7 +407,7 @@
       <textarea id="booking-notes" placeholder="Anything we should know — feeding schedule, medications, special instructions..."></textarea>
     </div>
 
-    <div class="info-box" style="margin-bottom:0;">Boarding is $85/night. Pricing is confirmed when we review your request.</div>
+    <div class="info-box" id="booking-price-info" style="margin-bottom:0;">Boarding is $85/night. Pricing is confirmed when we review your request.</div>
 
     <div class="form-error" id="booking-form-error"></div>
     <button class="btn-primary" id="booking-submit" onclick="submitBooking()">
@@ -559,7 +569,15 @@ async function init() {
   } else {
     showView('view-onboarding');
   }
-
+  document.querySelectorAll('input[name="booking-service"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      const isDaycare = this.value === 'daycare';
+      document.getElementById('booking-pickup-row').style.display = isDaycare ? 'none' : '';
+      document.getElementById('booking-price-info').textContent = isDaycare
+        ? 'Daycare is $65/session. Pricing is confirmed when we review your request.'
+        : 'Boarding is $85/night. Pricing is confirmed when we review your request.';
+    });
+  });
   // Pre-fill contact fields
   if (clientData.name)        document.getElementById('c-name').value    = clientData.name;
   if (clientData.phone)       document.getElementById('c-phone').value   = clientData.phone;
@@ -1161,6 +1179,8 @@ function buildBookingPetPills() {
 
 async function submitBooking() {
   let valid = true;
+  const serviceType = document.querySelector('input[name="booking-service"]:checked')?.value || 'boarding';
+  const isDaycare   = serviceType === 'daycare';
   const selectedPets = Array.from(document.querySelectorAll('input[name="booking-pet"]:checked')).map(el => el.value);
   const startDate  = document.getElementById('booking-start-date').value;
   const startTime  = document.getElementById('booking-start-time').value;
@@ -1187,8 +1207,8 @@ async function submitBooking() {
   if (!selectedPets.length) showErr('booking-pet-error', 'Please select at least one pet.'); else hideErr('booking-pet-error');
   if (!startDate) showErr('booking-start-date-error', 'Please select a drop-off date.'); else hideErr('booking-start-date-error');
   if (!startTime) showErr('booking-start-time-error', 'Please select a drop-off time.'); else hideErr('booking-start-time-error');
-  if (!endDate)   showErr('booking-end-date-error',   'Please select a pick-up date.');  else hideErr('booking-end-date-error');
-  if (!endTime)   showErr('booking-end-time-error',   'Please select a pick-up time.');  else hideErr('booking-end-time-error');
+if (!isDaycare && !endDate) showErr('booking-end-date-error', 'Please select a pick-up date.'); else hideErr('booking-end-date-error');
+  if (!isDaycare && !endTime) showErr('booking-end-time-error', 'Please select a pick-up time.'); else hideErr('booking-end-time-error');
   if (!transport) showErr('booking-transport-error',  'Please select a transport option.'); else hideErr('booking-transport-error');
 
   if (startDate && endDate && endDate < startDate) {
@@ -1208,6 +1228,7 @@ async function submitBooking() {
         token: clientToken,
         clientId: clientData.clientId,
         petIds: selectedPets,
+        serviceType,
         startDate, startTime, endDate, endTime,
         transport, notes,
       }),
