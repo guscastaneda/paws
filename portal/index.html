@@ -1125,9 +1125,11 @@ async function submitDoc() {
 }
 
 // ── AGREEMENT ─────────────────────────────────────────────────────────────────
-const name = document.getElementById('agree-name').value.trim();
+function toggleAgreeBtn() {
+  const name = document.getElementById('agree-name').value.trim();
   const checked = document.getElementById('agree-check').checked;
   document.getElementById('ag-submit').disabled = !(name.length >= 3 && checked);
+}
 
 document.getElementById('agree-name').addEventListener('input', toggleAgreeBtn);
 
