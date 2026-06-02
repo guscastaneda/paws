@@ -351,18 +351,19 @@
 
     <div class="form-row">
       <div class="form-group">
-        <label>Drop-off Date <span class="req">*</span></label>
+        <label id="booking-start-date-label">Drop-off Date <span class="req">*</span></label>
         <input type="date" id="booking-start-date"/>
         <div class="field-error" id="booking-start-date-error">Please select a date.</div>
       </div>
       <div class="form-group">
-        <label>Drop-off Time <span class="req">*</span></label>
+        <label id="booking-start-time-label">Drop-off Time <span class="req">*</span></label>
         <select id="booking-start-time">
           <option value="">Select time...</option>
           <option value="Early morning (7:30–9AM)">Early morning (7:30–9AM)</option>
           <option value="Noon (11:30AM–12:30PM)">Noon (11:30AM–12:30PM)</option>
           <option value="Late Afternoon (4:00–5:30PM)">Late Afternoon (4:00–5:30PM)</option>
         </select>
+        <div id="booking-daycare-hint" style="display:none;font-size:0.75rem;color:var(--brand-stone);font-weight:300;margin-top:0.35rem;">Our drop-off windows are 7:30–9AM. Please announce your arrival time.</div>
         <div class="field-error" id="booking-start-time-error">Please select a time.</div>
       </div>
     </div>
@@ -570,16 +571,19 @@ async function init() {
     showView('view-onboarding');
   }
   document.querySelectorAll('input[name="booking-service"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-      const isDaycare = this.value === 'daycare';
-      document.getElementById('booking-pickup-row').style.display = isDaycare ? 'none' : '';
-      document.getElementById('booking-title').innerHTML = isDaycare ? 'Request <em>Daycare</em>' : 'Book a <em>Boarding Stay</em>';
-      document.getElementById('booking-btn-text').textContent = isDaycare ? 'Request Daycare' : 'Request Boarding Stay';
-      document.getElementById('booking-price-info').textContent = isDaycare
-        ? 'Daycare is $65/session. Pricing is confirmed when we review your request.'
-        : 'Boarding is $85/night. Pricing is confirmed when we review your request.';
-    });
+  radio.addEventListener('change', function() {
+    const isDaycare = this.value === 'daycare';
+    document.getElementById('booking-pickup-row').style.display = isDaycare ? 'none' : '';
+    document.getElementById('booking-title').innerHTML = isDaycare ? 'Request <em>Daycare</em>' : 'Book a <em>Boarding Stay</em>';
+    document.getElementById('booking-btn-text').textContent = isDaycare ? 'Request Daycare' : 'Request Boarding Stay';
+    document.getElementById('booking-start-date-label').innerHTML = isDaycare ? 'Date <span class="req">*</span>' : 'Drop-off Date <span class="req">*</span>';
+    document.getElementById('booking-start-time-label').innerHTML = isDaycare ? 'Arrival Time <span class="req">*</span>' : 'Drop-off Time <span class="req">*</span>';
+    document.getElementById('booking-daycare-hint').style.display = isDaycare ? 'block' : 'none';
+    document.getElementById('booking-price-info').textContent = isDaycare
+      ? `Daycare is $${clientData.daycarePrice}/session. Pricing is confirmed when we review your request.`
+      : `Boarding is $${clientData.boardingPrice}/night. Pricing is confirmed when we review your request.`;
   });
+});
   // Pre-fill contact fields
   if (clientData.name)        document.getElementById('c-name').value    = clientData.name;
   if (clientData.phone)       document.getElementById('c-phone').value   = clientData.phone;
@@ -806,7 +810,7 @@ function buildDashboard() {
         '</div>' +
       '</div>' +
       '<button class="btn-book" id="dash-book-btn">' +
-        '🏡 Book a Boarding Stay' +
+        '🐾 Book a Service' +
       '</button>';
   // Wire buttons after innerHTML is set
   setTimeout(() => {
