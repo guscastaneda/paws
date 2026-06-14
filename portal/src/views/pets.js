@@ -23,6 +23,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
     const card = document.createElement('div');
     card.className = 'pet-profile-card';
     card.id = 'pet-card-' + pet.id;
+
     if (!pet.active) {
       card.innerHTML = `
     <div class="pet-card" style="flex-direction:column;align-items:stretch;gap:0;opacity:0.75;">
@@ -94,7 +95,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
           ${photoHtml}
           <div style="flex:1;">
             <div style="font-size:1rem;font-weight:500;color:var(--brand-bark);">${pet.name}${genderIcon ? ` <span style="font-size:0.78rem;color:var(--brand-stone);font-weight:300;">${genderIcon}</span>` : ''}</div>
-            <div style="font-size:0.78rem;color:var(--brand-stone);font-weight:300;">${[pet.breed, pet.age].filter(Boolean).join(' · ')}</div>
+            <div style="font-size:0.78rem;color:var(--brand-stone);font-weight:300;">${[pet.breed || 'Mixed Breed', pet.age].filter(Boolean).join(' · ')}</div>
             <div style="margin-top:0.25rem;">${snBadge}</div>
           </div>
           <div style="display:flex;align-items:center;gap:0.5rem;">
@@ -112,6 +113,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
           <div style="font-size:0.7rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;color:var(--brand-stone);margin-bottom:0.25rem;">Health Notes</div>
           <div style="font-size:0.8rem;color:var(--brand-bark);font-weight:300;line-height:1.5;">${pet.notes}</div>
         </div>` : ''}
+
         ${pet.allergies ? `<div style="font-size:0.78rem;color:var(--brand-bark);margin-bottom:0.5rem;"><span style="font-weight:500;">Allergies:</span> <span style="font-weight:300;">${pet.allergies}</span></div>` : ''}
         ${pet.medications ? `<div style="font-size:0.78rem;color:var(--brand-bark);margin-bottom:0.5rem;"><span style="font-weight:500;">Medications:</span> <span style="font-weight:300;">${pet.medications}</span></div>` : ''}
         ${pet.feeding ? `<div style="font-size:0.78rem;color:var(--brand-bark);margin-bottom:0.75rem;"><span style="font-weight:500;">Feeding:</span> <span style="font-weight:300;">${pet.feeding}</span></div>` : ''}
@@ -134,7 +136,6 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
 
     container.appendChild(card);
 
-    // Wire buttons after render
     setTimeout(() => {
       const docsBtn = document.getElementById('pet-docs-btn-' + pet.id);
       if (docsBtn) docsBtn.onclick = () => goToStep('docs');
@@ -150,7 +151,6 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
     }, 0);
   });
 
-  // Add Register New Pet button
   const addBtn = document.createElement('button');
   addBtn.style.cssText = 'width:100%;padding:0.75rem;background:transparent;color:var(--brand-primary);border:1.5px dashed var(--brand-primary);border-radius:12px;font-family:var(--font-body);font-size:0.875rem;font-weight:500;cursor:pointer;margin-top:0.25rem;';
   addBtn.textContent = '+ Register a New Pet';
@@ -188,7 +188,6 @@ function openVetForm(pet, vetType, clientData, WORKER_URL, clientToken) {
         <button onclick="document.getElementById('vet-form-modal').remove()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--brand-stone);">✕</button>
       </div>
       <div style="font-size:0.82rem;color:var(--brand-stone);margin-bottom:1.25rem;font-weight:300;">For ${pet.name}. Changes will be reviewed before updating your account.</div>
-
       <div style="margin-bottom:1rem;">
         <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Clinic Name <span style="color:var(--brand-gold);">*</span></label>
         <input id="vet-clinic" type="text" value="${current?.clinic || ''}" placeholder="e.g. MSPCA Angell" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;">
@@ -205,9 +204,7 @@ function openVetForm(pet, vetType, clientData, WORKER_URL, clientToken) {
         <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Email</label>
         <input id="vet-email" type="email" value="${current?.email || ''}" placeholder="info@vetclinic.com" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;">
       </div>
-
       <div id="vet-error" style="color:var(--brand-error);font-size:0.8rem;margin-bottom:0.75rem;display:none;"></div>
-
       <button id="vet-submit-btn" onclick="submitVetForm('${pet.id}', '${pet.name}', '${vetType}', '${clientData.clientId}', '${clientToken}', '${WORKER_URL}')"
         style="width:100%;padding:0.85rem;background:var(--brand-primary);color:#fff;border:none;border-radius:12px;font-family:var(--font-body);font-size:0.95rem;font-weight:500;cursor:pointer;">
         Submit Update
@@ -219,12 +216,12 @@ function openVetForm(pet, vetType, clientData, WORKER_URL, clientToken) {
 }
 
 window.submitVetForm = async function (petId, petName, vetType, clientId, clientToken, WORKER_URL) {
-  const clinic = document.getElementById('vet-clinic')?.value.trim();
-  const phone = document.getElementById('vet-phone')?.value.trim();
+  const clinic  = document.getElementById('vet-clinic')?.value.trim();
+  const phone   = document.getElementById('vet-phone')?.value.trim();
   const address = document.getElementById('vet-address')?.value.trim();
-  const email = document.getElementById('vet-email')?.value.trim();
-  const errEl = document.getElementById('vet-error');
-  const btn = document.getElementById('vet-submit-btn');
+  const email   = document.getElementById('vet-email')?.value.trim();
+  const errEl   = document.getElementById('vet-error');
+  const btn     = document.getElementById('vet-submit-btn');
 
   if (!clinic) {
     errEl.textContent = 'Please enter the clinic name.';
@@ -243,7 +240,6 @@ window.submitVetForm = async function (petId, petName, vetType, clientId, client
     });
     if (!res.ok) throw new Error('Server error');
     document.getElementById('vet-form-modal').remove();
-    // Show brief success toast
     const toast = document.createElement('div');
     toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--brand-success);color:#fff;padding:0.75rem 1.5rem;border-radius:999px;font-size:0.875rem;font-weight:500;z-index:200;';
     toast.textContent = 'Vet info submitted for review ✓';
@@ -257,156 +253,99 @@ window.submitVetForm = async function (petId, petName, vetType, clientId, client
   }
 };
 
-// ── Build new pet registration HTML ──────────────────────────────────────────
-export function buildNewPetView() {
-  return `
-  <div id="view-new-pet">
-    <div class="step-header">
-      <button class="step-back" id="new-pet-back">← Back</button>
-      <div class="step-title">Register a <em>New Pet</em></div>
-      <p class="step-desc">Tell us about your pet. We will review and add them to your account within 24 hours.</p>
-    </div>
+// ── Breed picker ──────────────────────────────────────────────────────────────
+function initBreedPicker(pet, WORKER_URL) {
+  const selected = [];
 
-    <div class="form-group">
-      <label>Pet Name <span class="req">*</span></label>
-      <input type="text" id="np-name" placeholder="e.g. Buddy"/>
-      <div class="field-error" id="np-name-error">Please enter your pet's name.</div>
-    </div>
+  // Pre-populate from current pet breeds if breedIds are available
+  if (pet.breedIds && pet.breedIds.length > 0 && pet.breed) {
+    const breedNames = pet.breed.startsWith('Mixed Breed (')
+      ? pet.breed.replace('Mixed Breed (', '').replace(')', '').split(' · ')
+      : [pet.breed];
+    pet.breedIds.forEach((id, i) => {
+      if (id && breedNames[i]) selected.push({ id, name: breedNames[i] });
+    });
+  }
 
-    <div class="form-row">
-      <div class="form-group">
-        <label>Species <span class="req">*</span></label>
-        <select id="np-species">
-          <option value="">Select...</option>
-          <option value="Dog">Dog</option>
-          <option value="Cat">Cat</option>
-          <option value="Other">Other</option>
-        </select>
-        <div class="field-error" id="np-species-error">Please select a species.</div>
-      </div>
-      <div class="form-group">
-        <label>Gender</label>
-        <select id="np-gender">
-          <option value="">Select...</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-        </select>
-      </div>
-    </div>
+  const pillsEl   = document.getElementById('ep-breed-pills');
+  const searchEl  = document.getElementById('ep-breed-search');
+  const listEl    = document.getElementById('ep-breed-list');
+  const unknownEl = document.getElementById('ep-breed-unknown');
 
-    <div class="form-row">
-      <div class="form-group">
-        <label>Breed <span class="opt">(optional)</span></label>
-        <input type="text" id="np-breed" placeholder="e.g. Golden Retriever"/>
-      </div>
-      <div class="form-group">
-        <label>Date of Birth <span class="opt">(optional)</span></label>
-        <input type="date" id="np-dob"/>
-      </div>
-    </div>
+  if (!pillsEl || !searchEl || !listEl || !unknownEl) return;
 
-    <div class="form-group">
-      <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.875rem;font-weight:400;cursor:pointer;">
-        <input type="checkbox" id="np-spayed" style="width:16px;height:16px;accent-color:var(--brand-primary);">
-        Spayed / Neutered
-      </label>
-    </div>
+  let allBreeds = [];
 
-    <div class="form-group">
-      <label>Health Notes <span class="opt">(optional)</span></label>
-      <textarea id="np-notes" placeholder="Any medical history, allergies, medications, or special needs we should know about..."></textarea>
-    </div>
+  fetch((WORKER_URL || '') + '/breeds')
+    .then(r => r.json())
+    .then(breeds => {
+      allBreeds = breeds.filter(b => b.species === 'Dog');
+      renderList('');
+    })
+    .catch(() => {
+      listEl.innerHTML = '<div style="padding:0.75rem;font-size:0.8rem;color:var(--brand-stone);">Could not load breeds.</div>';
+    });
 
-    <div class="divider"></div>
-    <p class="step-desc" style="margin-bottom:1rem;">Veterinarian <span style="color:var(--brand-stone);font-weight:300;">(optional — you can add this later)</span></p>
-
-    <div class="form-group">
-      <label>Clinic Name</label>
-      <input type="text" id="np-vet-clinic" placeholder="e.g. MSPCA Angell"/>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Phone</label>
-        <input type="tel" id="np-vet-phone" placeholder="(555) 555-5555"/>
-      </div>
-      <div class="form-group">
-        <label>Address</label>
-        <input type="text" id="np-vet-address" placeholder="Boston, MA"/>
-      </div>
-    </div>
-
-    <div class="form-error" id="np-form-error"></div>
-    <button class="btn-primary" id="np-submit">
-      <span class="btn-text">Register Pet</span>
-      <span class="btn-loading">Submitting…</span>
-    </button>
-  </div>
-
-  <div id="view-new-pet-success" style="display:none;">
-    <div class="success-wrap">
-      <div class="success-circle">🐾</div>
-      <h2>Pet registered!</h2>
-      <p style="margin-top:0.5rem;">We will review and add them to your account within 24 hours. You can upload their compliance documents in the meantime.</p>
-    </div>
-    <button class="btn-primary" style="margin-top:1.5rem;" id="np-success-back">Back to Portal</button>
-  </div>`;
-}
-
-// ── Wire new pet form ─────────────────────────────────────────────────────────
-export function wireNewPetForm(clientData, goHome, WORKER_URL, clientToken) {
-  const backBtn = document.getElementById('new-pet-back');
-  if (backBtn) backBtn.onclick = goHome;
-
-  const successBack = document.getElementById('np-success-back');
-  if (successBack) successBack.onclick = goHome;
-
-  const submit = document.getElementById('np-submit');
-  if (!submit) return;
-
-  submit.onclick = async () => {
-    let valid = true;
-    const name = document.getElementById('np-name')?.value.trim();
-    const species = document.getElementById('np-species')?.value;
-
-    if (!name) { document.getElementById('np-name-error').classList.add('visible'); valid = false; }
-    else document.getElementById('np-name-error').classList.remove('visible');
-    if (!species) { document.getElementById('np-species-error').classList.add('visible'); valid = false; }
-    else document.getElementById('np-species-error').classList.remove('visible');
-    if (!valid) return;
-
-    submit.disabled = true;
-    submit.classList.add('loading');
-    document.getElementById('np-form-error').classList.remove('visible');
-
-    try {
-      const res = await fetch(WORKER_URL + '/pet', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token: clientToken,
-          clientId: clientData.clientId,
-          petName: name,
-          species,
-          breed: document.getElementById('np-breed')?.value.trim() || '',
-          dob: document.getElementById('np-dob')?.value || '',
-          gender: document.getElementById('np-gender')?.value || '',
-          spayedNeutered: document.getElementById('np-spayed')?.checked || false,
-          notes: document.getElementById('np-notes')?.value.trim() || '',
-          vetClinic: document.getElementById('np-vet-clinic')?.value.trim() || '',
-          vetPhone: document.getElementById('np-vet-phone')?.value.trim() || '',
-          vetAddress: document.getElementById('np-vet-address')?.value.trim() || '',
-        }),
+  function renderPills() {
+    pillsEl.innerHTML = '';
+    selected.forEach(b => {
+      const pill = document.createElement('div');
+      pill.style.cssText = 'display:flex;align-items:center;gap:0.3rem;background:var(--brand-sage-light);border:1.5px solid var(--brand-sage);border-radius:999px;padding:0.2rem 0.6rem;font-size:0.75rem;font-weight:500;color:var(--brand-primary);';
+      const removeBtn = document.createElement('button');
+      removeBtn.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--brand-stone);font-size:0.85rem;line-height:1;padding:0;';
+      removeBtn.textContent = '✕';
+      removeBtn.addEventListener('click', () => {
+        const idx = selected.findIndex(s => s.id === b.id);
+        if (idx > -1) selected.splice(idx, 1);
+        renderPills();
+        renderList(searchEl.value);
       });
-      if (!res.ok) throw new Error('Server error');
-      document.getElementById('view-new-pet').style.display = 'none';
-      document.getElementById('view-new-pet-success').style.display = 'block';
-    } catch {
-      document.getElementById('np-form-error').textContent = 'Something went wrong. Please try again.';
-      document.getElementById('np-form-error').classList.add('visible');
-      submit.disabled = false;
-      submit.classList.remove('loading');
+      pill.textContent = b.name + ' ';
+      pill.appendChild(removeBtn);
+      pillsEl.appendChild(pill);
+    });
+  }
+
+  function renderList(query) {
+    const q = query.toLowerCase();
+    const filtered = allBreeds
+      .filter(b => b.name.toLowerCase().includes(q) && !selected.find(s => s.id === b.id))
+      .slice(0, 30);
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<div style="padding:0.75rem;font-size:0.8rem;color:var(--brand-stone);">No breeds found.</div>';
+      return;
     }
-  };
+
+    listEl.innerHTML = '';
+    filtered.forEach(b => {
+      const item = document.createElement('div');
+      item.style.cssText = 'padding:0.6rem 0.85rem;font-size:0.85rem;cursor:pointer;border-bottom:1px solid var(--brand-stone-light);color:var(--brand-bark);';
+      item.textContent = b.name;
+      item.addEventListener('mouseenter', () => item.style.background = 'var(--brand-sage-light)');
+      item.addEventListener('mouseleave', () => item.style.background = '');
+      item.addEventListener('click', () => {
+        if (selected.length >= 3) return;
+        selected.push({ id: b.id, name: b.name });
+        searchEl.value = '';
+        renderPills();
+        renderList('');
+      });
+      listEl.appendChild(item);
+    });
+  }
+
+  unknownEl.addEventListener('click', e => {
+    e.preventDefault();
+    selected.length = 0;
+    renderPills();
+    renderList('');
+  });
+
+  searchEl.addEventListener('input', () => renderList(searchEl.value));
+  renderPills();
+
+  window._getSelectedBreedIds = () => selected.map(b => b.id);
 }
 
 // ── Edit pet bottom sheet ─────────────────────────────────────────────────────
@@ -420,13 +359,11 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
 
   modal.innerHTML = `
     <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(44,31,20,0.15);">
-      <!-- Header -->
       <div style="position:sticky;top:0;background:#fff;padding:1.25rem 1.5rem 0.75rem;border-bottom:1px solid var(--brand-stone-light);z-index:1;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
           <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;">Update ${pet.name}</div>
           <button onclick="document.getElementById('edit-pet-modal').remove()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--brand-stone);">✕</button>
         </div>
-        <!-- Tabs -->
         <div style="display:flex;gap:0;">
           <button class="edit-pet-tab active" data-tab="basic" onclick="switchEditPetTab('basic')" style="flex:1;padding:0.6rem 0.5rem;background:none;border:none;border-bottom:2px solid var(--brand-primary);font-family:var(--font-body);font-size:0.8rem;font-weight:500;color:var(--brand-primary);cursor:pointer;">Basic Info</button>
           <button class="edit-pet-tab" data-tab="health" onclick="switchEditPetTab('health')" style="flex:1;padding:0.6rem 0.5rem;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--font-body);font-size:0.8rem;font-weight:400;color:var(--brand-stone);cursor:pointer;">Health & Behavior</button>
@@ -441,8 +378,11 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
           <p style="font-size:0.8rem;color:var(--brand-stone);font-weight:300;margin-bottom:1rem;">Updates go to review before being applied.</p>
 
           <div style="margin-bottom:1rem;">
-            <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Breed</label>
-            <input id="ep-breed" type="text" value="${pet.breed || ''}" placeholder="e.g. German Shorthaired Pointer" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;">
+            <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Breed <span style="font-weight:300;text-transform:none;letter-spacing:0;">(up to 3)</span></label>
+            <div id="ep-breed-pills" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.5rem;min-height:1rem;"></div>
+            <input id="ep-breed-search" type="text" placeholder="Search breeds…" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;margin-bottom:0.4rem;" autocomplete="off"/>
+            <div id="ep-breed-list" style="max-height:180px;overflow-y:auto;border:1.5px solid var(--brand-stone-light);border-radius:10px;background:#fff;"></div>
+            <div style="font-size:0.72rem;color:var(--brand-stone);margin-top:0.35rem;font-weight:300;">Can't find the breed? <a href="#" id="ep-breed-unknown" style="color:var(--brand-primary);">Select Mixed / Unknown</a></div>
           </div>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
@@ -481,22 +421,18 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
             <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Allergies</label>
             <textarea id="ep-allergies" placeholder="e.g. chicken, pollen, penicillin" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;min-height:70px;resize:vertical;">${pet.allergies || ''}</textarea>
           </div>
-
           <div style="margin-bottom:1rem;">
             <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Current Medications</label>
             <textarea id="ep-medications" placeholder="e.g. Apoquel 16mg once daily with food" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;min-height:70px;resize:vertical;">${pet.medications || ''}</textarea>
           </div>
-
           <div style="margin-bottom:1rem;">
             <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Feeding Schedule</label>
             <textarea id="ep-feeding" placeholder="e.g. 1 cup Orijen dry kibble AM and PM, no treats before noon" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;min-height:70px;resize:vertical;">${pet.feeding || ''}</textarea>
           </div>
-
           <div style="margin-bottom:1rem;">
             <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Fears & Triggers</label>
             <textarea id="ep-fears" placeholder="e.g. thunderstorms, fireworks, vacuum cleaners, men with hats" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;min-height:70px;resize:vertical;">${pet.fears || ''}</textarea>
           </div>
-
           <div style="margin-bottom:1rem;">
             <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Temperament</label>
             <textarea id="ep-temperament" placeholder="e.g. friendly with other dogs, reactive on leash, shy with strangers at first" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;min-height:70px;resize:vertical;">${pet.temperament || ''}</textarea>
@@ -527,7 +463,6 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
           </div>
         </div>
 
-        <!-- Error + Submit -->
         <div id="ep-error" style="color:var(--brand-error);font-size:0.8rem;margin-bottom:0.75rem;display:none;"></div>
         <button id="ep-submit-btn" style="width:100%;padding:0.85rem;background:var(--brand-primary);color:#fff;border:none;border-radius:12px;font-family:var(--font-body);font-size:0.95rem;font-weight:500;cursor:pointer;">
           Submit Updates
@@ -538,17 +473,17 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 
-  // Wire submit via closure — avoids string interpolation issues
   setTimeout(() => {
     const submitBtn = document.getElementById('ep-submit-btn');
     if (submitBtn) {
       submitBtn.onclick = () => submitEditPetClosure(pet.id, pet.name, clientData.clientId, clientToken, WORKER_URL);
     }
+    initBreedPicker(pet, WORKER_URL);
   }, 0);
 }
 
 async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKER_URL) {
-  const btn = document.getElementById('ep-submit-btn');
+  const btn   = document.getElementById('ep-submit-btn');
   const errEl = document.getElementById('ep-error');
   if (!btn) return;
   btn.disabled = true;
@@ -556,20 +491,19 @@ async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKE
   errEl.style.display = 'none';
 
   const fields = {
-    'Breed': document.getElementById('ep-breed')?.value.trim() || '',
-    'Date of Birth': document.getElementById('ep-dob')?.value || '',
-    'Gender': document.getElementById('ep-gender')?.value || '',
-    'Spayed/Neutered': document.getElementById('ep-spayed')?.checked ? 'Yes' : 'No',
-    'Microchip Number': document.getElementById('ep-microchip')?.value.trim() || '',
-    'Allergies': document.getElementById('ep-allergies')?.value.trim() || '',
+    'Date of Birth':       document.getElementById('ep-dob')?.value || '',
+    'Gender':              document.getElementById('ep-gender')?.value || '',
+    'Spayed/Neutered':     document.getElementById('ep-spayed')?.checked ? 'Yes' : 'No',
+    'Microchip Number':    document.getElementById('ep-microchip')?.value.trim() || '',
+    'Allergies':           document.getElementById('ep-allergies')?.value.trim() || '',
     'Current Medications': document.getElementById('ep-medications')?.value.trim() || '',
-    'Feeding Schedule': document.getElementById('ep-feeding')?.value.trim() || '',
-    'Fears & Triggers': document.getElementById('ep-fears')?.value.trim() || '',
-    'Temperament': document.getElementById('ep-temperament')?.value.trim() || '',
-    'Vet Clinic': document.getElementById('ep-vet-clinic')?.value.trim() || '',
-    'Vet Phone': document.getElementById('ep-vet-phone')?.value.trim() || '',
-    'Vet Email': document.getElementById('ep-vet-email')?.value.trim() || '',
-    'Vet Address': document.getElementById('ep-vet-address')?.value.trim() || '',
+    'Feeding Schedule':    document.getElementById('ep-feeding')?.value.trim() || '',
+    'Fears & Triggers':    document.getElementById('ep-fears')?.value.trim() || '',
+    'Temperament':         document.getElementById('ep-temperament')?.value.trim() || '',
+    'Vet Clinic':          document.getElementById('ep-vet-clinic')?.value.trim() || '',
+    'Vet Phone':           document.getElementById('ep-vet-phone')?.value.trim() || '',
+    'Vet Email':           document.getElementById('ep-vet-email')?.value.trim() || '',
+    'Vet Address':         document.getElementById('ep-vet-address')?.value.trim() || '',
   };
 
   try {
@@ -581,11 +515,20 @@ async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKE
     const text = await res.text();
     const data = JSON.parse(text || '{}');
     if (!res.ok || data.error) throw new Error(data.error || 'Server error ' + res.status);
+
+    // Update breeds directly via /pet-breed
+    const breedIds = window._getSelectedBreedIds ? window._getSelectedBreedIds() : [];
+    await fetch(WORKER_URL + '/pet-breed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: clientToken, clientId, petId, breedIds }),
+    });
+
     const modal = document.getElementById('edit-pet-modal');
     if (modal) modal.remove();
     const toast = document.createElement('div');
     toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--brand-success);color:#fff;padding:0.75rem 1.5rem;border-radius:999px;font-size:0.875rem;font-weight:500;z-index:200;';
-    toast.textContent = 'Updates submitted for review ✓';
+    toast.textContent = 'Updates submitted ✓';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
   } catch (err) {
@@ -599,12 +542,156 @@ async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKE
 window.switchEditPetTab = function (tab) {
   ['basic', 'health', 'vet'].forEach(t => {
     const panel = document.getElementById('edit-tab-' + t);
-    const btn = document.querySelector(`.edit-pet-tab[data-tab="${t}"]`);
+    const btn   = document.querySelector(`.edit-pet-tab[data-tab="${t}"]`);
     if (panel) panel.style.display = t === tab ? 'block' : 'none';
     if (btn) {
       btn.style.borderBottomColor = t === tab ? 'var(--brand-primary)' : 'transparent';
-      btn.style.color = t === tab ? 'var(--brand-primary)' : 'var(--brand-stone)';
-      btn.style.fontWeight = t === tab ? '500' : '400';
+      btn.style.color             = t === tab ? 'var(--brand-primary)' : 'var(--brand-stone)';
+      btn.style.fontWeight        = t === tab ? '500' : '400';
     }
   });
 };
+
+// ── Build new pet registration HTML ──────────────────────────────────────────
+export function buildNewPetView() {
+  return `
+  <div id="view-new-pet">
+    <div class="step-header">
+      <button class="step-back" id="new-pet-back">← Back</button>
+      <div class="step-title">Register a <em>New Pet</em></div>
+      <p class="step-desc">Tell us about your pet. We will review and add them to your account within 24 hours.</p>
+    </div>
+    <div class="form-group">
+      <label>Pet Name <span class="req">*</span></label>
+      <input type="text" id="np-name" placeholder="e.g. Buddy"/>
+      <div class="field-error" id="np-name-error">Please enter your pet's name.</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Species <span class="req">*</span></label>
+        <select id="np-species">
+          <option value="">Select...</option>
+          <option value="Dog">Dog</option>
+          <option value="Cat">Cat</option>
+          <option value="Other">Other</option>
+        </select>
+        <div class="field-error" id="np-species-error">Please select a species.</div>
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="np-gender">
+          <option value="">Select...</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Breed <span class="opt">(optional)</span></label>
+        <input type="text" id="np-breed" placeholder="e.g. Golden Retriever"/>
+      </div>
+      <div class="form-group">
+        <label>Date of Birth <span class="opt">(optional)</span></label>
+        <input type="date" id="np-dob"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.875rem;font-weight:400;cursor:pointer;">
+        <input type="checkbox" id="np-spayed" style="width:16px;height:16px;accent-color:var(--brand-primary);">
+        Spayed / Neutered
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Health Notes <span class="opt">(optional)</span></label>
+      <textarea id="np-notes" placeholder="Any medical history, allergies, medications, or special needs we should know about..."></textarea>
+    </div>
+    <div class="divider"></div>
+    <p class="step-desc" style="margin-bottom:1rem;">Veterinarian <span style="color:var(--brand-stone);font-weight:300;">(optional — you can add this later)</span></p>
+    <div class="form-group">
+      <label>Clinic Name</label>
+      <input type="text" id="np-vet-clinic" placeholder="e.g. MSPCA Angell"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="tel" id="np-vet-phone" placeholder="(555) 555-5555"/>
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" id="np-vet-address" placeholder="Boston, MA"/>
+      </div>
+    </div>
+    <div class="form-error" id="np-form-error"></div>
+    <button class="btn-primary" id="np-submit">
+      <span class="btn-text">Register Pet</span>
+      <span class="btn-loading">Submitting…</span>
+    </button>
+  </div>
+
+  <div id="view-new-pet-success" style="display:none;">
+    <div class="success-wrap">
+      <div class="success-circle">🐾</div>
+      <h2>Pet registered!</h2>
+      <p style="margin-top:0.5rem;">We will review and add them to your account within 24 hours. You can upload their compliance documents in the meantime.</p>
+    </div>
+    <button class="btn-primary" style="margin-top:1.5rem;" id="np-success-back">Back to Portal</button>
+  </div>`;
+}
+
+// ── Wire new pet form ─────────────────────────────────────────────────────────
+export function wireNewPetForm(clientData, goHome, WORKER_URL, clientToken) {
+  const backBtn = document.getElementById('new-pet-back');
+  if (backBtn) backBtn.onclick = goHome;
+
+  const successBack = document.getElementById('np-success-back');
+  if (successBack) successBack.onclick = goHome;
+
+  const submit = document.getElementById('np-submit');
+  if (!submit) return;
+
+  submit.onclick = async () => {
+    let valid = true;
+    const name    = document.getElementById('np-name')?.value.trim();
+    const species = document.getElementById('np-species')?.value;
+
+    if (!name)    { document.getElementById('np-name-error').classList.add('visible');    valid = false; }
+    else            document.getElementById('np-name-error').classList.remove('visible');
+    if (!species) { document.getElementById('np-species-error').classList.add('visible'); valid = false; }
+    else            document.getElementById('np-species-error').classList.remove('visible');
+    if (!valid) return;
+
+    submit.disabled = true;
+    submit.classList.add('loading');
+    document.getElementById('np-form-error').classList.remove('visible');
+
+    try {
+      const res = await fetch(WORKER_URL + '/pet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token:          clientToken,
+          clientId:       clientData.clientId,
+          petName:        name,
+          species,
+          breed:          document.getElementById('np-breed')?.value.trim()      || '',
+          dob:            document.getElementById('np-dob')?.value                || '',
+          gender:         document.getElementById('np-gender')?.value             || '',
+          spayedNeutered: document.getElementById('np-spayed')?.checked           || false,
+          notes:          document.getElementById('np-notes')?.value.trim()      || '',
+          vetClinic:      document.getElementById('np-vet-clinic')?.value.trim() || '',
+          vetPhone:       document.getElementById('np-vet-phone')?.value.trim()  || '',
+          vetAddress:     document.getElementById('np-vet-address')?.value.trim()|| '',
+        }),
+      });
+      if (!res.ok) throw new Error('Server error');
+      document.getElementById('view-new-pet').style.display       = 'none';
+      document.getElementById('view-new-pet-success').style.display = 'block';
+    } catch {
+      document.getElementById('np-form-error').textContent = 'Something went wrong. Please try again.';
+      document.getElementById('np-form-error').classList.add('visible');
+      submit.disabled = false;
+      submit.classList.remove('loading');
+    }
+  };
+}

@@ -1,11 +1,10 @@
 import { errRes, jsonRes, atFetch } from "./helpers.js";
 import { CLIENTS_TABLE, PETS_TABLE, PENDING_UPDATES_TABLE, FIELDS } from "./constants.js";
 
-const VETS_TABLE = "tblUC3XRDQnNCwTri";
+const VETS_TABLE      = "tblUC3XRDQnNCwTri";
+const BREEDS_TABLE    = "tblLsiIKKeimLnBxF";
 
 // ── POST /pet ─────────────────────────────────────────────────────────────────
-// Registers a new pet as a draft (inactive) linked to the client.
-// Vet info goes to Pending Updates for manual linking.
 export async function handlePostPet(req, env) {
   let body;
   try { body = await req.json(); } catch { return errRes("Invalid JSON"); }
@@ -16,15 +15,12 @@ export async function handlePostPet(req, env) {
     notes, vetClinic, vetPhone, vetAddress,
   } = body;
 
-  if (!token || !clientId || !petName) {
-    return errRes("Missing required fields");
-  }
+  if (!token || !clientId || !petName) return errRes("Missing required fields");
 
-  // Create pet record — inactive until you review and activate
   const petFields = {
-    "Pet Name":        petName,
-    "Active":          false,
-    "Clients":         [clientId],
+    "Pet Name": petName,
+    "Active":   false,
+    "Clients":  [clientId],
   };
   if (gender)         petFields["Gender"]          = gender;
   if (dob)            petFields["Date of Birth"]   = dob;
@@ -45,7 +41,6 @@ export async function handlePostPet(req, env) {
   const petId    = petData.records[0].id;
   const petLabel = petName + (breed ? ` (${breed})` : "");
 
-  // Submit vet info + breed + species as a Pending Update for your review
   const now = new Date().toISOString();
   const updates = [];
 
@@ -88,16 +83,12 @@ export async function handlePostPet(req, env) {
 }
 
 // ── POST /vet ─────────────────────────────────────────────────────────────────
-// Submits a vet update for a specific pet to Pending Updates.
 export async function handlePostVet(req, env) {
   let body;
   try { body = await req.json(); } catch { return errRes("Invalid JSON"); }
 
   const { token, clientId, petId, petName, vetType, vetClinic, vetPhone, vetAddress, vetEmail, vetUrl } = body;
-
-  if (!token || !clientId || !petId || !vetClinic) {
-    return errRes("Missing required fields");
-  }
+  if (!token || !clientId || !petId || !vetClinic) return errRes("Missing required fields");
 
   const now     = new Date().toISOString();
   const vetInfo = [vetClinic, vetPhone, vetAddress, vetEmail, vetUrl].filter(Boolean).join(" | ");
@@ -129,8 +120,6 @@ export async function handlePostVet(req, env) {
 }
 
 // ── POST /pet-update ──────────────────────────────────────────────────────────
-// Writes basic pet info directly to the Pet record.
-// Vet changes go to Pending Updates for manual linking.
 export async function handlePostPetUpdate(req, env) {
   let body;
   try { body = await req.json(); } catch { return errRes("Invalid JSON"); }
@@ -138,7 +127,6 @@ export async function handlePostPetUpdate(req, env) {
   const { token, clientId, petId, petName, fields } = body;
   if (!token || !clientId || !petId || !fields) return errRes("Missing required fields");
 
-  // ── Direct writes to Pet record ───────────────────────────────────────────
   const directFields = {};
 
   if (fields["Date of Birth"])       directFields["Date of Birth"]       = fields["Date of Birth"];
@@ -150,13 +138,8 @@ export async function handlePostPetUpdate(req, env) {
   if (fields["Fears & Triggers"])    directFields["Fears & Triggers"]    = fields["Fears & Triggers"];
   if (fields["Temperament"])         directFields["Temperament"]         = fields["Temperament"];
 
-  // Spayed/Neutered is a checkbox
   if (fields["Spayed/Neutered"] === "Yes") directFields["Spayed/Neutered"] = true;
   else if (fields["Spayed/Neutered"] === "No") directFields["Spayed/Neutered"] = false;
-
-  // Breed — write to plain text field directly
-  if (fields["Breed"]?.trim()) directFields["Breed (Text)"] = fields["Breed"].trim();
-  const breedVal = null; // no longer needed for pending updates
 
   if (Object.keys(directFields).length > 0) {
     const patchRes = await atFetch(env, `/${PETS_TABLE}/${petId}`, {
@@ -169,26 +152,9 @@ export async function handlePostPetUpdate(req, env) {
     }
   }
 
-  // ── Pending Updates for things requiring manual linking ───────────────────
   const now = new Date().toISOString();
   const pendingUpdates = [];
 
-  // Breed requires manual linking (linked field)
-  if (breedVal) {
-    pendingUpdates.push({
-      fields: {
-        [FIELDS.PU_CLIENT]:    [clientId],
-        [FIELDS.PU_SUBMITTED]: now,
-        [FIELDS.PU_STATUS]:    "Pending 🟡",
-        [FIELDS.PU_FIELD]:     `${petName} — Breed`,
-        [FIELDS.PU_CURRENT]:   "",
-        [FIELDS.PU_NEW]:       breedVal,
-        [FIELDS.PU_NOTES]:     `Pet ID: ${petId} — please link breed in Airtable`,
-      }
-    });
-  }
-
-  // Vet info requires manual linking
   const vetParts = [
     fields["Vet Clinic"]  ? `Clinic: ${fields["Vet Clinic"]}`   : "",
     fields["Vet Phone"]   ? `Phone: ${fields["Vet Phone"]}`     : "",
@@ -226,4 +192,34 @@ export async function handlePostPetUpdate(req, env) {
     directUpdates: Object.keys(directFields).length,
     pendingUpdates: pendingUpdates.length,
   });
+}
+
+// ── POST /pet-breed ───────────────────────────────────────────────────────────
+// Writes breed linked record IDs directly to the Pets table.
+// Accepts breedIds: string[] of Airtable record IDs from the Breeds table.
+// Empty array clears all breeds.
+export async function handlePostPetBreed(req, env) {
+  let body;
+  try { body = await req.json(); } catch { return errRes("Invalid JSON"); }
+
+  const { token, clientId, petId, breedIds } = body;
+  if (!token || !clientId || !petId) return errRes("Missing required fields");
+  if (!Array.isArray(breedIds))      return errRes("breedIds must be an array");
+  if (breedIds.length > 3)           return errRes("Maximum 3 breeds allowed");
+
+  const patchRes = await atFetch(env, `/${PETS_TABLE}/${petId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      fields: {
+        "Breeds": breedIds,  // plain string array — Airtable accepts this for linked fields
+      }
+    }),
+  });
+
+  if (!patchRes.ok) {
+    const err = await patchRes.json().catch(() => ({}));
+    return errRes("Failed to update breeds: " + JSON.stringify(err), 502);
+  }
+
+  return jsonRes({ success: true, breedIds });
 }
