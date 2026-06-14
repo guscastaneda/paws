@@ -125,6 +125,8 @@ async function handleGetClient(req, env) {
           dob,
           age,
           gender:        (p.fields["Gender"] || {}).name || "",
+          console.log("gender raw:", JSON.stringify(p.fields["Gender"]));
+          console.log("all pet field keys:", Object.keys(p.fields).join(", "));
           spayedNeutered: p.fields["Spayed/Neutered"] === true,
           microchip:     p.fields["Microchip Number"]    || "",
           allergies:     p.fields["Allergies"]           || "",
