@@ -120,6 +120,7 @@ async function handleGetClient(req, env) {
         pets.push({
           id:            p.id,
           active:        isActive,
+          rawPetFields:  Object.keys(p.fields), // debug
           name:          p.fields["Pet Name"]    || "",
           breed,
           dob,
