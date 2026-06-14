@@ -10,6 +10,7 @@ import { handlePostBooking }         from "./src/booking.js";
 import { handleGetAdminClients }     from "./src/admin.js";
 import { handleSetupClient }         from './src/setup-client.js';
 import { handlePostPet, handlePostVet, handlePostPetUpdate } from "./src/pet.js";
+import { handleGetBreeds }           from './src/breeds.js';
 
 export default {
   async fetch(req, env) {
@@ -31,6 +32,7 @@ export default {
     if (path === "/pet-update" && method === "POST") return handlePostPetUpdate(req, env);
     if (path === "/admin/clients" && method === "GET") return handleGetAdminClients(req, env);
     if (path === '/setup-client') return handleSetupClient(req, env);
+    if (path === '/breeds' && req.method === 'GET') return handleGetBreeds(req, env);
     return env.ASSETS.fetch(req);
   },
 };

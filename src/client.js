@@ -107,20 +107,30 @@ async function handleGetClient(req, env) {
           age = y + (m > 0 ? "." + m : "") + " yrs";
         }
 
-        // Breed (Text) is the client-submitted plain text field
-        // Breeds is the linked field with curated breed records
-        const breedText = p.fields["Breed (Text)"] || "";
-        const breedRefs = p.fields["Breeds"] || [];
-        const breedLinked = breedRefs.map(b => {
-          if (typeof b === "object" && b.name) return b.name;
-          return null;
-        }).filter(Boolean).join(", ");
-        const breed = breedLinked || breedText;
+const breedText = p.fields["Breed (Text)"] || "";
+const breedRefs = p.fields["Breeds"] || [];
+const breedIds  = breedRefs.map(b => typeof b === "object" ? b.id : b).filter(Boolean);
+let breedLinked = "";
+if (breedIds.length > 0) {
+  const breedFilter = encodeURIComponent(
+    `OR(${breedIds.map(id => `RECORD_ID()="${id}"`).join(",")})`
+  );
+  const breedRes = await atFetch(env, `/tblLsiIKKeimLnBxF?filterByFormula=${breedFilter}&fields[]=fldFetxyc0IbkFadw`);
+  if (breedRes.ok) {
+    const breedData = await breedRes.json();
+    const names = (breedData.records || []).map(r => r.fields["fldFetxyc0IbkFadw"] || "").filter(Boolean);
+    if (names.length === 1) {
+      breedLinked = names[0];
+    } else if (names.length > 1) {
+      breedLinked = "Mixed Breed (" + names.join(" · ") + ")";
+    }
+  }
+}
+const breed = breedLinked || breedText;
 
         pets.push({
           id:            p.id,
           active:        isActive,
-          rawPetFields:  Object.keys(p.fields), // debug
           name:          p.fields["Pet Name"]    || "",
           breed,
           dob,
