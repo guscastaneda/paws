@@ -29,7 +29,7 @@ async function handleGetClient(req, env) {
     const petFilter = encodeURIComponent(
       `OR(${petIdList.map(id => `RECORD_ID()="${id}"`).join(",")})`
     );
-    const petsRes = await atFetch(env, `/${PETS_TABLE}?filterByFormula=${petFilter}&fields[]=Pet%20Name&fields[]=Active&fields[]=fldeME6BfqF8KhXag&fields[]=Date%20of%20Birth&fields[]=Breed%20(Text)&fields[]=Breeds&fields[]=Spayed%2FNeutered&fields[]=Microchip%20Number&fields[]=Allergies&fields[]=Current%20Medications&fields[]=Feeding%20Schedule&fields[]=Fears%20%26%20Triggers&fields[]=Temperament&fields[]=Pet%20Notes&fields[]=Photo&fields[]=Compliance%20Documents&fields[]=Veterinarians&fields[]=Clients`);
+    const petsRes = await atFetch(env, `/${PETS_TABLE}?filterByFormula=${petFilter}&fields[]=Pet%20Name&fields[]=Active&fields[]=Gender&fields[]=Date%20of%20Birth&fields[]=Breed%20(Text)&fields[]=Breeds&fields[]=Spayed%2FNeutered&fields[]=Microchip%20Number&fields[]=Allergies&fields[]=Current%20Medications&fields[]=Feeding%20Schedule&fields[]=Fears%20%26%20Triggers&fields[]=Temperament&fields[]=Pet%20Notes&fields[]=Photo&fields[]=Compliance%20Documents&fields[]=Veterinarians&fields[]=Clients`);
     if (petsRes.ok) {
       const petsData = await petsRes.json();
 
@@ -125,7 +125,9 @@ async function handleGetClient(req, env) {
           breed,
           dob,
           age,
-          gender: (p.fields["Gender"] || p.fields["fldeME6BfqF8KhXag"] || {}).name || "",
+          gender: typeof p.fields["Gender"] === "object" 
+  ? (p.fields["Gender"] || {}).name || "" 
+  : p.fields["Gender"] || "",
           spayedNeutered: p.fields["Spayed/Neutered"] === true,
           microchip:     p.fields["Microchip Number"]    || "",
           allergies:     p.fields["Allergies"]           || "",
