@@ -1,8 +1,6 @@
 import { errRes, jsonRes, atFetch } from "./helpers.js";
 
 const BREEDS_TABLE = "tblLsiIKKeimLnBxF";
-const BREED_NAME_FIELD = "fldFetxyc0IbkFadw";
-const BREED_SPECIES_FIELD = "fldRJouS1cAwWQsmA";
 
 // Simple in-memory cache — resets on Worker restart but good enough
 let breedsCache = null;
@@ -16,14 +14,14 @@ async function handleGetBreeds(req, env) {
     return jsonRes(breedsCache);
   }
 
-  const res = await atFetch(env, `/${BREEDS_TABLE}?fields[]=${BREED_NAME_FIELD}&fields[]=${BREED_SPECIES_FIELD}&sort[0][field]=${BREED_NAME_FIELD}&sort[0][direction]=asc`);
+  const res = await atFetch(env, `/${BREEDS_TABLE}?fields[]=Breed%20Name&fields[]=Species&sort[0][field]=Breed%20Name&sort[0][direction]=asc`);
   if (!res.ok) return errRes("Failed to fetch breeds", 502);
 
   const data = await res.json();
   const breeds = (data.records || []).map(r => ({
     id:      r.id,
-    name:    r.fields[BREED_NAME_FIELD] || "",
-    species: (r.fields[BREED_SPECIES_FIELD] || {}).name || "Dog",
+    name:    r.fields["Breed Name"] || "",
+    species: (r.fields["Species"] || {}).name || "Dog",
   })).filter(b => b.name);
 
   // Deduplicate by name
