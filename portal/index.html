@@ -1255,9 +1255,51 @@ if (!isDaycare && !endDate) showErr('booking-end-date-error', 'Please select a p
     const fmt = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
     const summary = document.getElementById('booking-summary');
     if (summary) {
-      const pricingNote = isDaycare
-        ? '💰 Pricing confirmed when we review your request.'
-        : '💰 Pricing starts at $85/night — final total confirmed within 24 hrs';
+      // Calculate estimate
+      const numPets = selectedPets.length;
+      let estimateLines = [];
+      let estimateTotal = 0;
+
+      if (isDaycare) {
+        const rate     = clientData.daycarePrice || 65;
+        const session  = rate * numPets;
+        estimateTotal += session;
+        estimateLines.push(numPets > 1
+          ? `☀️ Daycare: $${rate} x ${numPets} dogs = $${session}`
+          : `☀️ Daycare: $${rate}/session`);
+      } else {
+        const rate   = clientData.boardingPrice || 85;
+        const nights = Math.max(1, Math.round((new Date(endDate) - new Date(startDate)) / 86400000));
+        const dog1   = rate * nights;
+        estimateTotal += dog1;
+        estimateLines.push(`🏡 Dog 1: $${rate} x ${nights} night${nights > 1 ? 's' : ''} = $${dog1}`);
+        if (numPets > 1) {
+          const dog2Rate  = Math.max(0, rate - 15);
+          const dog2Total = dog2Rate * nights * (numPets - 1);
+          estimateTotal  += dog2Total;
+          estimateLines.push(`🏡 Dog 2: $${dog2Rate} x ${nights} night${nights > 1 ? 's' : ''} = $${dog2Total}`);
+        }
+      }
+
+      // Transport add-on
+      if (transport && transport !== 'None') {
+        const transportRate = 5;
+        const tripMulti     = transport === 'Round Trip' ? 2 : 1;
+        const dog1Fee       = transportRate * tripMulti;
+        const dog2Fee       = numPets > 1 ? (transportRate * 0.5) * tripMulti * (numPets - 1) : 0;
+        const transportFee  = dog1Fee + dog2Fee;
+        estimateTotal      += transportFee;
+        let tLine = `🚙 Transport (${transport}): $${dog1Fee}`;
+        if (dog2Fee > 0) tLine += ` + $${dog2Fee} (2nd dog)`;
+        estimateLines.push(tLine);
+      }
+
+      const pricingNote = [
+        ...estimateLines,
+        ``,
+        `Est. Total: ~$${estimateTotal}`,
+        `*Peak season or multi-week discounts may apply. Final price confirmed within 24hrs.`
+      ].join('\n');
       const dateLines = isDaycare
         ? '📅 Date: ' + fmt(startDate) + ' · ' + startTime + '<br>'
         : '📅 Drop-off: ' + fmt(startDate) + ' · ' + startTime + '<br>' +
@@ -1266,8 +1308,8 @@ if (!isDaycare && !endDate) showErr('booking-end-date-error', 'Please select a p
         '<strong>' + (isDaycare ? '☀️' : '🐾') + ' ' + (lastBooking.pets.join(', ') || 'Your pet') + '</strong><br>' +
         '<strong>' + (isDaycare ? 'Daycare' : 'Boarding') + '</strong><br>' +
         dateLines +
-        '🚗 Transport: ' + transport + '<br>' +
-        pricingNote;
+        '🚗 Transport: ' + transport + '<br><br>' +
+        '<pre style="font-family:var(--font-body);font-size:0.78rem;color:var(--brand-bark);white-space:pre-wrap;margin:0;">' + pricingNote + '</pre>';
     }
 
     // Refresh client data in background

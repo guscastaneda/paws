@@ -209,7 +209,23 @@ const breed = breedLinked || breedText;
       })
       .sort((a, b) => a.startDate.localeCompare(b.startDate));
   }
-
+// Fetch service prices from Services table
+  let boardingPrice = 85;
+  let daycarePrice  = 65;
+  try {
+    const servicesRes = await atFetch(env, `/tbl2abVXy45haJAgC?fields[]=Service%20Name&fields[]=Base%20Price`);
+    if (servicesRes.ok) {
+      const servicesData = await servicesRes.json();
+      for (const s of servicesData.records || []) {
+        const name  = s.fields["Service Name"];
+        const price = s.fields["Base Price"];
+        if (name === "Boarding")  boardingPrice = price;
+        if (name === "Daycare")   daycarePrice  = price;
+      }
+    }
+  } catch (e) {
+    console.error("Failed to fetch service prices:", e);
+  }
   return jsonRes({
     clientId:             c.id,
     firstName:            clientName.split(" ")[0],
@@ -228,6 +244,8 @@ const breed = breedLinked || breedText;
     docsComplete:         allDocsComplete,
     pets,
     appointments,
+    boardingPrice,
+    daycarePrice,
   });
 }
 
