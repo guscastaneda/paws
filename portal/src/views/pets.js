@@ -48,7 +48,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
       ? `<img src="${pet.photoUrl}" alt="${pet.name}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--brand-sage);">`
       : `<div style="width:52px;height:52px;border-radius:50%;background:var(--brand-sage-light);border:2px solid var(--brand-sage);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🐶</div>`;
 
-    const genderIcon = pet.gender === 'Male' ? '♂' : pet.gender === 'Female' ? '♀' : '';
+    const genderIcon = pet.gender || '';
     const snBadge = pet.spayedNeutered
       ? `<span style="font-size:0.68rem;background:var(--brand-sage-light);color:var(--brand-primary);padding:0.15rem 0.45rem;border-radius:999px;font-weight:500;">✓ Spayed/Neutered</span>`
       : '';
@@ -93,7 +93,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
         <div style="display:flex;align-items:center;gap:0.85rem;">
           ${photoHtml}
           <div style="flex:1;">
-            <div style="font-size:1rem;font-weight:500;color:var(--brand-bark);">${pet.name} <span style="color:var(--brand-stone);font-weight:300;font-size:0.85rem;">${genderIcon}</span></div>
+            <div style="font-size:1rem;font-weight:500;color:var(--brand-bark);">${pet.name}${genderIcon ? ` <span style="font-size:0.78rem;color:var(--brand-stone);font-weight:300;">${genderIcon}</span>` : ''}</div>
             <div style="font-size:0.78rem;color:var(--brand-stone);font-weight:300;">${[pet.breed, pet.age].filter(Boolean).join(' · ')}</div>
             <div style="margin-top:0.25rem;">${snBadge}</div>
           </div>
@@ -112,6 +112,9 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
           <div style="font-size:0.7rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;color:var(--brand-stone);margin-bottom:0.25rem;">Health Notes</div>
           <div style="font-size:0.8rem;color:var(--brand-bark);font-weight:300;line-height:1.5;">${pet.notes}</div>
         </div>` : ''}
+        ${pet.allergies ? `<div style="font-size:0.78rem;color:var(--brand-bark);margin-bottom:0.5rem;"><span style="font-weight:500;">Allergies:</span> <span style="font-weight:300;">${pet.allergies}</span></div>` : ''}
+        ${pet.medications ? `<div style="font-size:0.78rem;color:var(--brand-bark);margin-bottom:0.5rem;"><span style="font-weight:500;">Medications:</span> <span style="font-weight:300;">${pet.medications}</span></div>` : ''}
+        ${pet.feeding ? `<div style="font-size:0.78rem;color:var(--brand-bark);margin-bottom:0.75rem;"><span style="font-weight:500;">Feeding:</span> <span style="font-weight:300;">${pet.feeding}</span></div>` : ''}
 
         <div style="margin-bottom:0.75rem;">
           <div style="font-size:0.7rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;color:var(--brand-stone);margin-bottom:0.4rem;">Documents</div>

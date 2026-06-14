@@ -122,7 +122,6 @@ if (breedIds.length > 0) {
   // Try field ID first, then common field names
   return r.fields["fldFetxyc0IbkFadw"] || r.fields["Breed Name"] || r.fields["Name"] || "";
 }).filter(Boolean);
-console.log("breed records:", JSON.stringify(breedData.records?.slice(0,2)));
     if (names.length === 1) {
       breedLinked = names[0];
     } else if (names.length > 1) {
