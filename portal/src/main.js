@@ -444,9 +444,15 @@ function buildDashboard() {
     apptCards.innerHTML = '';
 
     appts.forEach(appt => {
-      const isConfirmed = appt.status === 'Confirmed';
-      const statusColor = isConfirmed ? 'var(--brand-success)' : 'var(--brand-warning)';
-      const statusBg    = isConfirmed ? 'var(--brand-success-light)' : 'var(--brand-warning-light)';
+      const statusStyles = {
+        'Confirmed':             { color: 'var(--brand-success)',  bg: 'var(--brand-success-light)' },
+        'Requested':             { color: 'var(--brand-warning)',  bg: 'var(--brand-warning-light)' },
+        'Waitlisted':            { color: '#c07a2a',               bg: '#fff8f0' },
+        'Cancellation Requested':{ color: '#c0392b',               bg: '#fff3f3' },
+        'Cancelled':             { color: 'var(--brand-stone)',    bg: 'var(--brand-stone-light)' },
+        'In Progress':           { color: 'var(--brand-success)',  bg: 'var(--brand-success-light)' },
+      };
+      const { color: statusColor, bg: statusBg } = statusStyles[appt.status] || { color: 'var(--brand-stone)', bg: 'var(--brand-stone-light)' };
 
       const nights = appt.startDate && appt.endDate
         ? Math.max(1, Math.round((new Date(appt.endDate) - new Date(appt.startDate)) / 86400000))
@@ -481,19 +487,30 @@ function buildDashboard() {
         '</div>' +
         pricingLine +
         '<div id="appt-summary-' + appt.id + '" style="display:none;margin-top:0.75rem;padding:0.75rem;background:var(--brand-sage-light);border-radius:10px;">' +
+          (appt.status === 'Waitlisted'
+            ? '<div style="font-size:0.82rem;color:#c07a2a;font-weight:500;margin-bottom:0.5rem;">📋 You\'re on the waitlist for these dates. We\'ll reach out as soon as a spot opens up.</div>'
+            : appt.status === 'Cancelled'
+              ? '<div style="font-size:0.82rem;color:var(--brand-stone);margin-bottom:0.5rem;">This appointment has been cancelled.' + (appt.clientMessage ? ' See pricing details below.' : '') + '</div>'
+              : appt.status === 'Cancellation Requested'
+                ? '<div style="font-size:0.82rem;color:#c0392b;margin-bottom:0.5rem;">Your cancellation request is being reviewed. We\'ll follow up shortly.</div>'
+                : '') +
           (appt.clientMessage
             ? '<pre style="font-family:var(--font-body);font-size:0.78rem;color:var(--brand-bark);white-space:pre-wrap;margin:0;line-height:1.6;">' + appt.clientMessage + '</pre>'
-            : '<div style="font-size:0.78rem;color:var(--brand-stone);font-style:italic;">Pricing summary will appear here once confirmed.</div>') +
+            : (appt.status === 'Requested' || appt.status === 'Waitlisted' ? '' : '<div style="font-size:0.78rem;color:var(--brand-stone);font-style:italic;">Pricing summary will appear here once confirmed.</div>')) +
           '<div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--brand-stone-light);">' +
-            '<div style="font-size:0.72rem;color:var(--brand-stone);margin-bottom:0.5rem;">' +
-              (appt.category === 'DC'
-                ? '⚠️ Cancellations must be received 24+ hours in advance. Under 24 hours: 50% charge. No-show: full charge.'
-                : '⚠️ Cancellations 48+ hours before start date: no charge. Under 48 hours: one night\'s rate. No-show: full amount.') +
-            '</div>' +
-            '<button onclick="openCancellationModal(\'' + appt.id + '\', \'' + (appt.category || 'B') + '\', \'' + appt.startDate + '\', \'' + (appt.endDate || '') + '\')" ' +
-              'style="padding:0.35rem 0.75rem;background:transparent;color:#c0392b;border:1.5px solid #c0392b;border-radius:999px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;">' +
-              'Request Cancellation' +
-            '</button>' +
+            (appt.status !== 'Cancelled' && appt.status !== 'Cancellation Requested' && appt.status !== 'Waitlisted'
+              ? '<div style="font-size:0.72rem;color:var(--brand-stone);margin-bottom:0.5rem;">' +
+                  (appt.category === 'DC'
+                    ? '⚠️ Cancellations must be received 24+ hours in advance. Under 24 hours: 50% charge. No-show: full charge.'
+                    : '⚠️ Cancellations 48+ hours before start date: no charge. Under 48 hours: one night\'s rate. No-show: full amount.') +
+                '</div>'
+              : '') +
+            (appt.status !== 'Cancelled' && appt.status !== 'Cancellation Requested' && appt.status !== 'Waitlisted'
+              ? '<button onclick="openCancellationModal(\'' + appt.id + '\', \'' + (appt.category || 'B') + '\', \'' + appt.startDate + '\', \'' + (appt.endDate || '') + '\')" ' +
+                'style="padding:0.35rem 0.75rem;background:transparent;color:#c0392b;border:1.5px solid #c0392b;border-radius:999px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;">' +
+                'Request Cancellation' +
+              '</button>'
+              : '') +
           '</div>' +
         '</div>';
 

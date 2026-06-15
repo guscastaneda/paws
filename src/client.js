@@ -202,10 +202,15 @@ const breed = breedLinked || breedText;
         };
       })
       .filter(a => {
-        const isBoarding = a.category === "B";
-        const isActive   = a.status === "Requested" || a.status === "Confirmed";
-        const isFuture   = !a.endDate || a.endDate >= today;
-        return isBoarding && isActive && isFuture;
+        const isActive = [
+          "Requested",
+          "Confirmed",
+          "Waitlisted",
+          "Cancellation Requested",
+          "Cancelled",
+        ].includes(a.status);
+        const isFuture = !a.endDate || a.endDate >= today;
+        return isActive && isFuture;
       })
       .sort((a, b) => a.startDate.localeCompare(b.startDate));
   }
