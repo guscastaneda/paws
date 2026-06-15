@@ -886,17 +886,25 @@ function buildDashboard() {
       }
 
       apptCards.innerHTML +=
-        '<div style="padding:0.85rem 1rem;border-radius:12px;border:1.5px solid var(--brand-stone-light);background:#fff;">' +
+        '<div style="padding:0.85rem 1rem;border-radius:12px;border:1.5px solid var(--brand-stone-light);background:#fff;cursor:pointer;" onclick="toggleApptSummary(\'' + appt.id + '\')">' +
           '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem;">' +
-            '<div style="font-size:0.7rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);">🏡 Boarding</div>' +
-            '<span style="font-size:0.72rem;font-weight:500;padding:0.2rem 0.6rem;border-radius:999px;background:' + statusBg + ';color:' + statusColor + ';">' + appt.status + '</span>' +
+            '<div style="font-size:0.7rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);">' + (appt.category === 'DC' ? '☀️ Daycare' : '🏡 Boarding') + '</div>' +
+            '<div style="display:flex;align-items:center;gap:0.5rem;">' +
+              '<span style="font-size:0.72rem;font-weight:500;padding:0.2rem 0.6rem;border-radius:999px;background:' + statusBg + ';color:' + statusColor + ';">' + appt.status + '</span>' +
+              '<span id="appt-toggle-' + appt.id + '" style="font-size:0.75rem;color:var(--brand-stone);">▼</span>' +
+            '</div>' +
           '</div>' +
-          '<div style="font-size:0.92rem;font-weight:500;color:var(--brand-bark);margin-bottom:0.2rem;">' + fmt(appt.startDate) + ' → ' + fmt(appt.endDate) + '</div>' +
+          '<div style="font-size:0.92rem;font-weight:500;color:var(--brand-bark);margin-bottom:0.2rem;">' + fmt(appt.startDate) + (appt.endDate && appt.endDate !== appt.startDate ? ' → ' + fmt(appt.endDate) : '') + '</div>' +
           '<div style="font-size:0.78rem;font-weight:300;color:var(--brand-stone);">' +
-            (appt.startTime ? appt.startTime + ' drop-off · ' : '') +
-            (appt.endTime   ? appt.endTime   + ' pick-up'     : '') +
+            (appt.startTime ? appt.startTime + ' drop-off' : '') +
+            (appt.endTime   ? ' · ' + appt.endTime + ' pick-up' : '') +
           '</div>' +
           pricingLine +
+          '<div id="appt-summary-' + appt.id + '" style="display:none;margin-top:0.75rem;padding:0.75rem;background:var(--brand-sage-light);border-radius:10px;">' +
+            (appt.clientMessage
+              ? '<pre style="font-family:var(--font-body);font-size:0.78rem;color:var(--brand-bark);white-space:pre-wrap;margin:0;line-height:1.6;">' + appt.clientMessage + '</pre>'
+              : '<div style="font-size:0.78rem;color:var(--brand-stone);font-style:italic;">Pricing summary will appear here once confirmed.</div>') +
+          '</div>' +
         '</div>';
     });
   } else {
@@ -905,6 +913,14 @@ function buildDashboard() {
   
 }
 
+window.toggleApptSummary = function(apptId) {
+  const el     = document.getElementById('appt-summary-' + apptId);
+  const toggle = document.getElementById('appt-toggle-' + apptId);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  if (toggle) toggle.textContent = isOpen ? '▼' : '▲';
+};
 
 
 // ── FILE HANDLING ─────────────────────────────────────────────────────────────
