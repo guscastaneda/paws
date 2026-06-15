@@ -8,9 +8,10 @@ async function handlePostBooking(req, env) {
   let body;
   try { body = await req.json(); } catch { return errRes("Invalid JSON"); }
 
-  const { token, clientId, petIds, serviceType, startDate, startTime, endDate, endTime, transport, notes } = body;
+  const { token, clientId, petIds, serviceType, startDate, startTime, endDate, endTime, transport, notes, waitlist } = body;
 
-  const isDaycare = serviceType === "daycare";
+  const isDaycare  = serviceType === "daycare";
+  const isWaitlist = waitlist === true;
 
   if (!token || !clientId || !petIds?.length || !startDate || !startTime || !transport) {
     return errRes("Missing required fields");
@@ -28,7 +29,7 @@ async function handlePostBooking(req, env) {
     [FIELDS.APPT_START_DATE]: startDate,
     [FIELDS.APPT_START_TIME]: startTime,
     [FIELDS.APPT_TRANSPORT]:  transport,
-    [FIELDS.APPT_STATUS]:     "Requested",
+    [FIELDS.APPT_STATUS]:     isWaitlist ? "Waitlisted" : "Requested",
   };
 
   if (!isDaycare) {
@@ -89,6 +90,14 @@ async function handlePostBooking(req, env) {
       ? startTime
       : `Drop-off: ${startTime}${endTime ? " · Pick-up: " + endTime : ""}`;
 
+    const emailSubject = isWaitlist
+      ? `Waitlist Request — ${clientName}`
+      : `New ${isDaycare ? "Daycare" : "Boarding"} Request — ${clientName}`;
+
+    const emailHeading = isWaitlist ? "Waitlist Request" : "New Booking Request";
+    const emailIcon    = isWaitlist ? "📋" : (isDaycare ? "☀️" : "🏡");
+    const emailColor   = isWaitlist ? "#7a6a5a" : "#2D5A27";
+
     const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -98,12 +107,12 @@ async function handlePostBooking(req, env) {
       body: JSON.stringify({
         from:    "Paws on Longmeadow Bookings <bookings@pawsonlongmeadow.com>",
         to:      ["hello@pawsonlongmeadow.com"],
-        subject: `New ${isDaycare ? "Daycare" : "Boarding"} Request — ${clientName}`,
+        subject: emailSubject,
         html: `
           <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;padding:2rem;color:#2c1f14;">
             <div style="text-align:center;margin-bottom:2rem;">
-              <div style="font-size:2rem;">${isDaycare ? "☀️" : "🏡"}</div>
-              <div style="font-family:Georgia,serif;font-size:1.4rem;font-weight:600;color:#2D5A27;letter-spacing:0.1em;text-transform:uppercase;">New Booking Request</div>
+              <div style="font-size:2rem;">${emailIcon}</div>
+              <div style="font-family:Georgia,serif;font-size:1.4rem;font-weight:600;color:${emailColor};letter-spacing:0.1em;text-transform:uppercase;">${emailHeading}</div>
               <div style="font-size:0.85rem;color:#7a6a5a;margin-top:0.25rem;">Paws on Longmeadow</div>
             </div>
             <div style="background:#f5f0eb;border-radius:12px;padding:1.5rem;margin:1.5rem 0;">
@@ -115,10 +124,11 @@ async function handlePostBooking(req, env) {
                 <tr><td style="color:#7a6a5a;">Date(s)</td><td style="font-weight:500;">${dateLabel}</td></tr>
                 <tr><td style="color:#7a6a5a;">Time(s)</td><td style="font-weight:500;">${timeLabel}</td></tr>
                 <tr><td style="color:#7a6a5a;">Transport</td><td style="font-weight:500;">${transport}</td></tr>
+                ${isWaitlist ? `<tr><td style="color:#7a6a5a;">Status</td><td style="font-weight:500;color:#c07a2a;">Waitlisted — confirm if a spot opens</td></tr>` : ""}
                 ${notes ? `<tr><td style="color:#7a6a5a;">Notes</td><td style="font-weight:500;">${notes}</td></tr>` : ""}
               </table>
             </div>
-            <p style="font-size:0.9rem;line-height:1.6;color:#7a6a5a;">Review and confirm this request in Airtable.</p>
+            <p style="font-size:0.9rem;line-height:1.6;color:#7a6a5a;">${isWaitlist ? "This client wants to be notified if a spot opens up. Confirm in Airtable when available." : "Review and confirm this request in Airtable."}</p>
             <div style="border-top:1px solid #e8e0d8;margin-top:2rem;padding-top:1rem;text-align:center;font-size:0.8rem;color:#7a6a5a;">
               © Paws on Longmeadow · Sharon, MA
             </div>
@@ -132,7 +142,7 @@ async function handlePostBooking(req, env) {
     }
   }
 
-  return jsonRes({ success: true, appointmentId: apptId }, 201);
+  return jsonRes({ success: true, appointmentId: apptId, waitlisted: isWaitlist }, 201);
 }
 
 export { handlePostBooking };

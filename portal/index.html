@@ -442,7 +442,12 @@
       <label>Notes <span class="opt">(optional)</span></label>
       <textarea id="booking-notes" placeholder="Anything we should know — feeding schedule, medications, special instructions..."></textarea>
     </div>
-
+    <div class="form-group" style="margin-bottom:0.75rem;">
+      <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;font-weight:400;cursor:pointer;color:var(--brand-bark);">
+        <input type="checkbox" id="booking-waitlist" style="width:16px;height:16px;accent-color:var(--brand-primary);">
+        Join the waitlist instead — I'd like to be notified if a spot opens up
+      </label>
+    </div>
     <div class="info-box" id="booking-price-info" style="margin-bottom:0;">Boarding is $85/night. Pricing is confirmed when we review your request.</div>
 
     <div class="form-error" id="booking-form-error"></div>
@@ -885,7 +890,7 @@ function buildDashboard() {
         '</div>' +
       '</div>' +
       '<button class="btn-book" disabled title="Please upload missing documents first">' +
-        '🏡 Book a Boarding Stay' +
+        '🔒 Booking Unavailable' +
       '</button>';
   }
 
@@ -1412,6 +1417,7 @@ if (!isDaycare && !endDate) showErr('booking-end-date-error', 'Please select a p
         serviceType,
         startDate, startTime, endDate, endTime,
         transport, notes,
+        waitlist: document.getElementById('booking-waitlist')?.checked || false,
       }),
     });
     if (!res.ok) {
@@ -1490,9 +1496,12 @@ if (!isDaycare && !endDate) showErr('booking-end-date-error', 'Please select a p
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d) clientData = d; })
       .catch(() => {});
-    document.getElementById('booking-success-msg').textContent = isDaycare
-          ? 'Your daycare request has been received. We will confirm within 24 hours via text or email.'
-          : 'Your boarding request has been received. We will confirm your dates within 24 hours via text or email.';
+    const isWaitlist = document.getElementById('booking-waitlist')?.checked || false;
+    document.getElementById('booking-success-msg').textContent = isWaitlist
+      ? "You're on the waitlist! We'll reach out as soon as a spot opens up."
+      : isDaycare
+        ? 'Your daycare request has been received. We will confirm within 24 hours via text or email.'
+        : 'Your boarding request has been received. We will confirm your dates within 24 hours via text or email.';
     showView('view-booking-success');
   } catch (err) {
     document.getElementById('booking-form-error').textContent = 'Something went wrong: ' + err.message;
@@ -1513,6 +1522,8 @@ function bookAnother() {
   document.getElementById('booking-end-time').value   = '';
   document.querySelectorAll('input[name="booking-transport"]').forEach(el => el.checked = false);
   document.getElementById('booking-notes').value = '';
+  const waitlistCb = document.getElementById('booking-waitlist');
+  if (waitlistCb) waitlistCb.checked = false;
   document.getElementById('booking-form-error').classList.remove('visible');
   const btn = document.getElementById('booking-submit');
   btn.disabled = false; btn.classList.remove('loading');
