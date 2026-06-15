@@ -860,7 +860,8 @@ function buildDashboard() {
   const apptCards   = document.getElementById('dash-appt-cards');
   if (appts.length > 0) {
     apptSection.style.display = 'block';
-    apptCards.innerHTML = '';
+    if (apptCards.children.length !== appts.length) {
+      apptCards.innerHTML = '';
     const fmt = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
 
     appts.forEach(appt => {
@@ -907,6 +908,7 @@ function buildDashboard() {
       card.addEventListener('click', () => toggleApptSummary(appt.id));
       apptCards.appendChild(card);
     });
+    } // end rebuild guard
   } else {
     apptSection.style.display = 'none';
   }
