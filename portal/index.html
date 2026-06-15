@@ -854,7 +854,16 @@ function buildDashboard() {
       '</button>';
   }
 
- appts.forEach(appt => {
+// ── Upcoming appointments ──
+  const appts = clientData.appointments || [];
+  const apptSection = document.getElementById('dash-appointments');
+  const apptCards   = document.getElementById('dash-appt-cards');
+  if (appts.length > 0) {
+    apptSection.style.display = 'block';
+    apptCards.innerHTML = '';
+    const fmt = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+
+    appts.forEach(appt => {
       const isConfirmed = appt.status === 'Confirmed';
       const statusColor = isConfirmed ? 'var(--brand-success)' : 'var(--brand-warning)';
       const statusBg    = isConfirmed ? 'var(--brand-success-light)' : 'var(--brand-warning-light)';
@@ -898,6 +907,19 @@ function buildDashboard() {
       card.addEventListener('click', () => toggleApptSummary(appt.id));
       apptCards.appendChild(card);
     });
+  } else {
+    apptSection.style.display = 'none';
+  }
+}
+
+window.toggleApptSummary = function(apptId) {
+  const el     = document.getElementById('appt-summary-' + apptId);
+  const toggle = document.getElementById('appt-toggle-' + apptId);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  if (toggle) toggle.textContent = isOpen ? '▼' : '▲';
+};
 
 // ── FILE HANDLING ─────────────────────────────────────────────────────────────
 function handleFile(file) {
