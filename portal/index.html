@@ -860,8 +860,15 @@ function buildDashboard() {
   const apptCards   = document.getElementById('dash-appt-cards');
   if (appts.length > 0) {
     apptSection.style.display = 'block';
-    if (apptCards.children.length !== appts.length) {
-      apptCards.innerHTML = '';
+
+    // Save which summaries are open before rebuild
+    const openIds = new Set();
+    appts.forEach(a => {
+      const el = document.getElementById('appt-summary-' + a.id);
+      if (el && el.style.display !== 'none') openIds.add(a.id);
+    });
+
+    apptCards.innerHTML = '';
     const fmt = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
 
     appts.forEach(appt => {
@@ -905,10 +912,17 @@ function buildDashboard() {
             : '<div style="font-size:0.78rem;color:var(--brand-stone);font-style:italic;">Pricing summary will appear here once confirmed.</div>') +
         '</div>';
 
+      // Restore open state if it was open before rebuild
+      if (openIds.has(appt.id)) {
+        const summary = card.querySelector('#appt-summary-' + appt.id);
+        const toggle  = card.querySelector('#appt-toggle-'  + appt.id);
+        if (summary) summary.style.display = 'block';
+        if (toggle)  toggle.textContent = '▲';
+      }
+
       card.addEventListener('click', () => toggleApptSummary(appt.id));
       apptCards.appendChild(card);
     });
-    } // end rebuild guard
   } else {
     apptSection.style.display = 'none';
   }
@@ -916,13 +930,12 @@ function buildDashboard() {
 
 window.toggleApptSummary = function(apptId) {
   const el     = document.getElementById('appt-summary-' + apptId);
-  const toggle = document.getElementById('appt-toggle-' + apptId);
+  const toggle = document.getElementById('appt-toggle-'  + apptId);
   if (!el) return;
   const isOpen = el.style.display !== 'none';
   el.style.display = isOpen ? 'none' : 'block';
   if (toggle) toggle.textContent = isOpen ? '▼' : '▲';
 };
-
 // ── FILE HANDLING ─────────────────────────────────────────────────────────────
 function handleFile(file) {
   if (!file) return;
