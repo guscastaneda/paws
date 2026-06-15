@@ -5,6 +5,7 @@ import { cors, errRes }              from "./src/helpers.js";
 import { handleGetClient }           from "./src/client.js";
 import { handlePostProfile }         from "./src/profile.js";
 import { handlePostAgreement }       from "./src/agreement.js";
+import { handlePostCancellation } from './src/cancellation.js';
 import { handlePostCompliance }      from "./src/compliance.js";
 import { handlePostBooking }         from "./src/booking.js";
 import { handleGetAdminClients }     from "./src/admin.js";
@@ -25,6 +26,7 @@ export default {
     if (path === "/client"     && method === "GET")  return handleGetClient(req, env);
     if (path === "/profile"    && method === "POST") return handlePostProfile(req, env);
     if (path === "/agreement"  && method === "POST") return handlePostAgreement(req, env);
+    if (path === '/cancellation' && method === 'POST') return handlePostCancellation(req, env);
     if (path === "/compliance" && method === "POST") return handlePostCompliance(req, env);
     if (path === "/booking"    && method === "POST") return handlePostBooking(req, env);
     if (path === "/pet"        && method === "POST") return handlePostPet(req, env);
