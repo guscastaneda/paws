@@ -497,7 +497,7 @@ function buildDashboard() {
               ? '<div style="font-size:0.82rem;color:#c0392b;margin-bottom:0.5rem;">Your cancellation request is being reviewed. We\'ll follow up shortly.</div>'
               : '';
 
-      const canCancel = appt.status === 'Requested' || appt.status === 'Confirmed';
+      const canCancel = appt.status === 'Requested' || appt.status === 'Confirmed' || appt.status === 'Waitlisted';
       const canModify = appt.status === 'Requested' || appt.status === 'Waitlisted';
 
       const card = document.createElement('div');
