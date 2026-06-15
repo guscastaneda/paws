@@ -369,6 +369,7 @@
       <div class="step-title" id="booking-title">Book a <em>Boarding Stay</em></div>
       <p class="step-desc">Fill out the details below. We will confirm your dates within 24 hours.</p>
     </div>
+
     <div class="form-group">
       <label>Service <span class="req">*</span></label>
       <div class="doc-pills" id="booking-service-pills">
@@ -376,51 +377,80 @@
         <label for="bs-boarding">🏡 Boarding</label>
         <input type="radio" name="booking-service" class="doc-pill-input" id="bs-daycare" value="daycare"/>
         <label for="bs-daycare">☀️ Daycare</label>
+        <input type="radio" name="booking-service" class="doc-pill-input" id="bs-halfdaycare" value="half-daycare"/>
+        <label for="bs-halfdaycare">🌤️ Half-Day</label>
       </div>
     </div>
+
     <div class="form-group">
       <label>Which pet(s)? <span class="req">*</span></label>
       <div class="pet-pills" id="booking-pet-pills"></div>
       <div class="field-error" id="booking-pet-error">Please select at least one pet.</div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label id="booking-start-date-label">Drop-off Date <span class="req">*</span></label>
-        <input type="date" id="booking-start-date"/>
-        <div class="field-error" id="booking-start-date-error">Please select a date.</div>
-      </div>
-      <div class="form-group">
-        <label id="booking-start-time-label">Drop-off Time <span class="req">*</span></label>
-        <select id="booking-start-time">
-          <option value="">Select time...</option>
-          <option value="Early morning (7:30–9AM)">Early morning (7:30–9AM)</option>
-          <option value="Noon (11:30AM–12:30PM)">Noon (11:30AM–12:30PM)</option>
-          <option value="Late Afternoon (4:00–5:30PM)">Late Afternoon (4:00–5:30PM)</option>
-        </select>
-        <div id="booking-daycare-hint" style="display:none;font-size:0.75rem;color:var(--brand-stone);font-weight:300;margin-top:0.35rem;">Our drop-off windows are 7:30–9AM. Please announce your arrival time.</div>
-        <div class="field-error" id="booking-start-time-error">Please select a time.</div>
+    <!-- Boarding: start date + time -->
+    <div id="booking-start-row">
+      <div class="form-row">
+        <div class="form-group">
+          <label id="booking-start-date-label">Start Date <span class="req">*</span></label>
+          <input type="date" id="booking-start-date"/>
+          <div class="field-error" id="booking-start-date-error">Please select a date.</div>
+        </div>
+        <div class="form-group">
+          <label id="booking-start-time-label">Start Time <span class="req">*</span></label>
+          <select id="booking-start-time">
+            <option value="">Select time...</option>
+            <option value="Early morning (7:30–9AM)">Early morning (7:30–9AM)</option>
+            <option value="Noon (11:30AM–12:30PM)">Noon (11:30AM–12:30PM)</option>
+            <option value="Late Afternoon (4:00–5:30PM)">Late Afternoon (4:00–5:30PM)</option>
+          </select>
+          <div class="field-error" id="booking-start-time-error">Please select a time.</div>
+        </div>
       </div>
     </div>
 
-    <div id="booking-pickup-row">
-    <div class="form-row">
+    <!-- Daycare / Half-Daycare: date only -->
+    <div id="booking-date-only-row" style="display:none;">
       <div class="form-group">
-        <label>Pick-up Date <span class="req">*</span></label>
-        <input type="date" id="booking-end-date"/>
-        <div class="field-error" id="booking-end-date-error">Please select a date.</div>
-      </div>
-      <div class="form-group">
-        <label>Pick-up Time <span class="req">*</span></label>
-        <select id="booking-end-time">
-          <option value="">Select time...</option>
-          <option value="Early morning (7:30–9AM)">Early morning (7:30–9AM)</option>
-          <option value="Noon (11:30AM–12:30PM)">Noon (11:30AM–12:30PM)</option>
-          <option value="Late Afternoon (4:00–5:30PM)">Late Afternoon (4:00–5:30PM)</option>
-        </select>
-        <div class="field-error" id="booking-end-time-error">Please select a time.</div>
+        <label>Date <span class="req">*</span></label>
+        <input type="date" id="booking-single-date"/>
+        <div class="field-error" id="booking-single-date-error">Please select a date.</div>
       </div>
     </div>
+
+    <!-- Half-Daycare: AM/PM preference -->
+    <div id="booking-halfday-pref" style="display:none;">
+      <div class="form-group">
+        <label>Preference <span class="req">*</span></label>
+        <div class="doc-pills">
+          <input type="radio" name="halfday-pref" class="doc-pill-input" id="hd-am" value="AM" checked/>
+          <label for="hd-am">🌅 AM (7:30–Noon)</label>
+          <input type="radio" name="halfday-pref" class="doc-pill-input" id="hd-pm" value="PM"/>
+          <label for="hd-pm">🌇 PM (Noon–4:30PM)</label>
+        </div>
+        <div class="info-box" style="margin-top:0.5rem;">We'll confirm your session once we pair the other half of the day.</div>
+      </div>
+    </div>
+
+    <!-- Boarding: end date + time -->
+    <div id="booking-pickup-row">
+      <div class="form-row">
+        <div class="form-group">
+          <label>End Date <span class="req">*</span></label>
+          <input type="date" id="booking-end-date"/>
+          <div class="field-error" id="booking-end-date-error">Please select a date.</div>
+        </div>
+        <div class="form-group">
+          <label>End Time <span class="req">*</span></label>
+          <select id="booking-end-time">
+            <option value="">Select time...</option>
+            <option value="Early morning (7:30–9AM)">Early morning (7:30–9AM)</option>
+            <option value="Noon (11:30AM–12:30PM)">Noon (11:30AM–12:30PM)</option>
+            <option value="Late Afternoon (4:00–5:30PM)">Late Afternoon (4:00–5:30PM)</option>
+          </select>
+          <div class="field-error" id="booking-end-time-error">Please select a time.</div>
+        </div>
+      </div>
     </div>
 
     <div class="form-group">
@@ -442,12 +472,14 @@
       <label>Notes <span class="opt">(optional)</span></label>
       <textarea id="booking-notes" placeholder="Anything we should know — feeding schedule, medications, special instructions..."></textarea>
     </div>
-    <div class="form-group" style="margin-bottom:0.75rem;">
+
+    <div id="booking-waitlist-row" class="form-group" style="margin-bottom:0.75rem;">
       <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;font-weight:400;cursor:pointer;color:var(--brand-bark);">
         <input type="checkbox" id="booking-waitlist" style="width:16px;height:16px;accent-color:var(--brand-primary);">
-        Join the waitlist instead — I'd like to be notified if a spot opens up
+        Join the waitlist — notify me if a spot opens up
       </label>
     </div>
+
     <div class="info-box" id="booking-price-info" style="margin-bottom:0;">Boarding is $85/night. Pricing is confirmed when we review your request.</div>
 
     <div class="form-error" id="booking-form-error"></div>
