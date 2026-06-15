@@ -145,7 +145,7 @@ async function init() {
                         'Request Boarding Stay';
 
       const price = isHalfDaycare
-        ? 'Half-Daycare pricing will be confirmed when we pair your session.'
+        ? `Half-Daycare is $${clientData.halfDaycarePrice || 40}/session. Pricing is confirmed when we review your request.`
         : isDaycare
           ? `Daycare is $${clientData.daycarePrice || 65}/session. Pricing is confirmed when we review your request.`
           : `Boarding is $${clientData.boardingPrice || 85}/night. Pricing is confirmed when we review your request.`;
@@ -846,7 +846,7 @@ function buildBookingPetPills() {
   if (priceInfo) {
     const svc = document.querySelector('input[name="booking-service"]:checked')?.value || 'boarding';
     priceInfo.textContent = svc === 'half-daycare'
-      ? 'Half-Daycare pricing will be confirmed when we pair your session.'
+      ? `Half-Daycare is $${clientData.halfDaycarePrice || 40}/session. Pricing is confirmed when we review your request.`
       : svc === 'daycare'
         ? `Daycare is $${clientData.daycarePrice || 65}/session. Pricing is confirmed when we review your request.`
         : `Boarding is $${clientData.boardingPrice || 85}/night. Pricing is confirmed when we review your request.`;

@@ -216,7 +216,8 @@ const breed = breedLinked || breedText;
   }
 // Fetch service prices from Services table
   let boardingPrice = 85;
-  let daycarePrice  = 65;
+  let daycarePrice  = 50;
+  let halfDaycarePrice = 35;
   try {
     const servicesRes = await atFetch(env, `/tbl2abVXy45haJAgC?fields[]=Service%20Name&fields[]=Base%20Price`);
     if (servicesRes.ok) {
@@ -226,6 +227,7 @@ const breed = breedLinked || breedText;
         const price = s.fields["Base Price"];
         if (name === "Boarding")  boardingPrice = price;
         if (name === "Daycare")   daycarePrice  = price;
+        if (name === "Half-Daycare") halfDaycarePrice = price;
       }
     }
   } catch (e) {
@@ -251,6 +253,7 @@ const breed = breedLinked || breedText;
     appointments,
     boardingPrice,
     daycarePrice,
+    halfDaycarePrice,
   });
 }
 
