@@ -29,8 +29,8 @@ export async function handlePostCancellation(req, env) {
     method: "PATCH",
     body: JSON.stringify({
       fields: {
-        "Status": "Cancellation Requested 🔴",
-        "Client Notes": reason ? `[CANCELLATION REQUEST]\n${reason}` : "[CANCELLATION REQUEST — no reason provided]",
+        "Status": "Cancellation Requested",
+        "Appointment Notes": reason ? `[CANCELLATION REQUEST]\n${reason}` : "[CANCELLATION REQUEST — no reason provided]",
       },
       typecast: true,
     }),
