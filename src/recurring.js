@@ -71,7 +71,6 @@ export async function handlePostRecurringRequest(req, env) {
   const recordName   = `Recurring ${serviceLabel} for ${petNames.join(', ')} — ${days.join(', ')}`;
 
   const fields = {
-    'fldD8xTYhIYf4x0K9': [clientId],                    // Client (linked)
     'fldHvXQR3MenUZPeK': petIds,                        // Pets (linked)
     'fldLKB5AmHrUKNSFp': [serviceId],                   // Service (linked)
     'fldmTXeB6oeF3yvpZ': days,                          // Days of Week (multi-select)
