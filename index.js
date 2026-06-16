@@ -9,6 +9,7 @@ import { handlePostCancellation } from './src/cancellation.js';
 import { handlePostCompliance }      from "./src/compliance.js";
 import { handlePostBooking }         from "./src/booking.js";
 import { handleGetAdminClients }     from "./src/admin.js";
+import { handlePostRecurringRequest, handlePostRecurringPause, handlePostRecurringCancel } from './src/recurring.js';
 import { handleSetupClient }         from './src/setup-client.js';
 import { handlePostPet, handlePostVet, handlePostPetUpdate, handlePostPetBreed } from "./src/pet.js";
 import { handleGetBreeds }           from './src/breeds.js';
@@ -28,6 +29,9 @@ export default {
     if (path === "/agreement"  && method === "POST") return handlePostAgreement(req, env);
     if (path === '/cancellation' && method === 'POST') return handlePostCancellation(req, env);
     if (path === "/compliance" && method === "POST") return handlePostCompliance(req, env);
+    if (path === '/recurring-request' && method === 'POST') return handlePostRecurringRequest(req, env);
+    if (path === '/recurring-pause'   && method === 'POST') return handlePostRecurringPause(req, env);
+    if (path === '/recurring-cancel'  && method === 'POST') return handlePostRecurringCancel(req, env);
     if (path === "/booking"    && method === "POST") return handlePostBooking(req, env);
     if (path === "/pet"        && method === "POST") return handlePostPet(req, env);
     if (path === "/vet"        && method === "POST") return handlePostVet(req, env);

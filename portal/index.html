@@ -101,6 +101,14 @@
       <div id="dash-appt-cards" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
       <div class="divider"></div>
     </div>
+    <!-- Recurring services -->
+    <div id="dash-recurring" style="display:none;margin-bottom:0.5rem;">
+      <div class="section-header" style="margin-top:1.25rem;">
+        <div class="section-title">Recurring Services</div>
+      </div>
+      <div id="dash-recurring-cards" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
+      <div class="divider"></div>
+    </div>
 
     <div class="section-header" style="margin-top:1.25rem;">
       <div class="section-title">Your Pets</div>
@@ -379,6 +387,8 @@
         <label for="bs-daycare">☀️ Daycare</label>
         <input type="radio" name="booking-service" class="doc-pill-input" id="bs-halfdaycare" value="half-daycare"/>
         <label for="bs-halfdaycare">🌤️ Half-Day</label>
+        <input type="radio" name="booking-service" class="doc-pill-input" id="bs-recurring" value="recurring"/>
+        <label for="bs-recurring">🔄 Recurring</label>
       </div>
     </div>
 
@@ -430,6 +440,47 @@
         </div>
         
       </div>
+    </div>
+
+    <!-- Recurring: day picker -->
+    <div id="booking-recurring-row" style="display:none;">
+      <div class="form-group">
+        <label>Service Type <span class="req">*</span></label>
+        <div class="doc-pills">
+          <input type="radio" name="recurring-service" class="doc-pill-input" id="rs-daycare" value="daycare" checked/>
+          <label for="rs-daycare">☀️ Daycare</label>
+          <input type="radio" name="recurring-service" class="doc-pill-input" id="rs-halfdaycare" value="half-daycare"/>
+          <label for="rs-halfdaycare">🌤️ Half-Day</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Days of the Week <span class="req">*</span></label>
+        <div class="doc-pills" id="recurring-days-pills">
+          <input type="checkbox" name="recurring-day" class="doc-pill-input" id="rd-mon" value="Monday"/>
+          <label for="rd-mon">Mon</label>
+          <input type="checkbox" name="recurring-day" class="doc-pill-input" id="rd-tue" value="Tuesday"/>
+          <label for="rd-tue">Tue</label>
+          <input type="checkbox" name="recurring-day" class="doc-pill-input" id="rd-wed" value="Wednesday"/>
+          <label for="rd-wed">Wed</label>
+          <input type="checkbox" name="recurring-day" class="doc-pill-input" id="rd-thu" value="Thursday"/>
+          <label for="rd-thu">Thu</label>
+          <input type="checkbox" name="recurring-day" class="doc-pill-input" id="rd-fri" value="Friday"/>
+          <label for="rd-fri">Fri</label>
+        </div>
+        <div class="field-error" id="booking-days-error">Please select at least one day.</div>
+      </div>
+      <div id="booking-recurring-halfday-pref" style="display:none;">
+        <div class="form-group">
+          <label>Preference <span class="req">*</span></label>
+          <div class="doc-pills">
+            <input type="radio" name="recurring-halfday-pref" class="doc-pill-input" id="rh-am" value="AM" checked/>
+            <label for="rh-am">🌅 Morning</label>
+            <input type="radio" name="recurring-halfday-pref" class="doc-pill-input" id="rh-pm" value="PM"/>
+            <label for="rh-pm">🌇 Afternoon</label>
+          </div>
+        </div>
+      </div>
+      <div class="info-box">Weekly recurring service. We'll confirm and activate your schedule within 24 hours.</div>
     </div>
 
     <!-- Boarding: end date + time -->

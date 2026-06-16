@@ -127,12 +127,20 @@ async function init() {
       const isDaycare     = this.value === 'daycare';
       const isHalfDaycare = this.value === 'half-daycare';
       const isSingleDay   = isDaycare || isHalfDaycare;
+      const isRecurring   = this.value === 'recurring';
 
       document.getElementById('booking-start-row').style.display        = isSingleDay ? 'none' : '';
       document.getElementById('booking-pickup-row').style.display       = isSingleDay ? 'none' : '';
       document.getElementById('booking-date-only-row').style.display    = isSingleDay ? 'block' : 'none';
       document.getElementById('booking-halfday-pref').style.display     = isHalfDaycare ? 'block' : 'none';
       document.getElementById('booking-waitlist-row').style.display     = isSingleDay ? 'none' : 'block';
+
+      document.querySelectorAll('input[name="recurring-service"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      document.getElementById('booking-recurring-halfday-pref').style.display =
+        this.value === 'half-daycare' ? 'block' : 'none';
+    });
+  });
 
       document.getElementById('booking-title').innerHTML =
         isHalfDaycare ? 'Request <em>Half-Daycare</em>' :
@@ -545,9 +553,251 @@ function buildDashboard() {
   } else {
     apptSection.style.display = 'none';
   }
-
+  // ── Recurring services ──
+  buildRecurringServices();
   buildPetCards(clientData, goToStep, WORKER_URL, clientToken);
 }
+
+
+function buildRecurringServices() {
+  const services = clientData.recurringServices || [];
+  const section  = document.getElementById('dash-recurring');
+  if (!section) return;
+
+  if (services.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  const container = document.getElementById('dash-recurring-cards');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const serviceEmoji = s =>
+    s === 'Half-Daycare' ? '🌤️' :
+    s === 'Daycare'      ? '☀️'  :
+    s === 'Boarding'     ? '🏡'  : '🔄';
+
+  const statusStyles = {
+    'Active':                 { color: 'var(--brand-success)',  bg: 'var(--brand-success-light)' },
+    'Requested':              { color: 'var(--brand-warning)',  bg: 'var(--brand-warning-light)' },
+    'Paused':                 { color: '#c07a2a',               bg: '#fff8f0' },
+    'Cancellation Requested': { color: '#c0392b',               bg: '#fff3f3' },
+  };
+
+  services.forEach(svc => {
+    const { color: statusColor, bg: statusBg } = statusStyles[svc.status] || { color: 'var(--brand-stone)', bg: 'var(--brand-stone-light)' };
+    const canManage = svc.status === 'Active' || svc.status === 'Paused';
+
+    const card = document.createElement('div');
+    card.style.cssText = 'padding:0.85rem 1rem;border-radius:12px;border:1.5px solid var(--brand-stone-light);background:#fff;cursor:pointer;';
+
+    const pauseInfo = svc.status === 'Paused' && svc.pauseUntil
+      ? `<div style="font-size:0.75rem;color:#c07a2a;margin-top:0.2rem;">Paused until ${fmtDate(svc.pauseUntil)}</div>`
+      : '';
+
+    card.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem;">' +
+        '<div style="font-size:0.7rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);">' +
+          serviceEmoji(svc.service) + ' ' + svc.service + ' · Weekly' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:0.5rem;">' +
+          '<span style="font-size:0.72rem;font-weight:500;padding:0.2rem 0.6rem;border-radius:999px;background:' + statusBg + ';color:' + statusColor + ';">' + svc.status + '</span>' +
+          '<span id="rec-toggle-' + svc.id + '" style="font-size:0.75rem;color:var(--brand-stone);">▼</span>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:0.92rem;font-weight:500;color:var(--brand-bark);margin-bottom:0.2rem;">' +
+        svc.pets.join(' & ') +
+      '</div>' +
+      '<div style="font-size:0.78rem;font-weight:300;color:var(--brand-stone);">' +
+        svc.days.join(' · ') +
+      '</div>' +
+      pauseInfo +
+      '<div id="rec-summary-' + svc.id + '" style="display:none;margin-top:0.75rem;padding:0.75rem;background:var(--brand-sage-light);border-radius:10px;">' +
+        (svc.status === 'Requested'
+          ? '<div style="font-size:0.82rem;color:var(--brand-warning);margin-bottom:0.75rem;">Your recurring service request is pending review. We\'ll confirm shortly.</div>'
+          : svc.status === 'Cancellation Requested'
+            ? '<div style="font-size:0.82rem;color:#c0392b;margin-bottom:0.75rem;">Your cancellation request is being reviewed.</div>'
+            : '') +
+        (canManage
+          ? '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">' +
+              (svc.status === 'Active'
+                ? '<button onclick="openRecurringPauseModal(\'' + svc.id + '\', \'' + svc.service + '\')" ' +
+                  'style="padding:0.35rem 0.75rem;background:transparent;color:#c07a2a;border:1.5px solid #c07a2a;border-radius:999px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;">Pause Service</button>'
+                : '') +
+              '<button onclick="openRecurringCancelModal(\'' + svc.id + '\', \'' + svc.service + '\', \'' + svc.pets.join(', ') + '\')" ' +
+              'style="padding:0.35rem 0.75rem;background:transparent;color:#c0392b;border:1.5px solid #c0392b;border-radius:999px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;">Cancel Service</button>' +
+            '</div>'
+          : '') +
+      '</div>';
+
+    card.addEventListener('click', () => {
+      const el     = document.getElementById('rec-summary-' + svc.id);
+      const toggle = document.getElementById('rec-toggle-'  + svc.id);
+      if (!el) return;
+      const isOpen = el.style.display !== 'none';
+      el.style.display = isOpen ? 'none' : 'block';
+      if (toggle) toggle.textContent = isOpen ? '▼' : '▲';
+    });
+
+    container.appendChild(card);
+  });
+}
+
+
+
+window.openRecurringPauseModal = function(recurringId, serviceName) {
+  const existing = document.getElementById('recurring-modal');
+  if (existing) existing.remove();
+
+  const today   = new Date();
+  const maxDate = new Date();
+  maxDate.setDate(maxDate.getDate() + 14);
+  const fmt = d => d.toISOString().split('T')[0];
+
+  const modal = document.createElement('div');
+  modal.id = 'recurring-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(44,31,20,0.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:1.75rem 1.5rem 2.5rem;max-height:85vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(44,31,20,0.15);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;">Pause ${serviceName}</div>
+        <button onclick="document.getElementById('recurring-modal').remove()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--brand-stone);">✕</button>
+      </div>
+      <div style="font-size:0.85rem;color:var(--brand-stone);margin-bottom:1.25rem;line-height:1.6;">
+        We'll hold your spot for up to 2 weeks. After that, the spot may be offered to another client.
+      </div>
+      <div style="margin-bottom:1.25rem;">
+        <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Resume After <span style="color:var(--brand-gold);">*</span></label>
+        <input type="date" id="pause-until-date" min="${fmt(today)}" max="${fmt(maxDate)}"
+          style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;"/>
+        <div style="font-size:0.72rem;color:var(--brand-stone);margin-top:0.35rem;">Maximum 2 weeks from today (${fmtDate(fmt(maxDate))}).</div>
+      </div>
+      <div id="recurring-modal-error" style="color:#c0392b;font-size:0.8rem;margin-bottom:0.75rem;display:none;"></div>
+      <button id="recurring-modal-btn" onclick="submitRecurringPause('${recurringId}')"
+        style="width:100%;padding:0.85rem;background:#c07a2a;color:#fff;border:none;border-radius:12px;font-family:var(--font-body);font-size:0.95rem;font-weight:500;cursor:pointer;margin-bottom:0.6rem;">
+        Confirm Pause
+      </button>
+      <button onclick="document.getElementById('recurring-modal').remove()"
+        style="width:100%;padding:0.85rem;background:transparent;color:var(--brand-primary);border:1.5px solid var(--brand-primary);border-radius:12px;font-family:var(--font-body);font-size:0.95rem;font-weight:500;cursor:pointer;">
+        Keep Active
+      </button>
+    </div>`;
+
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+};
+
+window.submitRecurringPause = async function(recurringId) {
+  const btn      = document.getElementById('recurring-modal-btn');
+  const errEl    = document.getElementById('recurring-modal-error');
+  const pauseUntil = document.getElementById('pause-until-date')?.value;
+
+  if (!pauseUntil) {
+    errEl.textContent = 'Please select a resume date.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  errEl.style.display = 'none';
+
+  try {
+    const res = await fetch(WORKER_URL + '/recurring-pause', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: clientToken, clientId: clientData.clientId, recurringId, pauseUntil }),
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Server error'); }
+
+    document.getElementById('recurring-modal').remove();
+    const svc = (clientData.recurringServices || []).find(s => s.id === recurringId);
+    if (svc) { svc.status = 'Paused'; svc.pauseUntil = pauseUntil; }
+    buildDashboard();
+
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--brand-success);color:#fff;padding:0.75rem 1.5rem;border-radius:999px;font-size:0.875rem;font-weight:500;z-index:200;';
+    toast.textContent = 'Service paused ✓';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  } catch (err) {
+    errEl.textContent = err.message || 'Something went wrong.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Confirm Pause';
+  }
+};
+
+window.openRecurringCancelModal = function(recurringId, serviceName, petNames) {
+  const existing = document.getElementById('recurring-modal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'recurring-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(44,31,20,0.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:1.75rem 1.5rem 2.5rem;max-height:85vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(44,31,20,0.15);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;">Cancel ${serviceName}</div>
+        <button onclick="document.getElementById('recurring-modal').remove()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--brand-stone);">✕</button>
+      </div>
+      <div style="background:var(--brand-sage-light);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.85rem;">
+        <div style="font-weight:500;color:var(--brand-bark);">${serviceName} · ${petNames}</div>
+      </div>
+      <div style="background:#fff3f3;border:1.5px solid #f5c6c6;border-radius:10px;padding:0.75rem 1rem;margin-bottom:1.25rem;font-size:0.78rem;color:#c0392b;line-height:1.6;">
+        Cancelling a recurring service is permanent. Individual upcoming appointments will remain unless cancelled separately.
+        If you only need a short break, consider pausing instead.
+      </div>
+      <div style="margin-bottom:1.25rem;">
+        <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Reason <span style="font-weight:300;text-transform:none;">(optional)</span></label>
+        <textarea id="recurring-cancel-reason" placeholder="Let us know why you're cancelling..."
+          style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;min-height:80px;resize:vertical;"></textarea>
+      </div>
+      <div id="recurring-modal-error" style="color:#c0392b;font-size:0.8rem;margin-bottom:0.75rem;display:none;"></div>
+      <button id="recurring-modal-btn" onclick="submitRecurringCancel('${recurringId}')"
+        style="width:100%;padding:0.85rem;background:#c0392b;color:#fff;border:none;border-radius:12px;font-family:var(--font-body);font-size:0.95rem;font-weight:500;cursor:pointer;margin-bottom:0.6rem;">
+        Request Cancellation
+      </button>
+      <button onclick="document.getElementById('recurring-modal').remove()"
+        style="width:100%;padding:0.85rem;background:transparent;color:var(--brand-primary);border:1.5px solid var(--brand-primary);border-radius:12px;font-family:var(--font-body);font-size:0.95rem;font-weight:500;cursor:pointer;">
+        Keep Service
+      </button>
+    </div>`;
+
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+};
+
+window.submitRecurringCancel = async function(recurringId) {
+  const btn    = document.getElementById('recurring-modal-btn');
+  const errEl  = document.getElementById('recurring-modal-error');
+  const reason = document.getElementById('recurring-cancel-reason')?.value.trim();
+
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  errEl.style.display = 'none';
+
+  try {
+    const res = await fetch(WORKER_URL + '/recurring-cancel', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: clientToken, clientId: clientData.clientId, recurringId, reason }),
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Server error'); }
+
+    document.getElementById('recurring-modal').remove();
+    const svc = (clientData.recurringServices || []).find(s => s.id === recurringId);
+    if (svc) svc.status = 'Cancellation Requested';
+    buildDashboard();
+
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--brand-success);color:#fff;padding:0.75rem 1.5rem;border-radius:999px;font-size:0.875rem;font-weight:500;z-index:200;';
+    toast.textContent = 'Cancellation request sent ✓';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  } catch (err) {
+    errEl.textContent = err.message || 'Something went wrong.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Request Cancellation';
+  }
+};
 
 // ── APPOINTMENT TOGGLE ────────────────────────────────────────────────────────
 function toggleApptSummary(apptId) {
@@ -859,6 +1109,7 @@ window.submitBooking = async function () {
   const isDaycare     = serviceType === 'daycare';
   const isHalfDaycare = serviceType === 'half-daycare';
   const isSingleDay   = isDaycare || isHalfDaycare;
+  const isRecurring   = serviceType === 'recurring';
   const halfDayPref   = document.querySelector('input[name="halfday-pref"]:checked')?.value || 'AM';
   const selectedPets  = Array.from(document.querySelectorAll('input[name="booking-pet"]:checked')).map(el => el.value);
 
@@ -881,6 +1132,56 @@ window.submitBooking = async function () {
     document.getElementById('booking-form-error').textContent = 'Please update expired or missing documents for ' + blockedPets.map(p => p.name).join(', ') + ' before requesting a stay.';
     document.getElementById('booking-form-error').classList.add('visible');
     return;
+  }
+
+  // ── Recurring path ──
+  if (isRecurring) {
+    const recurringService = document.querySelector('input[name="recurring-service"]:checked')?.value || 'daycare';
+    const recurringDays    = Array.from(document.querySelectorAll('input[name="recurring-day"]:checked')).map(el => el.value);
+    const recurringHalfPref = document.querySelector('input[name="recurring-halfday-pref"]:checked')?.value || 'AM';
+
+    if (!recurringDays.length) {
+      document.getElementById('booking-days-error').classList.add('visible');
+      return;
+    }
+    document.getElementById('booking-days-error').classList.remove('visible');
+    if (!transport) { showErr('booking-transport-error', 'Please select a transport option.'); return; }
+    hideErr('booking-transport-error');
+
+    btn.disabled = true; btn.classList.add('loading');
+    document.getElementById('booking-form-error').classList.remove('visible');
+
+    try {
+      const res = await fetch(WORKER_URL + '/recurring-request', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: clientToken, clientId: clientData.clientId,
+          petIds: selectedPets,
+          serviceType: recurringService,
+          halfDayPreference: recurringService === 'half-daycare' ? recurringHalfPref : undefined,
+          days: recurringDays,
+          transport, notes,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Server error');
+
+      document.getElementById('booking-success-msg').textContent =
+        'Your recurring service request has been received. We\'ll confirm your schedule within 24 hours.';
+      document.getElementById('booking-summary').innerHTML =
+        '<strong>🔄 Recurring ' + (recurringService === 'half-daycare' ? 'Half-Daycare' : 'Daycare') + '</strong><br>' +
+        '📅 Every ' + recurringDays.join(', ') + '<br>' +
+        '🚗 Transport: ' + transport + '<br><br>' +
+        '<span style="font-size:0.78rem;color:var(--brand-stone);">Weekly · We\'ll activate your schedule once confirmed.</span>';
+
+      fetch(WORKER_URL + '/client?token=' + encodeURIComponent(clientToken)).then(r => r.ok ? r.json() : null).then(d => { if (d) clientData = d; }).catch(() => {});
+      showView('view-booking-success');
+    } catch (err) {
+      document.getElementById('booking-form-error').textContent = 'Something went wrong: ' + err.message;
+      document.getElementById('booking-form-error').classList.add('visible');
+      btn.disabled = false; btn.classList.remove('loading');
+    }
+    return; // stop here — don't run single booking path
   }
 
   const showErr = (id, msg) => { const el = document.getElementById(id); if (el) { el.textContent = msg; el.classList.add('visible'); } valid = false; };
@@ -1013,6 +1314,9 @@ window.bookAnother = function () {
   document.getElementById('booking-single-date').value = '';
   // Reset half-day pref
   document.querySelectorAll('input[name="halfday-pref"]').forEach(el => { el.checked = el.value === 'AM'; });
+  // Reset recurring options
+  document.querySelectorAll('input[name="recurring-day"]').forEach(el => el.checked = false);
+  document.getElementById('booking-recurring-row').style.display = 'none';
   // Reset transport
   document.querySelectorAll('input[name="booking-transport"]').forEach(el => el.checked = false);
   // Reset notes + waitlist
