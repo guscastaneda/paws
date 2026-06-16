@@ -277,6 +277,9 @@ async function handleGetClient(req, env) {
     console.error('Failed to fetch recurring services:', e);
   }
 
+  console.log('DEBUG petIdList:', JSON.stringify(petIdList));
+  console.log('DEBUG recurringServices:', JSON.stringify(recurringServices));
+
   return jsonRes({
     clientId:              c.id,
     firstName:             clientName.split(" ")[0],
