@@ -71,7 +71,6 @@ export async function handlePostRecurringRequest(req, env) {
   const recordName   = `Recurring ${serviceLabel} for ${petNames.join(', ')} — ${days.join(', ')}`;
 
   const fields = {
-    'fldH6Rdzg9Ajy7Ap7': recordName,                    // Name
     'fldD8xTYhIYf4x0K9': [clientId],                    // Client (linked)
     'fldHvXQR3MenUZPeK': petIds,                        // Pets (linked)
     'fldLKB5AmHrUKNSFp': [serviceId],                   // Service (linked)
