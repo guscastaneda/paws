@@ -45,6 +45,22 @@ function fmtDate(d) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+function formatRecurringDays(svc) {
+  const pluralDay = d => d + 's';
+  const days = (svc.days || []).map(pluralDay).join(' · ');
+  if (!days) return '';
+
+  if (svc.service === 'Half-Daycare') {
+    // Determine AM/PM from start time
+    const pref = (svc.startTime || '').toLowerCase().includes('noon') ||
+                 (svc.startTime || '').toLowerCase().includes('afternoon')
+      ? 'PM' : 'AM';
+    return days + ' (' + pref + ')';
+  }
+
+  return days;
+}
+
 // ── ONBOARDING STATUS ─────────────────────────────────────────────────────────
 function calcOnboardingSteps(data) {
   return {
@@ -654,7 +670,7 @@ function buildRecurringServices() {
         '</div>' +
       '</div>' +
       '<div style="font-size:0.92rem;font-weight:500;color:var(--brand-bark);margin-bottom:0.2rem;">' + svc.pets.join(' & ') + '</div>' +
-      '<div style="font-size:0.78rem;font-weight:300;color:var(--brand-stone);">' + svc.days.join(' · ') + '</div>' +
+      '<div style="font-size:0.78rem;font-weight:300;color:var(--brand-stone);">' + formatRecurringDays(svc) + '</div>' +
       pauseInfo +
       '<div id="rec-summary-' + svc.id + '" style="display:none;margin-top:0.75rem;padding:0.75rem;background:var(--brand-sage-light);border-radius:10px;">' +
         statusNote +
