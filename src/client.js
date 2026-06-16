@@ -231,24 +231,24 @@ async function handleGetClient(req, env) {
   try {
     const recurringRes = await atFetch(env,
       `/${RECURRING_TABLE}` +
-      `?fields[]=fldH6Rdzg9Ajy7Ap7` +  // Name (computed)
-      `&fields[]=fldLKB5AmHrUKNSFp`  +  // Service (linked)
-      `&fields[]=fldHvXQR3MenUZPeK`  +  // Pets (linked)
-      `&fields[]=fldmTXeB6oeF3yvpZ`  +  // Days of Week
-      `&fields[]=fldRcrIYS8mBW5gkP`  +  // Status
-      `&fields[]=fldOZK4aNqgJ6XPTd`  +  // Transport
-      `&fields[]=fldA9Rpn6LfklhBYy`  +  // Start Time
-      `&fields[]=fldbpasZ9gIQYusR7`  +  // End Time
-      `&fields[]=fldgiU49GyUGFBPJP`  +  // Pause Until
-      `&fields[]=fldfsbWrDjjtiq5mJ`      // Notes
+      `?fields[]=Pets` +
+      `&fields[]=Service` +
+      `&fields[]=Days%20of%20the%20Week` +
+      `&fields[]=Status` +
+      `&fields[]=Transport` +
+      `&fields[]=Start%20Time` +
+      `&fields[]=End%20Time` +
+      `&fields[]=Pause%20Until` +
+      `&fields[]=Notes` +
+      `&fields[]=Frequency`
     );
     if (recurringRes.ok) {
       const recurringData = await recurringRes.json();
      
       console.log('DEBUG recurring raw records:', JSON.stringify((recurringData.records || []).map(r => ({
         id: r.id,
-        petIds: (r.fields['fldHvXQR3MenUZPeK'] || []).map(p => typeof p === 'object' ? p.id : p),
-        status: (r.fields['fldRcrIYS8mBW5gkP'] || {}).name,
+        petIds: (r.fields['Pets'] || []).map(p => typeof p === 'object' ? p.id : p),
+        status: (r.fields['Status'] || {}).name,
       }))));
       
       const clientPetIds  = new Set(petIdList);
@@ -256,7 +256,7 @@ async function handleGetClient(req, env) {
       recurringServices = (recurringData.records || [])
         .filter(r => {
           // Match by pet IDs client-side — avoids unreliable linked field formula filtering
-          const recPetIds = (r.fields['fldHvXQR3MenUZPeK'] || [])
+          const recPetIds = (r.fields['Pets'] || [])
             .map(p => typeof p === 'object' ? p.id : p)
             .filter(Boolean);
           const belongsToClient = recPetIds.some(id => clientPetIds.has(id));
@@ -268,16 +268,16 @@ async function handleGetClient(req, env) {
         })
         .map(r => ({
           id:         r.id,
-          name:       r.fields['fldH6Rdzg9Ajy7Ap7'] || '',
-          service:    ((r.fields['fldLKB5AmHrUKNSFp'] || [])[0] || {}).name || '',
-          pets:       (r.fields['fldHvXQR3MenUZPeK'] || []).map(p => typeof p === 'object' ? p.name : p).filter(Boolean),
-          days:       (r.fields['fldmTXeB6oeF3yvpZ'] || []).map(d => typeof d === 'object' ? d.name : d).filter(Boolean),
-          status:     (r.fields['fldRcrIYS8mBW5gkP'] || {}).name || '',
-          transport:  (r.fields['fldOZK4aNqgJ6XPTd'] || {}).name || 'None',
-          startTime:  (r.fields['fldA9Rpn6LfklhBYy'] || {}).name || '',
-          endTime:    (r.fields['fldbpasZ9gIQYusR7']  || {}).name || '',
-          pauseUntil: r.fields['fldgiU49GyUGFBPJP'] || null,
-          notes:      r.fields['fldfsbWrDjjtiq5mJ']  || '',
+          name:       r.fields['Recurring Appointment Name'] || '',
+          service:    ((r.fields['Service'] || [])[0] || {}).name || '',
+          pets:       (r.fields['Pets'] || []).map(p => typeof p === 'object' ? p.name : p).filter(Boolean),
+          days:       (r.fields['Days of the Week'] || []).map(d => typeof d === 'object' ? d.name : d).filter(Boolean),
+          status:     (r.fields['Status'] || {}).name || '',
+          transport:  (r.fields['Transport'] || {}).name || 'None',
+          startTime:  (r.fields['Start Time'] || {}).name || '',
+          endTime:    (r.fields['End Time'] || {}).name || '',
+          pauseUntil: r.fields['Pause Until'] || null,
+          notes:      r.fields['Notes'] || '',
         }));
     }
   } catch (e) {
