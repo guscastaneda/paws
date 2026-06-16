@@ -242,6 +242,11 @@ async function handleGetClient(req, env) {
       `&fields[]=Notes` +
       `&fields[]=Frequency`
     );
+    console.log('DEBUG recurring fetch status:', recurringRes.status);
+    if (!recurringRes.ok) {
+      const errText = await recurringRes.text();
+      console.log('DEBUG recurring fetch error:', errText);
+    }
     if (recurringRes.ok) {
       const recurringData = await recurringRes.json();
      
