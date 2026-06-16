@@ -233,6 +233,50 @@ const breed = breedLinked || breedText;
   } catch (e) {
     console.error("Failed to fetch service prices:", e);
   }
+  // ── Fetch recurring services for this client ──
+  const RECURRING_TABLE = 'tblik1KKdS24p3Rz5';
+  let recurringServices = [];
+  try {
+    // Filter by pets linked to this client
+    const petIdOr = petIdList.map(id => `FIND("${id}", ARRAYJOIN(fldHvXQR3MenUZPeK, ","))`).join(',');
+    const recurringFilter = encodeURIComponent(`OR(${petIdOr})`);
+    const recurringRes = await atFetch(env,
+      `/${RECURRING_TABLE}?filterByFormula=${recurringFilter}` +
+      `&fields[]=fldH6Rdzg9Ajy7Ap7` +  // Name (computed, read only)
+      `&fields[]=fldLKB5AmHrUKNSFp` +  // Service
+      `&fields[]=fldHvXQR3MenUZPeK` +  // Pets
+      `&fields[]=fldmTXeB6oeF3yvpZ` +  // Days of Week
+      `&fields[]=fldRcrIYS8mBW5gkP` +  // Status
+      `&fields[]=fldOZK4aNqgJ6XPTd` +  // Transport
+      `&fields[]=fldA9Rpn6LfklhBYy` +  // Start Time
+      `&fields[]=fldbpasZ9gIQYusR7`  +  // End Time
+      `&fields[]=fldgiU49GyUGFBPJP` +  // Pause Until
+      `&fields[]=fldfsbWrDjjtiq5mJ`     // Notes
+    );
+    if (recurringRes.ok) {
+      const recurringData = await recurringRes.json();
+      recurringServices = (recurringData.records || [])
+        .filter(r => {
+          const status = (r.fields['fldRcrIYS8mBW5gkP'] || {}).name || '';
+          return ['Active', 'Requested', 'Paused', 'Cancellation Requested'].includes(status);
+        })
+        .map(r => ({
+          id:         r.id,
+          name:       r.fields['fldH6Rdzg9Ajy7Ap7'] || '',
+          service:    ((r.fields['fldLKB5AmHrUKNSFp'] || [])[0] || {}).name || '',
+          pets:       (r.fields['fldHvXQR3MenUZPeK'] || []).map(p => (typeof p === 'object' ? p.name : p)).filter(Boolean),
+          days:       (r.fields['fldmTXeB6oeF3yvpZ'] || []).map(d => (typeof d === 'object' ? d.name : d)).filter(Boolean),
+          status:     (r.fields['fldRcrIYS8mBW5gkP'] || {}).name || '',
+          transport:  (r.fields['fldOZK4aNqgJ6XPTd'] || {}).name || 'None',
+          startTime:  (r.fields['fldA9Rpn6LfklhBYy'] || {}).name || '',
+          endTime:    (r.fields['fldbpasZ9gIQYusR7']  || {}).name || '',
+          pauseUntil: r.fields['fldgiU49GyUGFBPJP'] || null,
+          notes:      r.fields['fldfsbWrDjjtiq5mJ']  || '',
+        }));
+    }
+  } catch (e) {
+    console.error('Failed to fetch recurring services:', e);
+  }
   return jsonRes({
     clientId:             c.id,
     firstName:            clientName.split(" ")[0],
@@ -254,6 +298,7 @@ const breed = breedLinked || breedText;
     boardingPrice,
     daycarePrice,
     halfDaycarePrice,
+    recurringServices,
   });
 }
 
