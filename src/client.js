@@ -212,56 +212,47 @@ async function handleGetClient(req, env) {
     console.error("Failed to fetch service prices:", e);
   }
 
-  // ── Recurring services — fetch all, filter client-side by pet IDs ─────────────
+// ── Recurring services ────────────────────────────────────────────────────────
   let recurringServices = [];
   try {
     const recurringRes = await atFetch(env, `/${RECURRING_TABLE}`);
     if (recurringRes.ok) {
       const recurringData = await recurringRes.json();
-
-      // Debug: log field keys from first record so we can see exact names
-      if (recurringData.records?.length > 0) {
-        console.log('DEBUG recurring field keys:', JSON.stringify(Object.keys(recurringData.records[0].fields)));
-        console.log('DEBUG recurring first record:', JSON.stringify(recurringData.records[0].fields));
-      }
-
-      const clientPetIds = new Set(petIdList);
+      const clientPetIds  = new Set(petIdList);
 
       recurringServices = (recurringData.records || [])
         .filter(r => {
+          // Pets field returns plain string IDs
           const recPetIds = (r.fields['Pets'] || [])
             .map(p => typeof p === 'object' ? p.id : p)
             .filter(Boolean);
           const belongsToClient = recPetIds.some(id => clientPetIds.has(id));
-          const status    = (r.fields['Status'] || {}).name || '';
+          const status    = r.fields['Status'] || '';
           const isVisible = ['Active', 'Requested', 'Paused', 'Cancellation Requested'].includes(status);
           return belongsToClient && isVisible;
         })
-        .map(r => {
-          console.log('DEBUG matched record:', JSON.stringify(r.fields));
-          // Try multiple possible field names for days
-          const daysRaw = r.fields['Days of the Week'] || r.fields['Day(s) of Week'] || r.fields['Days'] || r.fields['fldmTXeB6oeF3yvpZ'] || [];
-          return {
-            id:         r.id,
-            name:       r.fields['Recurring Appointment Name'] || '',
-            service:    ((r.fields['Service'] || [])[0] || {}).name || '',
-            pets:       (r.fields['Pets'] || []).map(p => typeof p === 'object' ? p.name : p).filter(Boolean),
-            days:       daysRaw.map(d => typeof d === 'object' ? d.name : d).filter(Boolean),
-            status:     (r.fields['Status'] || {}).name || '',
-            transport:  (r.fields['Transport'] || {}).name || 'None',
-            startTime:  (r.fields['Start Time'] || {}).name || '',
-            endTime:    (r.fields['End Time'] || {}).name || '',
-            pauseUntil: r.fields['Pause Until'] || null,
-            notes:      r.fields['Notes'] || '',
-          };
-        });
+        .map(r => ({
+          id:         r.id,
+          name:       r.fields['Recurring Appointment Name'] || '',
+          service:    r.fields['Service']?.[0] === 'rec99cemJqkCezIRN' ? 'Daycare'
+                    : r.fields['Service']?.[0] === 'rec4yyzqGvuDGomgy' ? 'Half-Daycare'
+                    : r.fields['Service']?.[0] === 'recToZsYSMELIVcMN' ? 'Boarding'
+                    : 'Daycare',
+          pets:       (r.fields['Pets'] || [])
+                        .map(id => pets.find(p => p.id === id)?.name || id)
+                        .filter(Boolean),
+          days:       r.fields['Days of Week'] || [],
+          status:     r.fields['Status'] || '',
+          transport:  r.fields['Transport Option'] || 'None',
+          startTime:  r.fields['Start Time'] || '',
+          endTime:    r.fields['End Time']   || '',
+          pauseUntil: r.fields['Pause Until'] || r.fields['fldgiU49GyUGFBPJP'] || null,
+          notes:      r.fields['Recurring Appointment Notes'] || '',
+        }));
     }
   } catch (e) {
     console.error('Failed to fetch recurring services:', e);
   }
-
-  console.log('DEBUG petIdList:', JSON.stringify(petIdList));
-  console.log('DEBUG recurringServices:', JSON.stringify(recurringServices));
 
   return jsonRes({
     clientId:              c.id,
