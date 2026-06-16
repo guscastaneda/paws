@@ -9,7 +9,6 @@ async function handleGetClient(req, env) {
   const token = new URL(req.url).searchParams.get("token");
   if (!token) return errRes("Missing token");
 
-  // Fetch client by token
   const formula = encodeURIComponent(`{Client Token} = "${token}"`);
   const res = await atFetch(env, `/${CLIENTS_TABLE}?filterByFormula=${formula}`);
   if (!res.ok) return errRes("Airtable error", 502);
@@ -23,7 +22,7 @@ async function handleGetClient(req, env) {
   const linkedPets = f["Pets"] || [];
   const petIdList  = linkedPets.map(p => typeof p === "object" ? p.id : p).filter(Boolean);
 
-  // ── Fetch pets with compliance docs ──────────────────────────────────────────
+  // ── Pets ──────────────────────────────────────────────────────────────────────
   let pets = [];
   if (petIdList.length > 0) {
     const petFilter = encodeURIComponent(
@@ -46,13 +45,10 @@ async function handleGetClient(req, env) {
         const isActive = p.fields["Active"] === true;
         const petDocs  = [];
 
-        // Compliance docs
         const docRefs = p.fields["Compliance Documents"] || [];
         const docIds  = docRefs.map(r => typeof r === "object" ? r.id : r).filter(Boolean);
         if (docIds.length > 0) {
-          const docFilter = encodeURIComponent(
-            `OR(${docIds.map(id => `RECORD_ID()="${id}"`).join(",")})`
-          );
+          const docFilter = encodeURIComponent(`OR(${docIds.map(id => `RECORD_ID()="${id}"`).join(",")})`);
           const docsRes = await atFetch(env, `/${COMPLIANCE_TABLE}?filterByFormula=${docFilter}`);
           if (docsRes.ok) {
             const docsData = await docsRes.json();
@@ -72,14 +68,11 @@ async function handleGetClient(req, env) {
         const hasTown   = petDocs.some(d => d.type === "Town License"       && !d.expired);
         const hasVax    = petDocs.some(d => d.type === "Vaccination Record" && !d.expired);
 
-        // Vets
         const vetRefs = p.fields["Veterinarians"] || [];
         const vetIds  = vetRefs.map(r => typeof r === "object" ? r.id : r).filter(Boolean);
         let vets = [];
         if (vetIds.length > 0) {
-          const vetFilter = encodeURIComponent(
-            `OR(${vetIds.map(id => `RECORD_ID()="${id}"`).join(",")})`
-          );
+          const vetFilter = encodeURIComponent(`OR(${vetIds.map(id => `RECORD_ID()="${id}"`).join(",")})`);
           const vetsRes = await atFetch(env, `/${VETS_TABLE}?filterByFormula=${vetFilter}`);
           if (vetsRes.ok) {
             const vetsData = await vetsRes.json();
@@ -94,11 +87,9 @@ async function handleGetClient(req, env) {
           }
         }
 
-        // Photo
         const photoField = p.fields["Photo"] || [];
         const photoUrl   = photoField.length > 0 ? (photoField[0].thumbnails?.large?.url || photoField[0].url || "") : "";
 
-        // Age
         const dob = p.fields["Date of Birth"] || "";
         let age = "";
         if (dob) {
@@ -110,23 +101,20 @@ async function handleGetClient(req, env) {
           age = y + (m > 0 ? "." + m : "") + " yrs";
         }
 
-        // Breed
         const breedText = p.fields["Breed (Text)"] || "";
         const breedRefs = p.fields["Breeds"] || [];
         const breedIds  = breedRefs.map(b => typeof b === "object" ? b.id : b).filter(Boolean);
         let breedLinked = "";
         if (breedIds.length > 0) {
-          const breedFilter = encodeURIComponent(
-            `OR(${breedIds.map(id => `RECORD_ID()="${id}"`).join(",")})`
-          );
+          const breedFilter = encodeURIComponent(`OR(${breedIds.map(id => `RECORD_ID()="${id}"`).join(",")})`);
           const breedRes = await atFetch(env, `/tblLsiIKKeimLnBxF?filterByFormula=${breedFilter}&fields[]=fldFetxyc0IbkFadw`);
           if (breedRes.ok) {
             const breedData = await breedRes.json();
             const names = (breedData.records || [])
               .map(r => r.fields["fldFetxyc0IbkFadw"] || r.fields["Breed Name"] || r.fields["Name"] || "")
               .filter(Boolean);
-            if (names.length === 1)      breedLinked = names[0];
-            else if (names.length > 1)   breedLinked = "Mixed Breed (" + names.join(" · ") + ")";
+            if (names.length === 1)    breedLinked = names[0];
+            else if (names.length > 1) breedLinked = "Mixed Breed (" + names.join(" · ") + ")";
           }
         }
         const breed = breedLinked || breedText;
@@ -134,21 +122,21 @@ async function handleGetClient(req, env) {
         pets.push({
           id:             p.id,
           active:         isActive,
-          name:           p.fields["Pet Name"]          || "",
+          name:           p.fields["Pet Name"]            || "",
           breed,
           dob,
           age,
           gender:         typeof p.fields["Gender"] === "object"
                             ? (p.fields["Gender"] || {}).name || ""
                             : p.fields["Gender"] || "",
-          spayedNeutered: p.fields["Spayed/Neutered"]   === true,
-          microchip:      p.fields["Microchip Number"]  || "",
-          allergies:      p.fields["Allergies"]         || "",
+          spayedNeutered: p.fields["Spayed/Neutered"]     === true,
+          microchip:      p.fields["Microchip Number"]    || "",
+          allergies:      p.fields["Allergies"]           || "",
           medications:    p.fields["Current Medications"] || "",
-          feeding:        p.fields["Feeding Schedule"]  || "",
-          fears:          p.fields["Fears & Triggers"]  || "",
-          temperament:    p.fields["Temperament"]       || "",
-          notes:          p.fields["Pet Notes"]         || "",
+          feeding:        p.fields["Feeding Schedule"]    || "",
+          fears:          p.fields["Fears & Triggers"]    || "",
+          temperament:    p.fields["Temperament"]         || "",
+          notes:          p.fields["Pet Notes"]           || "",
           photoUrl,
           vets,
           docs:           petDocs,
@@ -160,7 +148,7 @@ async function handleGetClient(req, env) {
 
   const allDocsComplete = pets.length > 0 && pets.every(p => p.docsComplete);
 
-  // ── Fetch appointments ────────────────────────────────────────────────────────
+  // ── Appointments ──────────────────────────────────────────────────────────────
   const linkedApptRefs = f["Appointments"] || f["fldihTexoIBjRsFdJ"] || [];
   const linkedApptIds  = linkedApptRefs.map(r => typeof r === "object" ? r.id : r).filter(Boolean);
   let appointments = [];
@@ -172,9 +160,7 @@ async function handleGetClient(req, env) {
 
     for (let i = 0; i < linkedApptIds.length; i += batchSize) {
       const batch    = linkedApptIds.slice(i, i + batchSize);
-      const idFilter = encodeURIComponent(
-        `OR(${batch.map(id => `RECORD_ID()="${id}"`).join(",")})`
-      );
+      const idFilter = encodeURIComponent(`OR(${batch.map(id => `RECORD_ID()="${id}"`).join(",")})`);
       const batchRes = await atFetch(env, `/${APPOINTMENTS_TABLE}?filterByFormula=${idFilter}`);
       if (batchRes.ok) {
         const batchData = await batchRes.json();
@@ -206,7 +192,7 @@ async function handleGetClient(req, env) {
       .sort((a, b) => a.startDate.localeCompare(b.startDate));
   }
 
-  // ── Fetch service prices ──────────────────────────────────────────────────────
+  // ── Service prices ────────────────────────────────────────────────────────────
   let boardingPrice    = 85;
   let daycarePrice     = 50;
   let halfDaycarePrice = 35;
@@ -226,14 +212,14 @@ async function handleGetClient(req, env) {
     console.error("Failed to fetch service prices:", e);
   }
 
-  // ── Fetch recurring services — fetch all, filter client-side by pet IDs ──────
+  // ── Recurring services — fetch all, filter client-side by pet IDs ─────────────
   let recurringServices = [];
   try {
     const recurringRes = await atFetch(env, `/${RECURRING_TABLE}`);
     if (recurringRes.ok) {
       const recurringData = await recurringRes.json();
 
-      // Log first record's field keys to find real field names
+      // Debug: log field keys from first record so we can see exact names
       if (recurringData.records?.length > 0) {
         console.log('DEBUG recurring field keys:', JSON.stringify(Object.keys(recurringData.records[0].fields)));
         console.log('DEBUG recurring first record:', JSON.stringify(recurringData.records[0].fields));
@@ -252,14 +238,15 @@ async function handleGetClient(req, env) {
           return belongsToClient && isVisible;
         })
         .map(r => {
-          // Log what we find for matched records
-          console.log('DEBUG matched record fields:', JSON.stringify(r.fields));
+          console.log('DEBUG matched record:', JSON.stringify(r.fields));
+          // Try multiple possible field names for days
+          const daysRaw = r.fields['Days of the Week'] || r.fields['Day(s) of Week'] || r.fields['Days'] || r.fields['fldmTXeB6oeF3yvpZ'] || [];
           return {
             id:         r.id,
             name:       r.fields['Recurring Appointment Name'] || '',
             service:    ((r.fields['Service'] || [])[0] || {}).name || '',
             pets:       (r.fields['Pets'] || []).map(p => typeof p === 'object' ? p.name : p).filter(Boolean),
-            days:       (r.fields['Days of the Week'] || r.fields['Day(s) of Week'] || r.fields['Days'] || []).map(d => typeof d === 'object' ? d.name : d).filter(Boolean),
+            days:       daysRaw.map(d => typeof d === 'object' ? d.name : d).filter(Boolean),
             status:     (r.fields['Status'] || {}).name || '',
             transport:  (r.fields['Transport'] || {}).name || 'None',
             startTime:  (r.fields['Start Time'] || {}).name || '',
@@ -270,11 +257,6 @@ async function handleGetClient(req, env) {
         });
     }
   } catch (e) {
-    console.error('Failed to fetch recurring services:', e);
-  }
-
-  console.log('DEBUG petIdList:', JSON.stringify(petIdList));
-  console.log('DEBUG recurringServices:', JSON.stringify(recurringServices)); catch (e) {
     console.error('Failed to fetch recurring services:', e);
   }
 
