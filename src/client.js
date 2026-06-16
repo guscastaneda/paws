@@ -244,6 +244,13 @@ async function handleGetClient(req, env) {
     );
     if (recurringRes.ok) {
       const recurringData = await recurringRes.json();
+     
+      console.log('DEBUG recurring raw records:', JSON.stringify((recurringData.records || []).map(r => ({
+        id: r.id,
+        petIds: (r.fields['fldHvXQR3MenUZPeK'] || []).map(p => typeof p === 'object' ? p.id : p),
+        status: (r.fields['fldRcrIYS8mBW5gkP'] || {}).name,
+      }))));
+      
       const clientPetIds  = new Set(petIdList);
 
       recurringServices = (recurringData.records || [])
