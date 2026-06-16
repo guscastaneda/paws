@@ -25,15 +25,14 @@ function showView(id) {
     if (mainCard)    mainCard.style.display    = 'none';
     if (bookingCard) bookingCard.style.display = 'block';
   } else if (id === 'view-booking-success') {
-    if (mainCard)            mainCard.style.display            = 'none';
-    if (bookingSuccessCard)  bookingSuccessCard.style.display  = 'block';
+    if (mainCard)            mainCard.style.display           = 'none';
+    if (bookingSuccessCard)  bookingSuccessCard.style.display = 'block';
   } else {
     if (mainCard) mainCard.style.display = '';
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     const target = document.getElementById(id);
     if (target) target.classList.add('active');
   }
-
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -117,49 +116,25 @@ async function init() {
 
   document.getElementById('ob-first-name').textContent = clientData.firstName || 'there';
 
-  // Inject new pet form
   const newPetCard = document.getElementById('new-pet-card');
   if (newPetCard) newPetCard.innerHTML = buildNewPetView();
 
-  // ── Service toggle listener ──
+  // ── Service toggle ──
   document.querySelectorAll('input[name="booking-service"]').forEach(radio => {
     radio.addEventListener('change', function () {
-      const isDaycare     = this.value === 'daycare';
-      const isHalfDaycare = this.value === 'half-daycare';
-      const isSingleDay   = isDaycare || isHalfDaycare;
-      const isRecurring   = this.value === 'recurring';
-
-      document.getElementById('booking-start-row').style.display        = isSingleDay ? 'none' : '';
-      document.getElementById('booking-pickup-row').style.display       = isSingleDay ? 'none' : '';
-      document.getElementById('booking-date-only-row').style.display    = isSingleDay ? 'block' : 'none';
-      document.getElementById('booking-halfday-pref').style.display     = isHalfDaycare ? 'block' : 'none';
-      document.getElementById('booking-waitlist-row').style.display     = isSingleDay ? 'none' : 'block';
-
-      document.querySelectorAll('input[name="recurring-service"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-      document.getElementById('booking-recurring-halfday-pref').style.display =
-        this.value === 'half-daycare' ? 'block' : 'none';
+      updateBookingFormLayout();
     });
   });
 
-      document.getElementById('booking-title').innerHTML =
-        isHalfDaycare ? 'Request <em>Half-Daycare</em>' :
-        isDaycare     ? 'Request <em>Daycare</em>'      :
-                        'Book a <em>Boarding Stay</em>';
-
-      document.getElementById('booking-btn-text').textContent =
-        isHalfDaycare ? 'Request Half-Daycare' :
-        isDaycare     ? 'Request Daycare'       :
-                        'Request Boarding Stay';
-
-      const price = isHalfDaycare
-        ? `Half-Daycare is $${clientData.halfDaycarePrice || 40}/session. Pricing is confirmed when we review your request.`
-        : isDaycare
-          ? `Daycare is $${clientData.daycarePrice || 65}/session. Pricing is confirmed when we review your request.`
-          : `Boarding is $${clientData.boardingPrice || 85}/night. Pricing is confirmed when we review your request.`;
-      document.getElementById('booking-price-info').textContent = price;
+  // ── Frequency toggle ──
+  document.querySelectorAll('input[name="booking-frequency"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+      updateBookingFormLayout();
     });
   });
+
+  // ── Recurring service sub-type (daycare vs half-daycare) ──
+  // handled by updateBookingFormLayout based on main service selection
 
   // Wire agreement
   document.getElementById('agree-name')?.addEventListener('input', toggleAgreeBtn);
@@ -195,6 +170,57 @@ async function init() {
     showView('view-dashboard');
   } else {
     showView('view-onboarding');
+  }
+}
+
+// ── BOOKING FORM LAYOUT ───────────────────────────────────────────────────────
+function updateBookingFormLayout() {
+  const service   = document.querySelector('input[name="booking-service"]:checked')?.value || 'boarding';
+  const frequency = document.querySelector('input[name="booking-frequency"]:checked')?.value || 'one-time';
+
+  const isBoarding    = service === 'boarding';
+  const isDaycare     = service === 'daycare';
+  const isHalfDaycare = service === 'half-daycare';
+  const isSingleDay   = isDaycare || isHalfDaycare;
+  const isRecurring   = isSingleDay && frequency === 'recurring';
+  const isOneTime     = isSingleDay && frequency === 'one-time';
+
+  // Title + button
+  document.getElementById('booking-title').innerHTML =
+    isHalfDaycare && isRecurring ? 'Request Recurring <em>Half-Daycare</em>' :
+    isHalfDaycare                ? 'Request <em>Half-Daycare</em>'           :
+    isDaycare && isRecurring     ? 'Request Recurring <em>Daycare</em>'      :
+    isDaycare                    ? 'Request <em>Daycare</em>'                :
+                                   'Book a <em>Boarding Stay</em>';
+
+  document.getElementById('booking-btn-text').textContent =
+    isRecurring   ? 'Request Recurring Service' :
+    isHalfDaycare ? 'Request Half-Daycare'      :
+    isDaycare     ? 'Request Daycare'            :
+                    'Request Boarding Stay';
+
+  // Frequency row — only for daycare / half-daycare
+  document.getElementById('booking-frequency-row').style.display  = isSingleDay   ? 'block' : 'none';
+
+  // Date rows
+  document.getElementById('booking-start-row').style.display      = isBoarding    ? 'block' : 'none';
+  document.getElementById('booking-pickup-row').style.display     = isBoarding    ? 'block' : 'none';
+  document.getElementById('booking-date-only-row').style.display  = isOneTime     ? 'block' : 'none';
+
+  // Half-day preference — show for half-daycare regardless of one-time or recurring
+  document.getElementById('booking-halfday-pref').style.display   = isHalfDaycare ? 'block' : 'none';
+
+  // Recurring day picker
+  document.getElementById('booking-recurring-days').style.display = isRecurring   ? 'block' : 'none';
+
+  // Price info
+  const priceInfo = document.getElementById('booking-price-info');
+  if (priceInfo) {
+    priceInfo.textContent = isHalfDaycare
+      ? `Half-Daycare is $${clientData.halfDaycarePrice || 40}/session. Pricing confirmed when we review your request.`
+      : isDaycare
+        ? `Daycare is $${clientData.daycarePrice || 65}/session. Pricing confirmed when we review your request.`
+        : `Boarding is $${clientData.boardingPrice || 85}/night. Pricing confirmed when we review your request.`;
   }
 }
 
@@ -235,7 +261,7 @@ function goToStep(step) {
   }
   showView('view-' + step);
   if (step === 'docs')    buildDocCards();
-  if (step === 'booking') buildBookingPetPills();
+  if (step === 'booking') { buildBookingPetPills(); updateBookingFormLayout(); }
   if (step === 'contact') buildContactCurrentInfo();
 }
 
@@ -250,8 +276,8 @@ function buildContactCurrentInfo() {
   const d = clientData;
   const lines = [
     d.name    ? '<strong>' + d.name + '</strong>' : '',
-    d.phone   ? '📞 ' + d.phone   : '',
-    d.email   ? '✉️ '  + d.email  : '',
+    d.phone   ? '📞 ' + d.phone    : '',
+    d.email   ? '✉️ '  + d.email   : '',
     d.address ? '📍 '  + d.address : '',
     (d.addName || d.addPhone) ? '<span style="color:var(--brand-stone);">Additional: ' + [d.addName, d.addPhone].filter(Boolean).join(' · ') + '</span>' : '',
   ].filter(Boolean).join('<br>');
@@ -478,7 +504,7 @@ function buildDashboard() {
         : null;
 
       const serviceLabel =
-        appt.category === 'DC' ? '☀️ Daycare' :
+        appt.category === 'DC' ? '☀️ Daycare'      :
         appt.category === 'HD' ? '🌤️ Half-Daycare' :
         '🏡 Boarding';
 
@@ -505,8 +531,7 @@ function buildDashboard() {
               ? '<div style="font-size:0.82rem;color:#c0392b;margin-bottom:0.5rem;">Your cancellation request is being reviewed. We\'ll follow up shortly.</div>'
               : '';
 
-      const canCancel = appt.status === 'Requested' || appt.status === 'Confirmed' || appt.status === 'Waitlisted';
-      const canModify = appt.status === 'Requested' || appt.status === 'Waitlisted';
+      const canCancel = ['Requested', 'Confirmed', 'Waitlisted'].includes(appt.status);
 
       const card = document.createElement('div');
       card.style.cssText = 'padding:0.85rem 1rem;border-radius:12px;border:1.5px solid var(--brand-stone-light);background:#fff;cursor:pointer;';
@@ -531,13 +556,13 @@ function buildDashboard() {
           (appt.clientMessage
             ? '<pre style="font-family:var(--font-body);font-size:0.78rem;color:var(--brand-bark);white-space:pre-wrap;margin:0;line-height:1.6;">' + appt.clientMessage + '</pre>'
             : (!statusMessage ? '<div style="font-size:0.78rem;color:var(--brand-stone);font-style:italic;">Pricing summary will appear here once confirmed.</div>' : '')) +
-          '<div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--brand-stone-light);display:flex;gap:0.5rem;flex-wrap:wrap;">' +
-            (canCancel
-              ? '<button onclick="openCancellationModal(\'' + appt.id + '\', \'' + (appt.category || 'B') + '\', \'' + appt.startDate + '\', \'' + (appt.endDate || '') + '\')" ' +
+          (canCancel
+            ? '<div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--brand-stone-light);">' +
+                '<button onclick="openCancellationModal(\'' + appt.id + '\', \'' + (appt.category || 'B') + '\', \'' + appt.startDate + '\', \'' + (appt.endDate || '') + '\')" ' +
                 'style="padding:0.35rem 0.75rem;background:transparent;color:#c0392b;border:1.5px solid #c0392b;border-radius:999px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;">' +
-                'Request Cancellation</button>'
-              : '') +
-          '</div>' +
+                'Request Cancellation</button>' +
+              '</div>'
+            : '') +
         '</div>';
 
       if (openIds.has(appt.id)) {
@@ -553,23 +578,34 @@ function buildDashboard() {
   } else {
     apptSection.style.display = 'none';
   }
+
   // ── Recurring services ──
   buildRecurringServices();
+
+  // ── Pet cards ──
   buildPetCards(clientData, goToStep, WORKER_URL, clientToken);
 }
 
+// ── APPOINTMENT TOGGLE ────────────────────────────────────────────────────────
+function toggleApptSummary(apptId) {
+  const el     = document.getElementById('appt-summary-' + apptId);
+  const toggle = document.getElementById('appt-toggle-'  + apptId);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  if (toggle) toggle.textContent = isOpen ? '▼' : '▲';
+}
+window.toggleApptSummary = toggleApptSummary;
 
+// ── RECURRING SERVICES ────────────────────────────────────────────────────────
 function buildRecurringServices() {
-  const services = clientData.recurringServices || [];
-  const section  = document.getElementById('dash-recurring');
+  const services  = clientData.recurringServices || [];
+  const section   = document.getElementById('dash-recurring');
   if (!section) return;
 
-  if (services.length === 0) {
-    section.style.display = 'none';
-    return;
-  }
-
+  if (services.length === 0) { section.style.display = 'none'; return; }
   section.style.display = 'block';
+
   const container = document.getElementById('dash-recurring-cards');
   if (!container) return;
   container.innerHTML = '';
@@ -580,22 +616,32 @@ function buildRecurringServices() {
     s === 'Boarding'     ? '🏡'  : '🔄';
 
   const statusStyles = {
-    'Active':                 { color: 'var(--brand-success)',  bg: 'var(--brand-success-light)' },
-    'Requested':              { color: 'var(--brand-warning)',  bg: 'var(--brand-warning-light)' },
-    'Paused':                 { color: '#c07a2a',               bg: '#fff8f0' },
-    'Cancellation Requested': { color: '#c0392b',               bg: '#fff3f3' },
+    'Active':                 { color: 'var(--brand-success)', bg: 'var(--brand-success-light)' },
+    'Requested':              { color: 'var(--brand-warning)', bg: 'var(--brand-warning-light)' },
+    'Paused':                 { color: '#c07a2a',              bg: '#fff8f0' },
+    'Cancellation Requested': { color: '#c0392b',              bg: '#fff3f3' },
   };
 
   services.forEach(svc => {
     const { color: statusColor, bg: statusBg } = statusStyles[svc.status] || { color: 'var(--brand-stone)', bg: 'var(--brand-stone-light)' };
-    const canManage = svc.status === 'Active' || svc.status === 'Paused';
+    const canPause  = svc.status === 'Active';
+    const canCancel = svc.status === 'Active' || svc.status === 'Paused' || svc.status === 'Requested';
 
     const card = document.createElement('div');
     card.style.cssText = 'padding:0.85rem 1rem;border-radius:12px;border:1.5px solid var(--brand-stone-light);background:#fff;cursor:pointer;';
 
     const pauseInfo = svc.status === 'Paused' && svc.pauseUntil
-      ? `<div style="font-size:0.75rem;color:#c07a2a;margin-top:0.2rem;">Paused until ${fmtDate(svc.pauseUntil)}</div>`
+      ? '<div style="font-size:0.75rem;color:#c07a2a;margin-top:0.2rem;">Paused until ' + fmtDate(svc.pauseUntil) + '</div>'
       : '';
+
+    const statusNote =
+      svc.status === 'Requested'
+        ? '<div style="font-size:0.82rem;color:var(--brand-warning);margin-bottom:0.75rem;">Your recurring service request is pending. We\'ll confirm shortly.</div>'
+        : svc.status === 'Cancellation Requested'
+          ? '<div style="font-size:0.82rem;color:#c0392b;margin-bottom:0.75rem;">Your cancellation request is being reviewed.</div>'
+          : svc.status === 'Paused'
+            ? '<div style="font-size:0.82rem;color:#c07a2a;margin-bottom:0.75rem;">Service is paused until ' + fmtDate(svc.pauseUntil) + '. It will resume automatically.</div>'
+            : '';
 
     card.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem;">' +
@@ -607,27 +653,21 @@ function buildRecurringServices() {
           '<span id="rec-toggle-' + svc.id + '" style="font-size:0.75rem;color:var(--brand-stone);">▼</span>' +
         '</div>' +
       '</div>' +
-      '<div style="font-size:0.92rem;font-weight:500;color:var(--brand-bark);margin-bottom:0.2rem;">' +
-        svc.pets.join(' & ') +
-      '</div>' +
-      '<div style="font-size:0.78rem;font-weight:300;color:var(--brand-stone);">' +
-        svc.days.join(' · ') +
-      '</div>' +
+      '<div style="font-size:0.92rem;font-weight:500;color:var(--brand-bark);margin-bottom:0.2rem;">' + svc.pets.join(' & ') + '</div>' +
+      '<div style="font-size:0.78rem;font-weight:300;color:var(--brand-stone);">' + svc.days.join(' · ') + '</div>' +
       pauseInfo +
       '<div id="rec-summary-' + svc.id + '" style="display:none;margin-top:0.75rem;padding:0.75rem;background:var(--brand-sage-light);border-radius:10px;">' +
-        (svc.status === 'Requested'
-          ? '<div style="font-size:0.82rem;color:var(--brand-warning);margin-bottom:0.75rem;">Your recurring service request is pending review. We\'ll confirm shortly.</div>'
-          : svc.status === 'Cancellation Requested'
-            ? '<div style="font-size:0.82rem;color:#c0392b;margin-bottom:0.75rem;">Your cancellation request is being reviewed.</div>'
-            : '') +
-        (canManage
+        statusNote +
+        (canPause || canCancel
           ? '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">' +
-              (svc.status === 'Active'
+              (canPause
                 ? '<button onclick="openRecurringPauseModal(\'' + svc.id + '\', \'' + svc.service + '\')" ' +
                   'style="padding:0.35rem 0.75rem;background:transparent;color:#c07a2a;border:1.5px solid #c07a2a;border-radius:999px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;">Pause Service</button>'
                 : '') +
-              '<button onclick="openRecurringCancelModal(\'' + svc.id + '\', \'' + svc.service + '\', \'' + svc.pets.join(', ') + '\')" ' +
-              'style="padding:0.35rem 0.75rem;background:transparent;color:#c0392b;border:1.5px solid #c0392b;border-radius:999px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;">Cancel Service</button>' +
+              (canCancel
+                ? '<button onclick="openRecurringCancelModal(\'' + svc.id + '\', \'' + svc.service + '\', \'' + svc.pets.join(', ') + '\')" ' +
+                  'style="padding:0.35rem 0.75rem;background:transparent;color:#c0392b;border:1.5px solid #c0392b;border-radius:999px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;">Cancel Service</button>'
+                : '') +
             '</div>'
           : '') +
       '</div>';
@@ -645,8 +685,7 @@ function buildRecurringServices() {
   });
 }
 
-
-
+// ── RECURRING MODALS ──────────────────────────────────────────────────────────
 window.openRecurringPauseModal = function(recurringId, serviceName) {
   const existing = document.getElementById('recurring-modal');
   if (existing) existing.remove();
@@ -660,7 +699,7 @@ window.openRecurringPauseModal = function(recurringId, serviceName) {
   modal.id = 'recurring-modal';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(44,31,20,0.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);';
   modal.innerHTML = `
-    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:1.75rem 1.5rem 2.5rem;max-height:85vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(44,31,20,0.15);">
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:1.75rem 1.5rem 2.5rem;max-height:85vh;overflow-y:auto;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
         <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;">Pause ${serviceName}</div>
         <button onclick="document.getElementById('recurring-modal').remove()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--brand-stone);">✕</button>
@@ -669,7 +708,7 @@ window.openRecurringPauseModal = function(recurringId, serviceName) {
         We'll hold your spot for up to 2 weeks. After that, the spot may be offered to another client.
       </div>
       <div style="margin-bottom:1.25rem;">
-        <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Resume After <span style="color:var(--brand-gold);">*</span></label>
+        <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Resume After <span style="color:var(--brand-warning);">*</span></label>
         <input type="date" id="pause-until-date" min="${fmt(today)}" max="${fmt(maxDate)}"
           style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;"/>
         <div style="font-size:0.72rem;color:var(--brand-stone);margin-top:0.35rem;">Maximum 2 weeks from today (${fmtDate(fmt(maxDate))}).</div>
@@ -690,15 +729,11 @@ window.openRecurringPauseModal = function(recurringId, serviceName) {
 };
 
 window.submitRecurringPause = async function(recurringId) {
-  const btn      = document.getElementById('recurring-modal-btn');
-  const errEl    = document.getElementById('recurring-modal-error');
+  const btn        = document.getElementById('recurring-modal-btn');
+  const errEl      = document.getElementById('recurring-modal-error');
   const pauseUntil = document.getElementById('pause-until-date')?.value;
 
-  if (!pauseUntil) {
-    errEl.textContent = 'Please select a resume date.';
-    errEl.style.display = 'block';
-    return;
-  }
+  if (!pauseUntil) { errEl.textContent = 'Please select a resume date.'; errEl.style.display = 'block'; return; }
 
   btn.disabled = true; btn.textContent = 'Submitting…';
   errEl.style.display = 'none';
@@ -735,7 +770,7 @@ window.openRecurringCancelModal = function(recurringId, serviceName, petNames) {
   modal.id = 'recurring-modal';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(44,31,20,0.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);';
   modal.innerHTML = `
-    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:1.75rem 1.5rem 2.5rem;max-height:85vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(44,31,20,0.15);">
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:1.75rem 1.5rem 2.5rem;max-height:85vh;overflow-y:auto;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
         <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;">Cancel ${serviceName}</div>
         <button onclick="document.getElementById('recurring-modal').remove()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--brand-stone);">✕</button>
@@ -744,8 +779,7 @@ window.openRecurringCancelModal = function(recurringId, serviceName, petNames) {
         <div style="font-weight:500;color:var(--brand-bark);">${serviceName} · ${petNames}</div>
       </div>
       <div style="background:#fff3f3;border:1.5px solid #f5c6c6;border-radius:10px;padding:0.75rem 1rem;margin-bottom:1.25rem;font-size:0.78rem;color:#c0392b;line-height:1.6;">
-        Cancelling a recurring service is permanent. Individual upcoming appointments will remain unless cancelled separately.
-        If you only need a short break, consider pausing instead.
+        Cancelling stops all future sessions. Individual upcoming appointments already created will remain unless cancelled separately. If you only need a short break, consider pausing instead.
       </div>
       <div style="margin-bottom:1.25rem;">
         <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Reason <span style="font-weight:300;text-transform:none;">(optional)</span></label>
@@ -799,19 +833,8 @@ window.submitRecurringCancel = async function(recurringId) {
   }
 };
 
-// ── APPOINTMENT TOGGLE ────────────────────────────────────────────────────────
-function toggleApptSummary(apptId) {
-  const el     = document.getElementById('appt-summary-' + apptId);
-  const toggle = document.getElementById('appt-toggle-'  + apptId);
-  if (!el) return;
-  const isOpen = el.style.display !== 'none';
-  el.style.display = isOpen ? 'none' : 'block';
-  if (toggle) toggle.textContent = isOpen ? '▼' : '▲';
-}
-window.toggleApptSummary = toggleApptSummary;
-
 // ── CANCELLATION ──────────────────────────────────────────────────────────────
-window.openCancellationModal = function (apptId, category, startDate, endDate) {
+window.openCancellationModal = function(apptId, category, startDate, endDate) {
   const existing = document.getElementById('cancellation-modal');
   if (existing) existing.remove();
 
@@ -825,7 +848,7 @@ window.openCancellationModal = function (apptId, category, startDate, endDate) {
   modal.id = 'cancellation-modal';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(44,31,20,0.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);';
   modal.innerHTML = `
-    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:1.75rem 1.5rem 2.5rem;max-height:85vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(44,31,20,0.15);">
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:1.75rem 1.5rem 2.5rem;max-height:85vh;overflow-y:auto;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
         <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;">Request Cancellation</div>
         <button onclick="document.getElementById('cancellation-modal').remove()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--brand-stone);">✕</button>
@@ -838,7 +861,8 @@ window.openCancellationModal = function (apptId, category, startDate, endDate) {
       </div>
       <div style="margin-bottom:1.25rem;">
         <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Reason <span style="font-weight:300;text-transform:none;">(optional)</span></label>
-        <textarea id="cancellation-reason" placeholder="Let us know why you're cancelling — this helps us plan..." style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;min-height:80px;resize:vertical;"></textarea>
+        <textarea id="cancellation-reason" placeholder="Let us know why you're cancelling — this helps us plan..."
+          style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;min-height:80px;resize:vertical;"></textarea>
       </div>
       <div id="cancellation-error" style="color:#c0392b;font-size:0.8rem;margin-bottom:0.75rem;display:none;"></div>
       <button id="cancellation-confirm-btn" onclick="submitCancellation('${apptId}', '${category}')"
@@ -855,24 +879,19 @@ window.openCancellationModal = function (apptId, category, startDate, endDate) {
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 };
 
-window.submitCancellation = async function (apptId, category) {
+window.submitCancellation = async function(apptId, category) {
   const btn    = document.getElementById('cancellation-confirm-btn');
   const errEl  = document.getElementById('cancellation-error');
   const reason = document.getElementById('cancellation-reason')?.value.trim();
-  btn.disabled = true;
-  btn.textContent = 'Submitting…';
+  btn.disabled = true; btn.textContent = 'Submitting…';
   errEl.style.display = 'none';
 
   try {
     const res = await fetch(WORKER_URL + '/cancellation', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: clientToken, clientId: clientData.clientId, appointmentId: apptId, serviceType: category, reason }),
     });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || 'Server error');
-    }
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Server error'); }
     document.getElementById('cancellation-modal').remove();
     const appt = (clientData.appointments || []).find(a => a.id === apptId);
     if (appt) appt.status = 'Cancellation Requested';
@@ -885,8 +904,7 @@ window.submitCancellation = async function (apptId, category) {
   } catch (err) {
     errEl.textContent = 'Something went wrong: ' + (err.message || 'Please try again.');
     errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Confirm Cancellation Request';
+    btn.disabled = false; btn.textContent = 'Confirm Cancellation Request';
   }
 };
 
@@ -899,14 +917,13 @@ function toggleAgreeBtn() {
 }
 window.toggleAgreeBtn = toggleAgreeBtn;
 
-window.submitAgreement = async function () {
+window.submitAgreement = async function() {
   const btn = document.getElementById('ag-submit');
   btn.disabled = true; btn.classList.add('loading');
   document.getElementById('ag-form-error').classList.remove('visible');
   try {
     const res = await fetch(WORKER_URL + '/agreement', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: clientToken, clientId: clientData.clientId, signedName: document.getElementById('agree-name').value.trim() }),
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -920,7 +937,7 @@ window.submitAgreement = async function () {
 };
 
 // ── CONTACT SUBMIT ────────────────────────────────────────────────────────────
-window.submitContact = async function () {
+window.submitContact = async function() {
   let valid = true;
   const name  = document.getElementById('c-name').value.trim();
   const phone = document.getElementById('c-phone').value.trim();
@@ -968,7 +985,7 @@ window.submitContact = async function () {
 };
 
 // ── EMERGENCY SUBMIT ──────────────────────────────────────────────────────────
-window.submitEmergency = async function () {
+window.submitEmergency = async function() {
   let valid = true;
   const name  = document.getElementById('e-name').value.trim();
   const phone = document.getElementById('e-phone').value.trim();
@@ -1002,7 +1019,7 @@ window.submitEmergency = async function () {
 };
 
 // ── DOC SUBMIT ────────────────────────────────────────────────────────────────
-window.submitDoc = async function () {
+window.submitDoc = async function() {
   if (!selectedDocFile) { document.getElementById('docs-file-error').classList.add('visible'); return; }
   document.getElementById('docs-file-error').classList.remove('visible');
 
@@ -1090,38 +1107,20 @@ function buildBookingPetPills() {
     container.appendChild(inp); container.appendChild(lbl);
     if (clientData.pets.length === 1) inp.checked = true;
   });
-
-  // Update price info with live prices
-  const priceInfo = document.getElementById('booking-price-info');
-  if (priceInfo) {
-    const svc = document.querySelector('input[name="booking-service"]:checked')?.value || 'boarding';
-    priceInfo.textContent = svc === 'half-daycare'
-      ? `Half-Daycare is $${clientData.halfDaycarePrice || 40}/session. Pricing is confirmed when we review your request.`
-      : svc === 'daycare'
-        ? `Daycare is $${clientData.daycarePrice || 65}/session. Pricing is confirmed when we review your request.`
-        : `Boarding is $${clientData.boardingPrice || 85}/night. Pricing is confirmed when we review your request.`;
-  }
 }
 
-window.submitBooking = async function () {
+window.submitBooking = async function() {
   let valid = true;
-  const serviceType   = document.querySelector('input[name="booking-service"]:checked')?.value || 'boarding';
-  const isDaycare     = serviceType === 'daycare';
-  const isHalfDaycare = serviceType === 'half-daycare';
+  const service     = document.querySelector('input[name="booking-service"]:checked')?.value || 'boarding';
+  const frequency   = document.querySelector('input[name="booking-frequency"]:checked')?.value || 'one-time';
+  const isDaycare     = service === 'daycare';
+  const isHalfDaycare = service === 'half-daycare';
   const isSingleDay   = isDaycare || isHalfDaycare;
-  const isRecurring   = serviceType === 'recurring';
+  const isRecurring   = isSingleDay && frequency === 'recurring';
   const halfDayPref   = document.querySelector('input[name="halfday-pref"]:checked')?.value || 'AM';
   const selectedPets  = Array.from(document.querySelectorAll('input[name="booking-pet"]:checked')).map(el => el.value);
-
-  const startDate = isSingleDay
-    ? document.getElementById('booking-single-date').value
-    : document.getElementById('booking-start-date').value;
-  const startTime = document.getElementById('booking-start-time').value;
-  const endDate   = document.getElementById('booking-end-date').value;
-  const endTime   = document.getElementById('booking-end-time').value;
-  const transport = document.querySelector('input[name="booking-transport"]:checked')?.value;
-  const notes     = document.getElementById('booking-notes').value.trim();
-  const isWaitlist = document.getElementById('booking-waitlist')?.checked || false;
+  const transport     = document.querySelector('input[name="booking-transport"]:checked')?.value;
+  const notes         = document.getElementById('booking-notes').value.trim();
 
   const REQUIRED_DOCS = ['Rabies Certificate', 'Town License', 'Vaccination Record'];
   const blockedPets   = (clientData.pets || []).filter(pet => {
@@ -1134,19 +1133,19 @@ window.submitBooking = async function () {
     return;
   }
 
-  // ── Recurring path ──
-  if (isRecurring) {
-    const recurringService = document.querySelector('input[name="recurring-service"]:checked')?.value || 'daycare';
-    const recurringDays    = Array.from(document.querySelectorAll('input[name="recurring-day"]:checked')).map(el => el.value);
-    const recurringHalfPref = document.querySelector('input[name="recurring-halfday-pref"]:checked')?.value || 'AM';
+  const showErr = (id, msg) => { const el = document.getElementById(id); if (el) { el.textContent = msg; el.classList.add('visible'); } valid = false; };
+  const hideErr = id => document.getElementById(id)?.classList.remove('visible');
 
-    if (!recurringDays.length) {
-      document.getElementById('booking-days-error').classList.add('visible');
-      return;
-    }
-    document.getElementById('booking-days-error').classList.remove('visible');
-    if (!transport) { showErr('booking-transport-error', 'Please select a transport option.'); return; }
-    hideErr('booking-transport-error');
+  const btn = document.getElementById('booking-submit');
+
+  // ── Recurring path ────────────────────────────────────────────────────────
+  if (isRecurring) {
+    const recurringDays = Array.from(document.querySelectorAll('input[name="recurring-day"]:checked')).map(el => el.value);
+
+    if (!selectedPets.length) { showErr('booking-pet-error', 'Please select at least one pet.'); valid = false; } else hideErr('booking-pet-error');
+    if (!recurringDays.length) { showErr('booking-days-error', 'Please select at least one day.'); valid = false; } else hideErr('booking-days-error');
+    if (!transport) { showErr('booking-transport-error', 'Please select a transport option.'); valid = false; } else hideErr('booking-transport-error');
+    if (!valid) return;
 
     btn.disabled = true; btn.classList.add('loading');
     document.getElementById('booking-form-error').classList.remove('visible');
@@ -1157,8 +1156,8 @@ window.submitBooking = async function () {
         body: JSON.stringify({
           token: clientToken, clientId: clientData.clientId,
           petIds: selectedPets,
-          serviceType: recurringService,
-          halfDayPreference: recurringService === 'half-daycare' ? recurringHalfPref : undefined,
+          serviceType: service,
+          halfDayPreference: isHalfDaycare ? halfDayPref : undefined,
           days: recurringDays,
           transport, notes,
         }),
@@ -1166,11 +1165,16 @@ window.submitBooking = async function () {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Server error');
 
+      const petNames = selectedPets.map(id => clientData.pets.find(p => p.id === id)?.name || id);
+      const svcLabel = isHalfDaycare ? 'Half-Daycare' : 'Daycare';
+
       document.getElementById('booking-success-msg').textContent =
-        'Your recurring service request has been received. We\'ll confirm your schedule within 24 hours.';
+        'Your recurring ' + svcLabel.toLowerCase() + ' request has been received. We\'ll confirm your schedule within 24 hours.';
       document.getElementById('booking-summary').innerHTML =
-        '<strong>🔄 Recurring ' + (recurringService === 'half-daycare' ? 'Half-Daycare' : 'Daycare') + '</strong><br>' +
+        '<strong>🔄 Recurring ' + svcLabel + '</strong><br>' +
+        '<strong>' + petNames.join(', ') + '</strong><br>' +
         '📅 Every ' + recurringDays.join(', ') + '<br>' +
+        (isHalfDaycare ? '🌓 ' + (halfDayPref === 'PM' ? 'Afternoon' : 'Morning') + ' preference<br>' : '') +
         '🚗 Transport: ' + transport + '<br><br>' +
         '<span style="font-size:0.78rem;color:var(--brand-stone);">Weekly · We\'ll activate your schedule once confirmed.</span>';
 
@@ -1181,11 +1185,16 @@ window.submitBooking = async function () {
       document.getElementById('booking-form-error').classList.add('visible');
       btn.disabled = false; btn.classList.remove('loading');
     }
-    return; // stop here — don't run single booking path
+    return;
   }
 
-  const showErr = (id, msg) => { const el = document.getElementById(id); if (el) { el.textContent = msg; el.classList.add('visible'); } valid = false; };
-  const hideErr = id => document.getElementById(id)?.classList.remove('visible');
+  // ── One-time path ─────────────────────────────────────────────────────────
+  const startDate = isSingleDay
+    ? document.getElementById('booking-single-date').value
+    : document.getElementById('booking-start-date').value;
+  const startTime = document.getElementById('booking-start-time').value;
+  const endDate   = document.getElementById('booking-end-date').value;
+  const endTime   = document.getElementById('booking-end-time').value;
 
   if (!selectedPets.length) showErr('booking-pet-error', 'Please select at least one pet.'); else hideErr('booking-pet-error');
   if (!startDate) showErr(isSingleDay ? 'booking-single-date-error' : 'booking-start-date-error', 'Please select a date.'); else { hideErr('booking-start-date-error'); hideErr('booking-single-date-error'); }
@@ -1196,7 +1205,6 @@ window.submitBooking = async function () {
   if (!isSingleDay && startDate && endDate && endDate < startDate) showErr('booking-end-date-error', 'End date must be after start date.');
   if (!valid) return;
 
-  const btn = document.getElementById('booking-submit');
   btn.disabled = true; btn.classList.add('loading');
   document.getElementById('booking-form-error').classList.remove('visible');
 
@@ -1205,23 +1213,17 @@ window.submitBooking = async function () {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         token: clientToken, clientId: clientData.clientId,
-        petIds: selectedPets, serviceType,
+        petIds: selectedPets, serviceType: service,
         halfDayPreference: isHalfDaycare ? halfDayPref : undefined,
-        startDate, startTime, endDate, endTime,
-        transport, notes, waitlist: isWaitlist,
+        startDate, startTime, endDate, endTime, transport, notes,
       }),
     });
 
     const bookingData = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(bookingData.error || ('HTTP ' + res.status));
 
-    const autoWaitlisted = bookingData.autoWaitlist;
-    const wasWaitlisted  = bookingData.waitlisted;
-
-    // Build summary
-    const selectedPetNames = Array.from(document.querySelectorAll('input[name="booking-pet"]:checked'))
-      .map(el => { const pet = clientData.pets.find(p => p.id === el.value); return pet ? pet.name : el.value; });
-    lastBooking = { startDate, startTime, endDate, endTime, transport, pets: selectedPetNames };
+    const petNames = selectedPets.map(id => clientData.pets.find(p => p.id === id)?.name || id);
+    lastBooking    = { startDate, startTime, endDate, endTime, transport, pets: petNames };
 
     const summary = document.getElementById('booking-summary');
     if (summary) {
@@ -1229,13 +1231,14 @@ window.submitBooking = async function () {
       let estimateLines = [], estimateTotal = 0;
 
       if (isSingleDay) {
-        const rate    = clientData.daycarePrice || 65;
+        const rate    = isHalfDaycare ? (clientData.halfDaycarePrice || 40) : (clientData.daycarePrice || 65);
         const session = rate * numPets;
         estimateTotal += session;
-        const label = isHalfDaycare
-          ? `🌤️ Half-Daycare (${halfDayPref} preference): $${rate}/session`
-          : numPets > 1 ? `☀️ Daycare: $${rate} x ${numPets} dogs = $${session}` : `☀️ Daycare: $${rate}/session`;
-        estimateLines.push(label);
+        estimateLines.push(
+          isHalfDaycare
+            ? `🌤️ Half-Daycare (${halfDayPref === 'PM' ? 'Afternoon' : 'Morning'}): $${rate}/session`
+            : numPets > 1 ? `☀️ Daycare: $${rate} x ${numPets} dogs = $${session}` : `☀️ Daycare: $${rate}/session`
+        );
       } else {
         const rate   = clientData.boardingPrice || 85;
         const nights = Math.max(1, Math.round((new Date(endDate) - new Date(startDate)) / 86400000));
@@ -1249,6 +1252,7 @@ window.submitBooking = async function () {
           estimateLines.push(`🏡 Dog 2: $${dog2Rate} x ${nights} night${nights > 1 ? 's' : ''} = $${dog2Total}`);
         }
       }
+
       if (transport && transport !== 'None') {
         const tripMulti = transport === 'Round Trip' ? 2 : 1;
         const dog1Fee   = 5 * tripMulti;
@@ -1259,39 +1263,29 @@ window.submitBooking = async function () {
         estimateLines.push(tLine);
       }
 
-      const pricingNote = wasWaitlisted
-        ? (isHalfDaycare
-            ? 'Your half-daycare session is pending pairing. Pricing confirmed on confirmation.'
-            : autoWaitlisted
-              ? `Auto-waitlisted — more than ${isSingleDay ? '2' : '6'} months out. Pricing confirmed closer to the date.`
-              : 'On the waitlist. Pricing confirmed when a spot opens.')
-        : [...estimateLines, '', `Est. Total: ~$${estimateTotal}`, '*Peak season or multi-week discounts may apply. Final price confirmed within 24hrs.'].join('\n');
-
+      const pricingNote = [...estimateLines, '', `Est. Total: ~$${estimateTotal}`, '*Peak season or multi-week discounts may apply. Final price confirmed within 24hrs.'].join('\n');
       const serviceEmoji = isHalfDaycare ? '🌤️' : isDaycare ? '☀️' : '🐾';
       const serviceLabel = isHalfDaycare ? 'Half-Daycare' : isDaycare ? 'Daycare' : 'Boarding';
-      const dateLines = isSingleDay
+      const dateLines    = isSingleDay
         ? '📅 Date: ' + fmtDate(startDate) + '<br>'
         : '📅 Start: ' + fmtDate(startDate) + (startTime ? ' · ' + startTime : '') + '<br>' +
           '📅 End: '   + fmtDate(endDate)   + (endTime   ? ' · ' + endTime   : '') + '<br>';
 
       summary.innerHTML =
-        '<strong>' + serviceEmoji + ' ' + (lastBooking.pets.join(', ') || 'Your pet') + '</strong><br>' +
-        '<strong>' + serviceLabel + (wasWaitlisted ? ' · Waitlisted' : '') + '</strong><br>' +
+        '<strong>' + serviceEmoji + ' ' + petNames.join(', ') + '</strong><br>' +
+        '<strong>' + serviceLabel + '</strong><br>' +
         dateLines + '🚗 Transport: ' + transport + '<br><br>' +
         '<pre style="font-family:var(--font-body);font-size:0.78rem;color:var(--brand-bark);white-space:pre-wrap;margin:0;">' + pricingNote + '</pre>';
     }
 
     fetch(WORKER_URL + '/client?token=' + encodeURIComponent(clientToken)).then(r => r.ok ? r.json() : null).then(d => { if (d) clientData = d; }).catch(() => {});
 
-    document.getElementById('booking-success-msg').textContent = isHalfDaycare
-      ? "Your half-daycare request is on the waitlist. We'll confirm once we pair your session with the other half of the day."
-      : autoWaitlisted
-        ? `Your request has been waitlisted — it's more than ${isSingleDay ? '2' : '6'} months out. We'll confirm closer to the date.`
-        : isWaitlist
-          ? "You're on the waitlist! We'll reach out as soon as a spot opens up."
-          : isDaycare
-            ? 'Your daycare request has been received. We will confirm within 24 hours via text or email.'
-            : 'Your boarding request has been received. We will confirm your dates within 24 hours via text or email.';
+    document.getElementById('booking-success-msg').textContent =
+      isHalfDaycare
+        ? 'Your half-daycare request is on the waitlist. We\'ll confirm once we pair your session with the other half of the day.'
+        : isDaycare
+          ? 'Your daycare request has been received. We will confirm within 24 hours via text or email.'
+          : 'Your boarding request has been received. We will confirm your dates within 24 hours via text or email.';
 
     showView('view-booking-success');
   } catch (err) {
@@ -1301,40 +1295,32 @@ window.submitBooking = async function () {
   }
 };
 
-window.bookAnother = function () {
-  // Reset pets
-  document.querySelectorAll('input[name="booking-pet"]').forEach(el => { el.checked = clientData.pets?.length === 1; });
+window.bookAnother = function() {
   // Reset service to boarding
   document.querySelectorAll('input[name="booking-service"]').forEach(el => { el.checked = el.value === 'boarding'; });
+  // Reset frequency to one-time
+  document.querySelectorAll('input[name="booking-frequency"]').forEach(el => { el.checked = el.value === 'one-time'; });
+  // Reset pets
+  document.querySelectorAll('input[name="booking-pet"]').forEach(el => { el.checked = clientData.pets?.length === 1; });
   // Reset dates/times
-  document.getElementById('booking-start-date').value  = '';
-  document.getElementById('booking-start-time').value  = '';
-  document.getElementById('booking-end-date').value    = '';
-  document.getElementById('booking-end-time').value    = '';
-  document.getElementById('booking-single-date').value = '';
+  ['booking-start-date', 'booking-start-time', 'booking-end-date', 'booking-end-time', 'booking-single-date'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
   // Reset half-day pref
   document.querySelectorAll('input[name="halfday-pref"]').forEach(el => { el.checked = el.value === 'AM'; });
-  // Reset recurring options
+  // Reset recurring days
   document.querySelectorAll('input[name="recurring-day"]').forEach(el => el.checked = false);
-  document.getElementById('booking-recurring-row').style.display = 'none';
   // Reset transport
   document.querySelectorAll('input[name="booking-transport"]').forEach(el => el.checked = false);
-  // Reset notes + waitlist
+  // Reset notes
   document.getElementById('booking-notes').value = '';
-  const waitlistCb = document.getElementById('booking-waitlist');
-  if (waitlistCb) waitlistCb.checked = false;
-  // Reset visibility to boarding defaults
-  document.getElementById('booking-start-row').style.display     = '';
-  document.getElementById('booking-pickup-row').style.display    = '';
-  document.getElementById('booking-date-only-row').style.display = 'none';
-  document.getElementById('booking-halfday-pref').style.display  = 'none';
-  document.getElementById('booking-waitlist-row').style.display  = 'block';
-  document.getElementById('booking-title').innerHTML             = 'Book a <em>Boarding Stay</em>';
-  document.getElementById('booking-btn-text').textContent        = 'Request Boarding Stay';
   // Reset errors
   document.getElementById('booking-form-error').classList.remove('visible');
+  // Reset button
   const btn = document.getElementById('booking-submit');
   btn.disabled = false; btn.classList.remove('loading');
+  // Reset layout
+  updateBookingFormLayout();
   showView('view-booking');
 };
 

@@ -109,7 +109,13 @@
       <div id="dash-recurring-cards" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
       <div class="divider"></div>
     </div>
-
+    <div id="dash-recurring" style="display:none;margin-bottom:0.5rem;">
+      <div class="section-header" style="margin-top:1.25rem;">
+        <div class="section-title">Recurring Services</div>
+      </div>
+      <div id="dash-recurring-cards" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
+      <div class="divider"></div>
+    </div>
     <div class="section-header" style="margin-top:1.25rem;">
       <div class="section-title">Your Pets</div>
     </div>
@@ -370,7 +376,6 @@
 </div><!-- end .card -->
 
 <div class="card" id="booking-card" style="display:none;">
-  <!-- ══ STEP: BOOK BOARDING ══ -->
   <div id="view-booking">
     <div class="step-header">
       <button class="step-back" onclick="goHome()">← Back</button>
@@ -378,6 +383,7 @@
       <p class="step-desc">Fill out the details below. We will confirm your dates within 24 hours.</p>
     </div>
 
+    <!-- Service selector -->
     <div class="form-group">
       <label>Service <span class="req">*</span></label>
       <div class="doc-pills" id="booking-service-pills">
@@ -387,11 +393,23 @@
         <label for="bs-daycare">☀️ Daycare</label>
         <input type="radio" name="booking-service" class="doc-pill-input" id="bs-halfdaycare" value="half-daycare"/>
         <label for="bs-halfdaycare">🌤️ Half-Day</label>
-        <input type="radio" name="booking-service" class="doc-pill-input" id="bs-recurring" value="recurring"/>
-        <label for="bs-recurring">🔄 Recurring</label>
       </div>
     </div>
 
+    <!-- Frequency toggle — only shown for Daycare / Half-Day -->
+    <div id="booking-frequency-row" style="display:none;">
+      <div class="form-group">
+        <label>Frequency <span class="req">*</span></label>
+        <div class="doc-pills">
+          <input type="radio" name="booking-frequency" class="doc-pill-input" id="bf-onetime" value="one-time" checked/>
+          <label for="bf-onetime">One-time</label>
+          <input type="radio" name="booking-frequency" class="doc-pill-input" id="bf-recurring" value="recurring"/>
+          <label for="bf-recurring">🔄 Weekly Recurring</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pet selector -->
     <div class="form-group">
       <label>Which pet(s)? <span class="req">*</span></label>
       <div class="pet-pills" id="booking-pet-pills"></div>
@@ -419,7 +437,7 @@
       </div>
     </div>
 
-    <!-- Daycare / Half-Daycare: date only -->
+    <!-- Daycare / Half-Day one-time: date only -->
     <div id="booking-date-only-row" style="display:none;">
       <div class="form-group">
         <label>Date <span class="req">*</span></label>
@@ -428,7 +446,7 @@
       </div>
     </div>
 
-    <!-- Half-Daycare: AM/PM preference -->
+    <!-- Half-Day preference (one-time or recurring) -->
     <div id="booking-halfday-pref" style="display:none;">
       <div class="form-group">
         <label>Preference <span class="req">*</span></label>
@@ -438,24 +456,14 @@
           <input type="radio" name="halfday-pref" class="doc-pill-input" id="hd-pm" value="PM"/>
           <label for="hd-pm">🌇 Afternoon</label>
         </div>
-        
       </div>
     </div>
 
     <!-- Recurring: day picker -->
-    <div id="booking-recurring-row" style="display:none;">
-      <div class="form-group">
-        <label>Service Type <span class="req">*</span></label>
-        <div class="doc-pills">
-          <input type="radio" name="recurring-service" class="doc-pill-input" id="rs-daycare" value="daycare" checked/>
-          <label for="rs-daycare">☀️ Daycare</label>
-          <input type="radio" name="recurring-service" class="doc-pill-input" id="rs-halfdaycare" value="half-daycare"/>
-          <label for="rs-halfdaycare">🌤️ Half-Day</label>
-        </div>
-      </div>
+    <div id="booking-recurring-days" style="display:none;">
       <div class="form-group">
         <label>Days of the Week <span class="req">*</span></label>
-        <div class="doc-pills" id="recurring-days-pills">
+        <div class="doc-pills">
           <input type="checkbox" name="recurring-day" class="doc-pill-input" id="rd-mon" value="Monday"/>
           <label for="rd-mon">Mon</label>
           <input type="checkbox" name="recurring-day" class="doc-pill-input" id="rd-tue" value="Tuesday"/>
@@ -468,19 +476,8 @@
           <label for="rd-fri">Fri</label>
         </div>
         <div class="field-error" id="booking-days-error">Please select at least one day.</div>
+        <div class="info-box" style="margin-top:0.5rem;">Weekly recurring. We'll confirm and activate your schedule within 24 hours.</div>
       </div>
-      <div id="booking-recurring-halfday-pref" style="display:none;">
-        <div class="form-group">
-          <label>Preference <span class="req">*</span></label>
-          <div class="doc-pills">
-            <input type="radio" name="recurring-halfday-pref" class="doc-pill-input" id="rh-am" value="AM" checked/>
-            <label for="rh-am">🌅 Morning</label>
-            <input type="radio" name="recurring-halfday-pref" class="doc-pill-input" id="rh-pm" value="PM"/>
-            <label for="rh-pm">🌇 Afternoon</label>
-          </div>
-        </div>
-      </div>
-      <div class="info-box">Weekly recurring service. We'll confirm and activate your schedule within 24 hours.</div>
     </div>
 
     <!-- Boarding: end date + time -->
@@ -504,6 +501,7 @@
       </div>
     </div>
 
+    <!-- Transport -->
     <div class="form-group">
       <label>Transport <span class="req">*</span></label>
       <div class="doc-pills" id="booking-transport-pills">
@@ -519,16 +517,10 @@
       <div class="field-error" id="booking-transport-error">Please select a transport option.</div>
     </div>
 
+    <!-- Notes -->
     <div class="form-group">
       <label>Notes <span class="opt">(optional)</span></label>
       <textarea id="booking-notes" placeholder="Anything we should know — feeding schedule, medications, special instructions..."></textarea>
-    </div>
-
-    <div id="booking-waitlist-row" class="form-group" style="margin-bottom:0.75rem;">
-      <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;font-weight:400;cursor:pointer;color:var(--brand-bark);">
-        <input type="checkbox" id="booking-waitlist" style="width:16px;height:16px;accent-color:var(--brand-primary);">
-        Join the waitlist — notify me if a spot opens up
-      </label>
     </div>
 
     <div class="info-box" id="booking-price-info" style="margin-bottom:0;">Boarding is $85/night. Pricing is confirmed when we review your request.</div>
