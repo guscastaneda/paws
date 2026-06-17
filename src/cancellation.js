@@ -1,9 +1,37 @@
 import { errRes, jsonRes, atFetch } from "./helpers.js";
 import { APPOINTMENTS_TABLE, CLIENTS_TABLE, PETS_TABLE } from "./constants.js";
 
+async function sendEmail(env, { to, replyTo, subject, html }) {
+  if (!env.RESEND_API_KEY) return;
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from: "Paws on Longmeadow <bookings@pawsonlongmeadow.com>", to, reply_to: replyTo, subject, html }),
+  }).catch(e => console.error("Email error:", e));
+}
+
+function emailWrapper(body) {
+  return `<div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;padding:2rem;color:#2c1f14;background:#fdfcfb;">
+    <div style="text-align:center;margin-bottom:2rem;">
+      <div style="font-size:1.5rem;letter-spacing:0.15em;font-weight:600;color:#2D5A27;text-transform:uppercase;">Paws on Longmeadow</div>
+      <div style="font-size:0.8rem;color:#7a6a5a;margin-top:0.25rem;">Sharon, Massachusetts</div>
+    </div>
+    ${body}
+    <div style="border-top:1px solid #e8e0d8;margin-top:2.5rem;padding-top:1rem;text-align:center;font-size:0.8rem;color:#7a6a5a;">
+      © Paws on Longmeadow · Sharon, MA · <a href="https://client.pawsonlongmeadow.com" style="color:#2D5A27;">Client Portal</a>
+    </div>
+  </div>`;
+}
+
+function summaryTable(rows) {
+  return `<div style="background:#f5f0eb;border-radius:12px;padding:1.25rem 1.5rem;margin:1.25rem 0;">
+    <table style="width:100%;font-size:0.88rem;line-height:1.9;border-collapse:collapse;">
+      ${rows.map(([label, value]) => `<tr><td style="color:#7a6a5a;width:130px;vertical-align:top;">${label}</td><td style="font-weight:500;color:#2c1f14;">${value}</td></tr>`).join('')}
+    </table>
+  </div>`;
+}
+
 // ── POST /cancellation ────────────────────────────────────────────────────────
-// Client requests cancellation of an appointment.
-// Updates appointment status to "Cancellation Requested" and sends email.
 export async function handlePostCancellation(req, env) {
   let body;
   try { body = await req.json(); } catch { return errRes("Invalid JSON"); }
@@ -11,7 +39,6 @@ export async function handlePostCancellation(req, env) {
   const { token, clientId, appointmentId, serviceType, startDate, reason } = body;
   if (!token || !clientId || !appointmentId) return errRes("Missing required fields");
 
-  // Verify the appointment belongs to this client
   const apptRes = await atFetch(env, `/${APPOINTMENTS_TABLE}/${appointmentId}`);
   if (!apptRes.ok) return errRes("Appointment not found", 404);
 
@@ -19,12 +46,10 @@ export async function handlePostCancellation(req, env) {
   const af     = appt.fields || {};
   const status = typeof af["Status"] === "object" ? af["Status"].name : af["Status"] || "";
 
-  // Don't allow cancellation of already-cancelled or completed appointments
   if (status === "Cancelled" || status === "Cancellation Requested") {
     return errRes("Appointment is already cancelled or cancellation is pending", 400);
   }
 
-  // Update appointment status
   const patchRes = await atFetch(env, `/${APPOINTMENTS_TABLE}/${appointmentId}`, {
     method: "PATCH",
     body: JSON.stringify({
@@ -41,59 +66,48 @@ export async function handlePostCancellation(req, env) {
     return errRes("Failed to update appointment: " + JSON.stringify(err), 502);
   }
 
-  // Fetch client name for email
-  let clientName = clientId;
+  let clientName  = clientId;
+  let clientEmail = '';
   try {
-    const clientRes = await atFetch(env, `/${CLIENTS_TABLE}/${clientId}`);
-    if (clientRes.ok) {
-      const clientData = await clientRes.json();
-      clientName = clientData.fields["Client Name"] || clientId;
-    }
+    const cr = await atFetch(env, `/${CLIENTS_TABLE}/${clientId}`);
+    if (cr.ok) { const cd = await cr.json(); clientName = cd.fields["Client Name"] || clientId; clientEmail = cd.fields["Email Address"] || ''; }
   } catch {}
 
-  // Send notification email
-  if (env.RESEND_API_KEY) {
-    const fmt = d => {
-      if (!d) return "Unknown";
-      return new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    };
+  const fmtDate = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' }) : 'Unknown';
+  const serviceLabel = serviceType === 'DC' ? '☀️ Daycare' : serviceType === 'HD' ? '🌤️ Half-Daycare' : '🏡 Boarding';
+  const dateLabel    = af["Start Date"] ? fmtDate(af["Start Date"]) + (af["End Date"] && af["End Date"] !== af["Start Date"] ? ' → ' + fmtDate(af["End Date"]) : '') : 'Unknown';
 
-    const serviceLabel = serviceType === "DC" ? "☀️ Daycare" : "🏡 Boarding";
-    const dateLabel    = af["Start Date"] ? fmt(af["Start Date"]) + (af["End Date"] && af["End Date"] !== af["Start Date"] ? " → " + fmt(af["End Date"]) : "") : "Unknown dates";
+  const policy = serviceType === 'DC' || serviceType === 'HD'
+    ? 'Cancellations received less than 24 hours in advance are charged 50% of the session rate. No-shows are charged the full rate.'
+    : 'Cancellations received less than 48 hours before the start date are charged one night\'s boarding rate. No-shows are charged the full reservation amount.';
 
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${env.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from:    "Paws on Longmeadow Bookings <bookings@pawsonlongmeadow.com>",
-        to:      ["hello@pawsonlongmeadow.com"],
-        subject: `Cancellation Request — ${clientName}`,
-        html: `
-          <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;padding:2rem;color:#2c1f14;">
-            <div style="text-align:center;margin-bottom:2rem;">
-              <div style="font-size:2rem;">🚫</div>
-              <div style="font-size:1.4rem;font-weight:600;color:#c0392b;letter-spacing:0.1em;text-transform:uppercase;">Cancellation Request</div>
-              <div style="font-size:0.85rem;color:#7a6a5a;margin-top:0.25rem;">Paws on Longmeadow</div>
-            </div>
-            <div style="background:#f5f0eb;border-radius:12px;padding:1.5rem;margin:1.5rem 0;">
-              <div style="font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#7a6a5a;margin-bottom:1rem;">Request Details</div>
-              <table style="width:100%;font-size:0.9rem;line-height:1.8;">
-                <tr><td style="color:#7a6a5a;width:120px;">Client</td><td style="font-weight:500;">${clientName}</td></tr>
-                <tr><td style="color:#7a6a5a;">Service</td><td style="font-weight:500;">${serviceLabel}</td></tr>
-                <tr><td style="color:#7a6a5a;">Dates</td><td style="font-weight:500;">${dateLabel}</td></tr>
-                ${reason ? `<tr><td style="color:#7a6a5a;">Reason</td><td style="font-weight:500;">${reason}</td></tr>` : ""}
-              </table>
-            </div>
-            <p style="font-size:0.9rem;color:#7a6a5a;">The appointment status has been updated to "Cancellation Requested" in Airtable. Please review and confirm the cancellation.</p>
-            <div style="border-top:1px solid #e8e0d8;margin-top:2rem;padding-top:1rem;text-align:center;font-size:0.8rem;color:#7a6a5a;">
-              © Paws on Longmeadow · Sharon, MA
-            </div>
-          </div>
-        `,
-      }),
+  // Owner notification
+  await sendEmail(env, {
+    to: ['hello@pawsonlongmeadow.com'],
+    subject: `Cancellation Request — ${clientName}`,
+    html: emailWrapper(`
+      <h2 style="font-size:1.3rem;font-weight:600;color:#c0392b;margin-bottom:0.25rem;">Cancellation Request</h2>
+      <p style="color:#7a6a5a;font-size:0.88rem;">From: ${clientName}${clientEmail ? ' · ' + clientEmail : ''}</p>
+      ${summaryTable([['Service', serviceLabel], ['Dates', dateLabel], ...(reason ? [['Reason', reason]] : [])])}
+      <p style="font-size:0.88rem;color:#7a6a5a;">Status updated to Cancellation Requested in Airtable. Review and confirm.</p>
+    `),
+  });
+
+  // Client confirmation
+  if (clientEmail) {
+    await sendEmail(env, {
+      to: [clientEmail],
+      replyTo: 'hello@pawsonlongmeadow.com',
+      subject: 'We received your cancellation request',
+      html: emailWrapper(`
+        <h2 style="font-size:1.3rem;font-weight:600;color:#c0392b;margin-bottom:0.25rem;">Cancellation request received</h2>
+        <p style="font-size:0.95rem;color:#2c1f14;line-height:1.7;">Hi ${clientName.split(' ')[0]}, we've received your cancellation request for the following appointment:</p>
+        ${summaryTable([['Service', serviceLabel], ['Dates', dateLabel]])}
+        <p style="font-size:0.95rem;color:#2c1f14;line-height:1.7;">We'll review and follow up shortly. As a reminder:</p>
+        <p style="font-size:0.88rem;color:#7a6a5a;font-style:italic;line-height:1.6;">${policy}</p>
+        ${reason ? `<p style="font-size:0.88rem;color:#7a6a5a;font-style:italic;">Your note: "${reason}"</p>` : ''}
+        <p style="font-size:0.95rem;color:#2c1f14;line-height:1.7;margin-top:1.5rem;">— Gus &amp; Marian<br><span style="color:#7a6a5a;">Paws on Longmeadow</span></p>
+      `),
     });
   }
 
