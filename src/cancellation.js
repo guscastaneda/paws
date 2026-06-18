@@ -98,6 +98,7 @@ export async function handlePostCancellation(req, env) {
   });
 
   // Client confirmation
+  // Client confirmation
   if (clientEmail) {
     await sendEmail(env, {
       to: [clientEmail],

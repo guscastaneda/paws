@@ -121,6 +121,7 @@ async function handlePostBooking(req, env) {
   // Fetch client + pet names
   let clientName  = clientId;
   let clientEmail = '';
+  let clientToken = '';
   let petNames    = petIds.join(", ");
 
   try {

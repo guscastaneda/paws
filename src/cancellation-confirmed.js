@@ -12,7 +12,10 @@ async function sendEmail(env, { to, replyTo, subject, html }) {
   }).catch(e => console.error("Email error:", e));
 }
 
-function emailWrapper(body) {
+function emailWrapper(body, clientToken) {
+  const portalUrl = clientToken
+    ? `https://client.pawsonlongmeadow.com/?client=${clientToken}`
+    : `https://client.pawsonlongmeadow.com`;
   return `<div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;padding:2rem;color:#2c1f14;background:#fdfcfb;">
     <div style="text-align:center;margin-bottom:2rem;">
       <div style="font-size:1.5rem;letter-spacing:0.15em;font-weight:600;color:#2D5A27;text-transform:uppercase;">Paws on Longmeadow</div>
@@ -20,7 +23,7 @@ function emailWrapper(body) {
     </div>
     ${body}
     <div style="border-top:1px solid #e8e0d8;margin-top:2.5rem;padding-top:1rem;text-align:center;font-size:0.8rem;color:#7a6a5a;">
-      © Paws on Longmeadow · Sharon, MA · <a href="https://client.pawsonlongmeadow.com" style="color:#2D5A27;">Client Portal</a>
+      © Paws on Longmeadow · Sharon, MA · <a href="${portalUrl}" style="color:#2D5A27;">Client Portal</a>
     </div>
   </div>`;
 }
@@ -79,14 +82,17 @@ async function processCancellationConfirmed(env, recordId) {
     const clientId    = (clientRefs[0] && (typeof clientRefs[0] === "object" ? clientRefs[0].id : clientRefs[0])) || null;
     if (!clientId) { console.log("processCancellationConfirmed: no client linked", recordId); return { success: false, error: "No client linked to appointment" }; }
 
-    let clientName  = clientId;
+  let clientName  = clientId;
     let clientEmail = '';
+    let clientToken = '';
+
     try {
       const cr = await atFetch(env, `/${CLIENTS_TABLE}/${clientId}`);
       if (cr.ok) {
         const cd = await cr.json();
         clientName  = cd.fields["Client Name"]   || clientId;
         clientEmail = cd.fields["Email Address"] || '';
+        clientToken = cd.fields["Client Token"]  || '';
       }
     } catch (e) { console.error("Failed to fetch client:", e); }
 
@@ -138,7 +144,7 @@ async function processCancellationConfirmed(env, recordId) {
           ${summaryTable(summaryRows)}
           <p style="font-size:0.95rem;color:#2c1f14;line-height:1.7;">${feeNote}</p>
           <p style="font-size:0.95rem;color:#2c1f14;line-height:1.7;margin-top:1.5rem;">— Gus &amp; Marian<br><span style="color:#7a6a5a;">Paws on Longmeadow</span></p>
-        `),
+        `, clientToken),
       });
     }
 
@@ -200,6 +206,7 @@ async function processRecurringArchived(env, recordId) {
     let clientId = null;
     let clientName  = '';
     let clientEmail = '';
+    let clientToken = '';
 
     try {
       for (const petId of petIds) {
@@ -219,6 +226,7 @@ async function processRecurringArchived(env, recordId) {
           const cd = await cr.json();
           clientName  = cd.fields["Client Name"]   || '';
           clientEmail = cd.fields["Email Address"] || '';
+          clientToken = cd.fields["Client Token"]  || '';
         }
       }
     } catch (e) { console.error("Failed to fetch pet/client info:", e); }
@@ -255,7 +263,7 @@ async function processRecurringArchived(env, recordId) {
           ${summaryTable(summaryRows)}
           <p style="font-size:0.95rem;color:#2c1f14;line-height:1.7;">Any individual appointments already scheduled remain on your calendar unless cancelled separately through the portal. We'd love to have you back anytime — just reach out or submit a new request through the portal.</p>
           <p style="font-size:0.95rem;color:#2c1f14;line-height:1.7;margin-top:1.5rem;">— Gus &amp; Marian<br><span style="color:#7a6a5a;">Paws on Longmeadow</span></p>
-        `),
+        `, clientToken),
       });
     }
 
