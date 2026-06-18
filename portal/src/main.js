@@ -493,6 +493,9 @@ function buildDashboard() {
   const apptSection = document.getElementById('dash-appointments');
   const apptCards   = document.getElementById('dash-appt-cards');
 
+  const APPT_VISIBLE_DEFAULT = 4;
+  const showAllAppts = window._showAllAppts === true;
+
   if (appts.length > 0) {
     apptSection.style.display = 'block';
 
@@ -504,7 +507,9 @@ function buildDashboard() {
 
     apptCards.innerHTML = '';
 
-    appts.forEach(appt => {
+    const visibleAppts = showAllAppts ? appts : appts.slice(0, APPT_VISIBLE_DEFAULT);
+
+    visibleAppts.forEach(appt => {
       const statusStyles = {
         'Confirmed':              { color: 'var(--brand-success)',  bg: 'var(--brand-success-light)' },
         'Requested':              { color: 'var(--brand-warning)',  bg: 'var(--brand-warning-light)' },
@@ -597,6 +602,19 @@ function buildDashboard() {
       card.addEventListener('click', () => toggleApptSummary(appt.id));
       apptCards.appendChild(card);
     });
+
+    if (appts.length > APPT_VISIBLE_DEFAULT) {
+      const toggleBtn = document.createElement('button');
+      toggleBtn.style.cssText = 'width:100%;padding:0.6rem;background:transparent;color:var(--brand-primary);border:1.5px dashed var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.8rem;font-weight:500;cursor:pointer;margin-top:0.25rem;';
+      toggleBtn.textContent = showAllAppts
+        ? 'Show fewer'
+        : `Show all (${appts.length})`;
+      toggleBtn.onclick = () => {
+        window._showAllAppts = !showAllAppts;
+        buildDashboard();
+      };
+      apptCards.appendChild(toggleBtn);
+    }
   } else {
     apptSection.style.display = 'none';
   }

@@ -188,7 +188,7 @@ async function handleGetClient(req, env) {
         };
       })
       .filter(a => {
-        const isActive = ["Requested", "Confirmed", "Waitlisted", "Cancellation Requested", "Cancelled"].includes(a.status);
+        const isActive = ["Requested", "Confirmed", "Waitlisted", "Cancellation Requested"].includes(a.status);
         const isFuture = !a.endDate || a.endDate >= today;
         return isActive && isFuture;
       })
