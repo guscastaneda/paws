@@ -31,7 +31,10 @@ async function sendEmail(env, { to, replyTo, subject, html }) {
   }).catch(e => console.error("Email error:", e));
 }
 
-function emailWrapper(body) {
+function emailWrapper(body, clientToken) {
+  const portalUrl = clientToken
+    ? `https://client.pawsonlongmeadow.com/?client=${clientToken}`
+    : `https://client.pawsonlongmeadow.com`;
   return `<div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;padding:2rem;color:#2c1f14;background:#fdfcfb;">
     <div style="text-align:center;margin-bottom:2rem;">
       <div style="font-size:1.5rem;letter-spacing:0.15em;font-weight:600;color:#2D5A27;text-transform:uppercase;">Paws on Longmeadow</div>
@@ -39,7 +42,7 @@ function emailWrapper(body) {
     </div>
     ${body}
     <div style="border-top:1px solid #e8e0d8;margin-top:2.5rem;padding-top:1rem;text-align:center;font-size:0.8rem;color:#7a6a5a;">
-      © Paws on Longmeadow · Sharon, MA · <a href="https://client.pawsonlongmeadow.com" style="color:#2D5A27;">Client Portal</a>
+      © Paws on Longmeadow · Sharon, MA · <a href="${portalUrl}" style="color:#2D5A27;">Client Portal</a>
     </div>
   </div>`;
 }
@@ -126,6 +129,7 @@ async function handlePostBooking(req, env) {
       const cd = await clientRes.json();
       clientName  = cd.fields["Client Name"]    || clientId;
       clientEmail = cd.fields["Email Address"]  || '';
+      clientToken = cd.fields["Client Token"]   || '';
     }
     const petNameList = [];
     for (const petId of petIds) {
@@ -177,7 +181,7 @@ async function handlePostBooking(req, env) {
   });
 
   // Client confirmation
-  if (clientEmail) {
+if (clientEmail) {
     await sendEmail(env, {
       to: [clientEmail],
       replyTo: 'hello@pawsonlongmeadow.com',
@@ -188,7 +192,7 @@ async function handlePostBooking(req, env) {
         ${summaryTable(summaryRows)}
         <p style="font-size:0.95rem;color:#2c1f14;line-height:1.7;">${statusNote}</p>
         <p style="font-size:0.95rem;color:#2c1f14;line-height:1.7;margin-top:1.5rem;">— Gus &amp; Marian<br><span style="color:#7a6a5a;">Paws on Longmeadow</span></p>
-      `),
+      `, clientToken),
     });
   }
 

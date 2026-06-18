@@ -531,11 +531,17 @@
 
     .agreement-box h4 {
       font-family: var(--font-display);
-      font-size: 1rem;
+      font-size: 1.20rem;
       font-weight: 600;
       margin-bottom: 0.75rem;
       color: var(--brand-bark);
     }
+    .agreement-box h5 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--brand-bark);
+}
 
     .agreement-box p { margin-bottom: 0.75rem; }
     .agreement-box p:last-child { margin-bottom: 0; }
