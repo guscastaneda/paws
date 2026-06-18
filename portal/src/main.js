@@ -534,6 +534,12 @@ function buildDashboard() {
         pricingLine = '<div style="font-size:0.75rem;font-weight:300;color:var(--brand-stone);margin-top:0.2rem;">Pricing starts at $' + (clientData.boardingPrice || 85) + '/night — confirmation coming soon</div>';
       }
 
+      const feeLine = (appt.status === 'Cancelled' || appt.status === 'Cancellation Requested') && appt.cancellationFee !== null
+        ? (appt.cancellationFee > 0
+            ? '<div style="font-size:0.82rem;color:#c0392b;font-weight:500;margin-bottom:0.5rem;">Cancellation fee: $' + appt.cancellationFee.toFixed(2) + '</div>'
+            : '<div style="font-size:0.82rem;color:var(--brand-success);font-weight:500;margin-bottom:0.5rem;">Cancellation fee: None' + (appt.cancellationFeeReason === 'Grace Period' ? ' — cancelled within 4 hours of booking' : ' — cancelled with sufficient notice') + '</div>')
+        : '';
+
       const statusMessage =
         appt.status === 'Waitlisted'
           ? '<div style="font-size:0.82rem;color:#c07a2a;font-weight:500;margin-bottom:0.5rem;">📋 ' +
@@ -542,9 +548,9 @@ function buildDashboard() {
               : 'You\'re on the waitlist for these dates. We\'ll reach out as soon as a spot opens up.') +
             '</div>'
           : appt.status === 'Cancelled'
-            ? '<div style="font-size:0.82rem;color:var(--brand-stone);margin-bottom:0.5rem;">This appointment has been cancelled.' + (appt.clientMessage ? ' See pricing details below.' : '') + '</div>'
+            ? '<div style="font-size:0.82rem;color:var(--brand-stone);margin-bottom:0.5rem;">This appointment has been cancelled.' + (appt.clientMessage ? ' See pricing details below.' : '') + '</div>' + feeLine
             : appt.status === 'Cancellation Requested'
-              ? '<div style="font-size:0.82rem;color:#c0392b;margin-bottom:0.5rem;">Your cancellation request is being reviewed. We\'ll follow up shortly.</div>'
+              ? '<div style="font-size:0.82rem;color:#c0392b;margin-bottom:0.5rem;">Your cancellation request is being reviewed. We\'ll follow up shortly.</div>' + feeLine
               : '';
 
       const canCancel = ['Requested', 'Confirmed', 'Waitlisted'].includes(appt.status);

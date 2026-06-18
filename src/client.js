@@ -173,15 +173,18 @@ async function handleGetClient(req, env) {
         const af     = a.fields || {};
         const status = af["Status"] || {};
         const cat    = af["Service Category"] || {};
+        const fee    = typeof af["Cancellation Fee"] === "number" ? af["Cancellation Fee"] : null;
         return {
-          id:            a.id,
-          startDate:     af["Start Date"]  || "",
-          endDate:       af["End Date"]    || "",
-          startTime:     (typeof af["Start Time"] === "object" ? af["Start Time"].name : af["Start Time"]) || "",
-          endTime:       (typeof af["End Time"]   === "object" ? af["End Time"].name   : af["End Time"])   || "",
-          status:        (typeof status === "object" ? status.name : status) || "",
-          category:      (typeof cat    === "object" ? cat.name    : cat)    || "",
-          clientMessage: af["Client Message"] || "",
+          id:                    a.id,
+          startDate:              af["Start Date"]  || "",
+          endDate:                af["End Date"]    || "",
+          startTime:              (typeof af["Start Time"] === "object" ? af["Start Time"].name : af["Start Time"]) || "",
+          endTime:                (typeof af["End Time"]   === "object" ? af["End Time"].name   : af["End Time"])   || "",
+          status:                 (typeof status === "object" ? status.name : status) || "",
+          category:               (typeof cat    === "object" ? cat.name    : cat)    || "",
+          clientMessage:          af["Client Message"] || "",
+          cancellationFee:        fee,
+          cancellationFeeReason:  af["Cancellation Fee Reason"] || "",
         };
       })
       .filter(a => {
