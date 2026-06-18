@@ -105,22 +105,31 @@ async function processCancellationConfirmed(env, recordId) {
       ? fmtDate(af["Start Date"]) + (af["End Date"] && af["End Date"] !== af["Start Date"] ? ' → ' + fmtDate(af["End Date"]) : '')
       : '';
 
-    const fee = typeof af["Cancellation Fee"] === "number" ? af["Cancellation Fee"] : null;
+    const fee       = typeof af["Cancellation Fee"] === "number" ? af["Cancellation Fee"] : null;
+    const feeReason  = af["Cancellation Fee Reason"] || "";
+
+    const zeroFeeLabel = feeReason === "Grace Period"
+      ? "None — cancelled within 4 hours of booking"
+      : "None — cancelled with sufficient notice";
+
     const feeRows = fee !== null
       ? (fee > 0
           ? [['Cancellation fee', `$${fee.toFixed(2)}`]]
-          : [['Cancellation fee', 'None — cancelled with sufficient notice']])
+          : [['Cancellation fee', zeroFeeLabel]])
       : [];
 
     const summaryRows = [
       ['Service', serviceLabel],
       ['Date(s)', dateLabel],
       ...feeRows,
+      ...(feeReason ? [['Fee reason', feeReason]] : []),
     ];
 
     const feeNote = fee !== null && fee > 0
       ? `A cancellation fee of $${fee.toFixed(2)} applies per our cancellation policy, based on the notice given. We'll include this on your next invoice.`
-      : 'No cancellation fee applies — thank you for the advance notice.';
+      : feeReason === "Grace Period"
+        ? "No cancellation fee applies — you cancelled within 4 hours of booking, so it's on us."
+        : "No cancellation fee applies — thank you for the advance notice.";
 
     await sendEmail(env, {
       to: ['hello@pawsonlongmeadow.com'],
