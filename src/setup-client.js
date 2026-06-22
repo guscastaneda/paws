@@ -15,46 +15,28 @@ function toBase64(str) {
   return btoa(binary);
 }
 
-export async function handleSetupClient(request, env) {
-  const secret = request.headers.get('X-Webhook-Secret');
-  if (!secret || secret !== env.WEBHOOK_SECRET) {
-    return errRes('Unauthorized', 401);
-  }
-
-  let body;
-  try { body = await request.json(); } catch { return errRes('Invalid JSON', 400); }
-
-  const recordId = body.recordId;
-  if (!recordId) return errRes('Missing recordId', 400);
-
+// Core logic, callable directly (no HTTP) by both the route handler and backfill-qr.js
+export async function setupClientCore(env, recordId) {
   const token = generateToken();
   const magicLink = `https://client.pawsonlongmeadow.com?client=${token}`;
 
-  // Use the library's low-level matrix output (no canvas/Buffer dependency),
-  // then draw the SVG ourselves — safe in the Workers runtime.
-  let qrSvg;
-  try {
-    const qrData = QRCode.create(magicLink, { errorCorrectionLevel: 'M' });
-    const modules = qrData.modules;
-    const size = modules.size;
-    const moduleSize = 10;
-    const quiet = 4;
-    const total = (size + quiet * 2) * moduleSize;
+  const qrData = QRCode.create(magicLink, { errorCorrectionLevel: 'M' });
+  const modules = qrData.modules;
+  const size = modules.size;
+  const moduleSize = 10;
+  const quiet = 4;
+  const total = (size + quiet * 2) * moduleSize;
 
-    const rects = [];
-    for (let row = 0; row < size; row++) {
-      for (let col = 0; col < size; col++) {
-        if (modules.get(row, col)) {
-          rects.push(`<rect x="${(col + quiet) * moduleSize}" y="${(row + quiet) * moduleSize}" width="${moduleSize}" height="${moduleSize}"/>`);
-        }
+  const rects = [];
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      if (modules.get(row, col)) {
+        rects.push(`<rect x="${(col + quiet) * moduleSize}" y="${(row + quiet) * moduleSize}" width="${moduleSize}" height="${moduleSize}"/>`);
       }
     }
-
-    qrSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" width="${total}" height="${total}"><rect width="${total}" height="${total}" fill="white"/><g fill="black">${rects.join('')}</g></svg>`;
-  } catch (e) {
-    return errRes(`QR generation failed: ${e.message || String(e)}`, 500);
   }
 
+  const qrSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" width="${total}" height="${total}"><rect width="${total}" height="${total}" fill="white"/><g fill="black">${rects.join('')}</g></svg>`;
   const qrBase64 = toBase64(qrSvg);
 
   const tokenRes = await atFetch(env, `/${CLIENTS_TABLE}/${recordId}`, {
@@ -63,7 +45,7 @@ export async function handleSetupClient(request, env) {
   });
   if (!tokenRes.ok) {
     const err = await tokenRes.text();
-    return errRes(`Failed to write token: ${err}`, 500);
+    throw new Error(`Failed to write token: ${err}`);
   }
 
   const uploadRes = await fetch(
@@ -84,8 +66,29 @@ export async function handleSetupClient(request, env) {
 
   if (!uploadRes.ok) {
     const err = await uploadRes.text();
-    return errRes(`Token written but QR upload failed: ${err}`, 500);
+    throw new Error(`Token written but QR upload failed: ${err}`);
   }
 
-  return jsonRes({ ok: true, token, recordId });
+  return { token, recordId };
+}
+
+// HTTP handler — used by the real Airtable webhook
+export async function handleSetupClient(request, env) {
+  const secret = request.headers.get('X-Webhook-Secret');
+  if (!secret || secret !== env.WEBHOOK_SECRET) {
+    return errRes('Unauthorized', 401);
+  }
+
+  let body;
+  try { body = await request.json(); } catch { return errRes('Invalid JSON', 400); }
+
+  const recordId = body.recordId;
+  if (!recordId) return errRes('Missing recordId', 400);
+
+  try {
+    const result = await setupClientCore(env, recordId);
+    return jsonRes({ ok: true, ...result });
+  } catch (e) {
+    return errRes(e.message || String(e), 500);
+  }
 }

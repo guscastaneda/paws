@@ -1,7 +1,8 @@
 import { errRes, jsonRes, atFetch } from "./helpers.js";
 import { CLIENTS_TABLE, FIELDS } from "./constants.js";
+import { setupClientCore } from "./setup-client.js";
 
-const BATCH_SIZE = 10; // small enough to stay well under Workers' subrequest limit per invocation
+const BATCH_SIZE = 10;
 
 export async function handlePostBackfillQr(req, env) {
   const secret = req.headers.get('X-Webhook-Secret');
@@ -13,7 +14,6 @@ export async function handlePostBackfillQr(req, env) {
   try { body = await req.json(); } catch {}
   const startOffset = body.startOffset || 0;
 
-  // Fetch all client IDs (paginated, only once per call — cheap)
   const allClientIds = [];
   let offset = null;
   do {
@@ -30,18 +30,10 @@ export async function handlePostBackfillQr(req, env) {
 
   for (const recordId of batch) {
     try {
-      const setupRes = await fetch(new URL('/setup-client', req.url), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Webhook-Secret': env.WEBHOOK_SECRET,
-        },
-        body: JSON.stringify({ recordId }),
-      });
-      const setupData = await setupRes.json().catch(() => ({}));
-      results.push({ recordId, ok: setupRes.ok, status: setupRes.status, detail: setupData });
+      const result = await setupClientCore(env, recordId);
+      results.push({ recordId, ok: true, token: result.token });
     } catch (e) {
-      results.push({ recordId, ok: false, error: String(e) });
+      results.push({ recordId, ok: false, error: e.message || String(e) });
     }
   }
 
