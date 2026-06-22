@@ -12,7 +12,6 @@ import { handlePostBooking }         from "./src/booking.js";
 import { handleGetAdminClients }     from "./src/admin.js";
 import { handlePostRecurringRequest, handlePostRecurringPause, handlePostRecurringCancel } from './src/recurring.js';
 import { handleSetupClient }         from './src/setup-client.js';
-import { handlePostBackfillQr }      from './src/backfill-qr.js';
 import { handlePostPet, handlePostVet, handlePostPetUpdate, handlePostPetBreed } from "./src/pet.js";
 import { handleGetBreeds }           from './src/breeds.js';
 
@@ -43,7 +42,6 @@ export default {
     if (path === '/pet-breed' && req.method === 'POST') return handlePostPetBreed(req, env);
     if (path === "/admin/clients" && method === "GET") return handleGetAdminClients(req, env);
     if (path === '/setup-client') return handleSetupClient(req, env);
-    if (path === '/admin/backfill-qr' && method === 'POST') return handlePostBackfillQr(req, env);
     if (path === '/breeds' && req.method === 'GET') return handleGetBreeds(req, env);
     return env.ASSETS.fetch(req);
   },
