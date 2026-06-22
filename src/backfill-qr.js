@@ -1,18 +1,12 @@
 import { errRes, jsonRes, atFetch } from "./helpers.js";
 import { CLIENTS_TABLE, FIELDS } from "./constants.js";
 
-// ── POST /admin/backfill-qr ───────────────────────────────────────────────────
-// TEMPORARY endpoint. Loops through all Client records and re-triggers the same
-// token + QR generation logic from setup-client.js for each one. Use this once
-// to backfill clients created while the QR upload was silently broken
-// (AIRTABLE_BASE_ID env var bug). Remove this route + file once backfill is done.
 export async function handlePostBackfillQr(req, env) {
   const secret = req.headers.get('X-Webhook-Secret');
   if (!secret || secret !== env.WEBHOOK_SECRET) {
     return errRes('Unauthorized', 401);
   }
 
-  // Fetch all client record IDs
   const allClientIds = [];
   let offset = null;
   do {
@@ -46,4 +40,9 @@ export async function handlePostBackfillQr(req, env) {
   const failed = results.filter(r => !r.ok);
 
   return jsonRes({
-    total:
+    total: allClientIds.length,
+    succeeded: succeeded,
+    failedCount: failed.length,
+    failed: failed,
+  });
+}
