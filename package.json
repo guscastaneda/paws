@@ -5,5 +5,8 @@
     "dev": "cd portal && npm run dev",
     "build": "cd portal && npm run build",
     "deploy": "cd portal && npm run build && cd .. && wrangler deploy"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
   }
 }

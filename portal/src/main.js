@@ -529,7 +529,7 @@ function buildDashboard() {
         appt.category === 'HD' ? '🌤️ Half-Daycare' :
         '🏡 Boarding';
 
-      let pricingLine = '';
+      let pricingLine = '';w
       if (appt.clientMessage) {
         const totalMatch = appt.clientMessage.match(/Total:\s*(\$[\d,.]+)/);
         pricingLine = totalMatch
