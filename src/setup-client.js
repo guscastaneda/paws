@@ -4,7 +4,7 @@
 // Generates a unique token + SVG QR code and writes both back to the record.
 
 import { cors, errRes, jsonRes, atFetch } from './helpers.js';
-import { CLIENTS_TABLE, FIELDS, QR_CODE_FIELD } from './constants.js';
+import { BASE_ID, CLIENTS_TABLE, FIELDS, QR_CODE_FIELD } from './constants.js';
 
 // ── QR Code Generator (pure JS, no dependencies) ─────────────────────────────
 
@@ -271,7 +271,7 @@ export async function handleSetupClient(request, env) {
   }
 
   // 2. Upload QR code via Airtable content API
-  const uploadUrl = `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${recordId}/${QR_CODE_FIELD}/uploadAttachment`;
+  const uploadUrl = `https://content.airtable.com/v0/${BASE_ID}/${recordId}/${QR_CODE_FIELD}/uploadAttachment`;
   const uploadRes = await fetch(uploadUrl, {
     method: 'POST',
     headers: {
