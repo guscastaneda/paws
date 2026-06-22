@@ -1,16 +1,19 @@
 import { errRes, jsonRes, atFetch } from "./helpers.js";
 import { CLIENTS_TABLE, FIELDS } from "./constants.js";
 
-// ── POST /admin/backfill-qr ───────────────────────────────────────────────────
-// TEMPORARY endpoint. Loops through all Client records and re-triggers the same
-// token + QR generation logic from setup-client.js for each one. Remove this
-// route + file once the backfill is done.
+const BATCH_SIZE = 10; // small enough to stay well under Workers' subrequest limit per invocation
+
 export async function handlePostBackfillQr(req, env) {
   const secret = req.headers.get('X-Webhook-Secret');
   if (!secret || secret !== env.WEBHOOK_SECRET) {
     return errRes('Unauthorized', 401);
   }
 
+  let body = {};
+  try { body = await req.json(); } catch {}
+  const startOffset = body.startOffset || 0;
+
+  // Fetch all client IDs (paginated, only once per call — cheap)
   const allClientIds = [];
   let offset = null;
   do {
@@ -22,8 +25,10 @@ export async function handlePostBackfillQr(req, env) {
     offset = data.offset || null;
   } while (offset);
 
+  const batch = allClientIds.slice(startOffset, startOffset + BATCH_SIZE);
   const results = [];
-  for (const recordId of allClientIds) {
+
+  for (const recordId of batch) {
     try {
       const setupRes = await fetch(new URL('/setup-client', req.url), {
         method: 'POST',
@@ -40,13 +45,15 @@ export async function handlePostBackfillQr(req, env) {
     }
   }
 
-  const succeeded = results.filter(r => r.ok).length;
-  const failed = results.filter(r => !r.ok);
+  const nextOffset = startOffset + BATCH_SIZE;
+  const done = nextOffset >= allClientIds.length;
 
   return jsonRes({
-    total: allClientIds.length,
-    succeeded: succeeded,
-    failedCount: failed.length,
-    failed: failed,
+    totalClients: allClientIds.length,
+    processedThisBatch: batch.length,
+    succeeded: results.filter(r => r.ok).length,
+    failed: results.filter(r => !r.ok),
+    nextOffset: done ? null : nextOffset,
+    done,
   });
 }
