@@ -33,7 +33,10 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
           <div style="font-size:1rem;font-weight:500;color:var(--brand-stone);">${pet.name}</div>
           <div style="font-size:0.78rem;color:var(--brand-stone);font-weight:300;">${[pet.breed, pet.age].filter(Boolean).join(' · ')}</div>
         </div>
-        <span style="font-size:0.7rem;font-weight:500;padding:0.2rem 0.65rem;border-radius:999px;background:var(--brand-stone-light);color:var(--brand-stone);">Inactive</span>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <button id="edit-pet-btn-${pet.id}" style="padding:0.25rem 0.65rem;background:transparent;color:var(--brand-primary);border:1.5px solid var(--brand-primary);border-radius:999px;font-family:var(--font-body);font-size:0.72rem;font-weight:500;cursor:pointer;">Edit</button>
+          <span style="font-size:0.7rem;font-weight:500;padding:0.2rem 0.65rem;border-radius:999px;background:var(--brand-stone-light);color:var(--brand-stone);">Inactive</span>
+        </div>
       </div>
       <div style="margin-top:0.75rem;padding:0.6rem 0.85rem;background:var(--brand-sage-light);border-radius:10px;display:flex;align-items:center;justify-content:space-between;">
         <span style="font-size:0.8rem;color:var(--brand-bark);font-weight:300;line-height:1.4;">It's been a while since ${pet.name}'s last stay. We'd love to do a trial daycare to make sure we're still a great fit!</span>
@@ -41,6 +44,10 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
       </div>
     </div>`;
       container.appendChild(card);
+      setTimeout(() => {
+        const editBtn = document.getElementById('edit-pet-btn-' + pet.id);
+        if (editBtn) editBtn.onclick = () => openEditPetForm(pet, clientData, WORKER_URL, clientToken);
+      }, 0);
       return;
     }
 
