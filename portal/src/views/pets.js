@@ -28,7 +28,9 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
       card.innerHTML = `
     <div class="pet-card" style="flex-direction:column;align-items:stretch;gap:0;opacity:0.75;">
       <div style="display:flex;align-items:center;gap:0.85rem;">
-        <div style="width:52px;height:52px;border-radius:50%;background:var(--brand-stone-light);border:2px solid var(--brand-stone-light);display:flex;align-items:center;justify-content:center;font-size:1.5rem;filter:grayscale(1);">🐶</div>
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--brand-stone-light);border:2px solid var(--brand-stone-light);display:flex;align-items:center;justify-content:center;color:var(--brand-stone);">
+          <svg class="ic" style="width:24px;height:24px;"><use href="#i-paw"/></svg>
+        </div>
         <div style="flex:1;">
           <div style="font-size:1rem;font-weight:500;color:var(--brand-stone);">${pet.name}</div>
           <div style="font-size:0.78rem;color:var(--brand-stone);font-weight:300;">${[pet.breed, pet.age].filter(Boolean).join(' · ')}</div>
@@ -54,11 +56,11 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
     // ── Header ──
     const photoHtml = pet.photoUrl
       ? `<img src="${pet.photoUrl}" alt="${pet.name}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--brand-sage);">`
-      : `<div style="width:52px;height:52px;border-radius:50%;background:var(--brand-sage-light);border:2px solid var(--brand-sage);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🐶</div>`;
+      : `<div style="width:52px;height:52px;border-radius:50%;background:var(--brand-sage-light);border:2px solid var(--brand-sage);display:flex;align-items:center;justify-content:center;color:var(--brand-primary);"><svg class="ic" style="width:24px;height:24px;"><use href="#i-paw"/></svg></div>`;
 
     const genderIcon = pet.gender || '';
     const snBadge = pet.spayedNeutered
-      ? `<span style="font-size:0.68rem;background:var(--brand-sage-light);color:var(--brand-primary);padding:0.15rem 0.45rem;border-radius:999px;font-weight:500;">✓ Spayed/Neutered</span>`
+      ? `<span style="font-size:0.68rem;background:var(--brand-sage-light);color:var(--brand-primary);padding:0.15rem 0.45rem;border-radius:999px;font-weight:500;"><svg class="ic" style="width:12px;height:12px;vertical-align:-0.1em;"><use href="#i-check"/></svg> Spayed/Neutered</span>`
       : '';
 
     // ── Doc rows ──
@@ -75,7 +77,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
         : (ok ? 'On file' : 'Missing');
 
       return `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.35rem 0;border-bottom:1px solid var(--brand-stone-light);">
-        <span style="font-size:0.8rem;color:${ok ? 'var(--brand-bark)' : 'var(--brand-warning)'};">${ok ? '✅' : '⚠️'} ${type}</span>
+        <span style="font-size:0.8rem;color:${ok ? 'var(--brand-bark)' : 'var(--brand-warning)'};"><svg class="ic" style="width:14px;height:14px;vertical-align:-0.15em;"><use href="#${ok ? 'i-check' : 'i-alert'}"/></svg> ${type}</span>
         <span style="font-size:0.72rem;color:${ok ? 'var(--brand-stone)' : 'var(--brand-warning)'};font-weight:300;">${expiryText}</span>
       </div>`;
     }).join('');
@@ -86,13 +88,13 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
 
     const vetHtml = primaryVet
       ? `<div style="margin-bottom:0.5rem;">
-          <div style="font-size:0.78rem;font-weight:500;color:var(--brand-bark);">🏥 ${primaryVet.clinic}</div>
-          ${primaryVet.phone ? `<div style="font-size:0.75rem;color:var(--brand-stone);font-weight:300;">📞 ${primaryVet.phone}</div>` : ''}
-          ${primaryVet.address ? `<div style="font-size:0.75rem;color:var(--brand-stone);font-weight:300;">📍 ${primaryVet.address}</div>` : ''}
+          <div style="font-size:0.78rem;font-weight:500;color:var(--brand-bark);"><svg class="ic" style="width:14px;height:14px;vertical-align:-0.12em;color:var(--brand-primary);"><use href="#i-vet"/></svg> ${primaryVet.clinic}</div>
+          ${primaryVet.phone ? `<div style="font-size:0.75rem;color:var(--brand-stone);font-weight:300;"><svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;"><use href="#i-phone"/></svg> ${primaryVet.phone}</div>` : ''}
+          ${primaryVet.address ? `<div style="font-size:0.75rem;color:var(--brand-stone);font-weight:300;"><svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;"><use href="#i-pin"/></svg> ${primaryVet.address}</div>` : ''}
         </div>
         ${specialists.map(v => `<div style="margin-bottom:0.4rem;padding-left:0.75rem;border-left:2px solid var(--brand-sage);">
-          <div style="font-size:0.75rem;font-weight:500;color:var(--brand-bark);">🔬 ${v.clinic}</div>
-          ${v.phone ? `<div style="font-size:0.72rem;color:var(--brand-stone);font-weight:300;">📞 ${v.phone}</div>` : ''}
+          <div style="font-size:0.75rem;font-weight:500;color:var(--brand-bark);"><svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;color:var(--brand-primary);"><use href="#i-vet"/></svg> ${v.clinic}</div>
+          ${v.phone ? `<div style="font-size:0.72rem;color:var(--brand-stone);font-weight:300;"><svg class="ic" style="width:12px;height:12px;vertical-align:-0.1em;"><use href="#i-phone"/></svg> ${v.phone}</div>` : ''}
         </div>`).join('')}`
       : `<div style="font-size:0.78rem;color:var(--brand-stone);font-weight:300;font-style:italic;">No vet on file</div>`;
 
@@ -107,14 +109,14 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
           </div>
           <div style="display:flex;align-items:center;gap:0.5rem;">
             <button id="edit-pet-btn-${pet.id}" style="padding:0.25rem 0.65rem;background:transparent;color:var(--brand-primary);border:1.5px solid var(--brand-primary);border-radius:999px;font-family:var(--font-body);font-size:0.72rem;font-weight:500;cursor:pointer;" onclick="event.stopPropagation()">Edit</button>
-            <span style="font-size:0.75rem;color:var(--brand-stone);" id="pet-toggle-${pet.id}">▼</span>
+            <span style="color:var(--brand-stone);display:inline-flex;" id="pet-toggle-${pet.id}"><svg class="ic" style="width:16px;height:16px;transform:rotate(90deg);"><use href="#i-arrow"/></svg></span>
           </div>
         </div>
       </div>
 
       <div id="pet-detail-${pet.id}" style="display:none;padding:0.75rem 0 0.25rem;">
 
-        ${pet.dob ? `<div style="font-size:0.78rem;color:var(--brand-stone);margin-bottom:0.75rem;">🎂 Born ${fmtDate(pet.dob)}</div>` : ''}
+        ${pet.dob ? `<div style="font-size:0.78rem;color:var(--brand-stone);margin-bottom:0.75rem;"><svg class="ic" style="width:14px;height:14px;vertical-align:-0.12em;color:var(--brand-primary);"><use href="#i-cake"/></svg> Born ${fmtDate(pet.dob)}</div>` : ''}
 
         ${pet.notes ? `<div style="background:var(--brand-gold-light);border-left:3px solid var(--brand-gold);border-radius:0 8px 8px 0;padding:0.6rem 0.8rem;margin-bottom:0.75rem;">
           <div style="font-size:0.7rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;color:var(--brand-stone);margin-bottom:0.25rem;">Health Notes</div>
@@ -172,7 +174,10 @@ window.togglePetCard = function (petId) {
   if (!detail) return;
   const isOpen = detail.style.display !== 'none';
   detail.style.display = isOpen ? 'none' : 'block';
-  if (toggle) toggle.textContent = isOpen ? '▼' : '▲';
+  if (toggle) {
+    const chevron = toggle.querySelector('svg');
+    if (chevron) chevron.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(-90deg)';
+  }
 };
 
 // ── Vet form ──────────────────────────────────────────────────────────────────
@@ -647,7 +652,7 @@ export function buildNewPetView() {
 
   <div id="view-new-pet-success" style="display:none;">
     <div class="success-wrap">
-      <div class="success-circle">🐾</div>
+      <div class="success-circle"><svg class="ic"><use href="#i-paw"/></svg></div>
       <h2>Pet registered!</h2>
       <p style="margin-top:0.5rem;">We will review and add them to your account within 24 hours. You can upload their compliance documents in the meantime.</p>
     </div>

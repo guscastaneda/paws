@@ -13,8 +13,40 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-paw" viewBox="0 0 24 24"><circle cx="5.5" cy="12.5" r="1.8"/><circle cx="10" cy="7.5" r="1.8"/><circle cx="14" cy="7.5" r="1.8"/><circle cx="18.5" cy="12.5" r="1.8"/><path d="M12 13c-2.2 0-4 1.6-4 3.6 0 1.6 1.3 2.4 2.6 2.4.8 0 1-.3 1.4-.3s.6.3 1.4.3c1.3 0 2.6-.8 2.6-2.4 0-2-1.8-3.6-4-3.6Z"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M9.5 20v-5h5v5"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/></symbol>
+<symbol id="i-vet" viewBox="0 0 24 24"><path d="M12 8v8M8 12h8"/><circle cx="12" cy="12" r="9"/></symbol>
+<symbol id="i-cake" viewBox="0 0 24 24"><path d="M4 20h16v-7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2Z"/><path d="M4 15c1.5 1 2.5 1 4 0s2.5-1 4 0 2.5 1 4 0 2-1 0 0"/><path d="M12 8V5M9 8V6M15 8V6"/></symbol>
+<symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.3 7.6L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5Z"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 20h14"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v6c0 4 3 6.5 7 9 4-2.5 7-5 7-9V6Z"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L20 13l2 5v3a1 1 0 0 1-1 1A17 17 0 0 1 4 5a1 1 0 0 1 1-1Z"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11a7 7 0 0 0-14 0c0 4.7 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+<symbol id="i-syringe" viewBox="0 0 24 24"><path d="m18 2 4 4M17 7 7 17l-4 1 1-4L14 4ZM9 11l4 4M15 5l4 4"/></symbol>
+<symbol id="i-building" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+<symbol id="i-sunrise" viewBox="0 0 24 24"><path d="M12 3v5M5.6 9.6 4 8M20 8l-1.6 1.6M2 18h20M7 18a5 5 0 0 1 10 0M9 6l3-3 3 3"/></symbol>
+<symbol id="i-sunset" viewBox="0 0 24 24"><path d="M12 8V3M5.6 9.6 4 8M20 8l-1.6 1.6M2 18h20M7 18a5 5 0 0 1 10 0M15 6l-3 3-3-3"/></symbol>
+<symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></symbol>
+<symbol id="i-car" viewBox="0 0 24 24"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11M5 11h14v6H5zM5 17v2M19 17v2"/><circle cx="8" cy="14" r="1"/><circle cx="16" cy="14" r="1"/></symbol>
+<symbol id="i-party" viewBox="0 0 24 24"><path d="m3 21 5-13 8 8-13 5ZM14 5l1-2M19 10l2-1M16 2l.5 2M21 6l-2 .5"/></symbol>
+<symbol id="i-half" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" fill="currentColor" stroke="none"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/></symbol>
+</defs></svg>
+
 <header class="site-header">
-  <span class="logo-mark">🐾</span>
+  <span class="logo-mark"><svg class="ic"><use href="#i-home"/></svg></span>
   <div class="site-name">Paws on Longmeadow</div>
   <div class="site-tagline">Client Portal</div>
 </header>
@@ -31,7 +63,7 @@
   <!-- ══ INVALID ══ -->
   <div id="view-invalid" class="view">
     <div class="invalid-wrap">
-      <div class="invalid-icon">🔒</div>
+      <div class="invalid-icon"><svg class="ic"><use href="#i-lock"/></svg></div>
       <h2>Link not recognized</h2>
       <p style="margin-top:0.5rem;">This link doesn't match any account. Please use the personal link sent to you, or reach out directly.</p>
     </div>
@@ -39,7 +71,7 @@
 
   <!-- ══ ONBOARDING HOME ══ -->
   <div id="view-onboarding" class="view">
-    <div class="greeting-name">Hi, <em id="ob-first-name">there</em> 👋</div>
+    <div class="greeting-name">Hi, <em id="ob-first-name">there</em></div>
     <p class="greeting-sub" style="margin-top:0.35rem;">Let's get your account set up. It takes about 5 minutes and you only have to do it once.</p>
 
     <div class="divider"></div>
@@ -61,7 +93,7 @@
           <div class="check-title">Contact Information</div>
           <div class="check-desc">Confirm your name, phone, email & address</div>
         </div>
-        <span class="check-arrow">→</span>
+        <span class="check-arrow"><svg class="ic"><use href="#i-arrow"/></svg></span>
       </div>
       <div class="check-item" id="step-emergency-item" onclick="goToStep('emergency')">
         <div class="check-icon" id="step-emergency-icon">2</div>
@@ -69,7 +101,7 @@
           <div class="check-title">Emergency Contact</div>
           <div class="check-desc">Someone to reach if you&#39;re both unavailable</div>
         </div>
-        <span class="check-arrow">→</span>
+        <span class="check-arrow"><svg class="ic"><use href="#i-arrow"/></svg></span>
       </div>
       <div class="check-item" id="step-docs-item" onclick="goToStep('docs')">
         <div class="check-icon" id="step-docs-icon">3</div>
@@ -77,7 +109,7 @@
           <div class="check-title">Compliance Documents</div>
           <div class="check-desc" id="step-docs-desc">Rabies certificate, town license & vaccination records per pet</div>
         </div>
-        <span class="check-arrow">→</span>
+        <span class="check-arrow"><svg class="ic"><use href="#i-arrow"/></svg></span>
       </div>
       <div class="check-item" id="step-agreement-item" onclick="goToStep('agreement')">
         <div class="check-icon" id="step-agreement-icon">4</div>
@@ -85,7 +117,7 @@
           <div class="check-title">Client Agreement</div>
           <div class="check-desc">Review and sign our service agreement</div>
         </div>
-        <span class="check-arrow">→</span>
+        <span class="check-arrow"><svg class="ic"><use href="#i-arrow"/></svg></span>
       </div>
     </div>
   </div>
@@ -123,19 +155,19 @@
     </div>
     <div class="quick-actions">
       <a class="action-btn" onclick="goToStep('docs')">
-        <span class="action-btn-icon">📎</span>
+        <span class="action-btn-icon"><svg class="ic"><use href="#i-upload"/></svg></span>
         <span class="action-btn-label">Upload Document</span>
       </a>
       <a class="action-btn" onclick="goToStep('contact')">
-        <span class="action-btn-icon">✏️</span>
+        <span class="action-btn-icon"><svg class="ic"><use href="#i-user"/></svg></span>
         <span class="action-btn-label">Update Info</span>
       </a>
       <a class="action-btn" onclick="goToStep('emergency')">
-        <span class="action-btn-icon">🚨</span>
+        <span class="action-btn-icon"><svg class="ic"><use href="#i-alert"/></svg></span>
         <span class="action-btn-label">Emergency Contact</span>
       </a>
       <a class="action-btn" onclick="goToStep('agreement')">
-        <span class="action-btn-icon">📋</span>
+        <span class="action-btn-icon"><svg class="ic"><use href="#i-doc"/></svg></span>
         <span class="action-btn-label">View Agreement</span>
       </a>
     </div>
@@ -144,7 +176,7 @@
   <!-- ══ STEP: CONTACT INFO ══ -->
   <div id="view-contact" class="view">
     <div class="step-header">
-      <button class="step-back" onclick="goHome()">← Back</button>
+      <button class="step-back" onclick="goHome()"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-arrow"/></svg> Back</button>
       <div class="step-title">Contact <em>Information</em></div>
       <p class="step-desc">Your current details are pre-filled below. Update anything that has changed — we will review and apply it to your account.</p>
     </div>
@@ -200,7 +232,7 @@
   <!-- ══ STEP: EMERGENCY CONTACT ══ -->
   <div id="view-emergency" class="view">
     <div class="step-header">
-      <button class="step-back" onclick="goHome()">← Back</button>
+      <button class="step-back" onclick="goHome()"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-arrow"/></svg> Back</button>
       <div class="step-title">Emergency <em>Contact</em></div>
       <p class="step-desc">Someone we can reach if both owners are unavailable — a family member, neighbor, or trusted friend.</p>
     </div>
@@ -233,7 +265,7 @@
   <!-- ══ STEP: DOCUMENTS ══ -->
   <div id="view-docs" class="view">
     <div class="step-header">
-      <button class="step-back" onclick="goHome()">← Back</button>
+      <button class="step-back" onclick="goHome()"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-arrow"/></svg> Back</button>
       <div class="step-title">Compliance <em>Documents</em></div>
       <p class="step-desc">We need three documents for each pet. Upload each one below.</p>
     </div>
@@ -247,7 +279,7 @@
   <!-- ══ UPLOAD MODAL (inline, shown when a card upload btn is tapped) ══ -->
   <div id="view-doc-upload" class="view">
     <div class="step-header">
-      <button class="step-back" onclick="showView('view-docs')">← Back</button>
+      <button class="step-back" onclick="showView('view-docs')"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-arrow"/></svg> Back</button>
       <div class="step-title" id="upload-title">Upload <em>Document</em></div>
       <p class="step-desc" id="upload-desc">Attach the file below.</p>
     </div>
@@ -262,7 +294,7 @@
       <label>Document File <span class="req">*</span></label>
       <div class="file-drop" id="docs-file-drop">
         <input type="file" id="docs-file-input" accept=".pdf,.jpg,.jpeg,.png,.heic,.heif,.webp"/>
-        <div class="file-drop-icon">📎</div>
+        <div class="file-drop-icon"><svg class="ic"><use href="#i-upload"/></svg></div>
         <div class="file-drop-text"><strong>Tap to choose a file</strong> or drag and drop<br/>PDF, JPG, PNG, or HEIC accepted</div>
         <div class="file-name" id="docs-file-name"></div>
       </div>
@@ -279,7 +311,7 @@
   <!-- ══ STEP: DOCS SUCCESS ══ -->
   <div id="view-docs-success" class="view">
     <div class="success-wrap">
-      <div class="success-circle">✅</div>
+      <div class="success-circle"><svg class="ic"><use href="#i-check"/></svg></div>
       <h2>Document received!</h2>
       <p style="margin-top:0.5rem;">We&#39;ll review it and you&#39;re good to go.</p>
     </div>
@@ -290,7 +322,7 @@
   <!-- ══ STEP: AGREEMENT ══ -->
   <div id="view-agreement" class="view">
     <div class="step-header">
-      <button class="step-back" onclick="goHome()">← Back</button>
+      <button class="step-back" onclick="goHome()"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-arrow"/></svg> Back</button>
       <div class="step-title">Client <em>Agreement</em></div>
       <p class="step-desc">Please read and sign our service agreement below.</p>
     </div>
@@ -362,7 +394,7 @@
   <!-- ══ STEP: CONTACT SUCCESS ══ -->
   <div id="view-contact-success" class="view">
     <div class="success-wrap">
-      <div class="success-circle">📬</div>
+      <div class="success-circle"><svg class="ic"><use href="#i-mail"/></svg></div>
       <h2>Updates received!</h2>
       <p style="margin-top:0.5rem;">Your changes have been sent for review and will be applied to your account shortly. No action needed on your end.</p>
     </div>
@@ -374,7 +406,7 @@
 <div class="card" id="booking-card" style="display:none;">
   <div id="view-booking">
     <div class="step-header">
-      <button class="step-back" onclick="goHome()">← Back</button>
+      <button class="step-back" onclick="goHome()"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-arrow"/></svg> Back</button>
       <div class="step-title" id="booking-title">Book a <em>Boarding Stay</em></div>
       <p class="step-desc">Fill out the details below. We will confirm your dates within 24 hours.</p>
     </div>
@@ -384,11 +416,11 @@
       <label>Service <span class="req">*</span></label>
       <div class="doc-pills" id="booking-service-pills">
         <input type="radio" name="booking-service" class="doc-pill-input" id="bs-boarding" value="boarding" checked/>
-        <label for="bs-boarding">🏡 Boarding</label>
+        <label for="bs-boarding"><svg class="ic"><use href="#i-home"/></svg> Boarding</label>
         <input type="radio" name="booking-service" class="doc-pill-input" id="bs-daycare" value="daycare"/>
-        <label for="bs-daycare">☀️ Daycare</label>
+        <label for="bs-daycare"><svg class="ic"><use href="#i-sun"/></svg> Daycare</label>
         <input type="radio" name="booking-service" class="doc-pill-input" id="bs-halfdaycare" value="half-daycare"/>
-        <label for="bs-halfdaycare">🌤️ Half-Day</label>
+        <label for="bs-halfdaycare"><svg class="ic"><use href="#i-half"/></svg> Half-Day</label>
       </div>
     </div>
 
@@ -400,7 +432,7 @@
           <input type="radio" name="booking-frequency" class="doc-pill-input" id="bf-onetime" value="one-time" checked/>
           <label for="bf-onetime">One-time</label>
           <input type="radio" name="booking-frequency" class="doc-pill-input" id="bf-recurring" value="recurring"/>
-          <label for="bf-recurring">🔄 Weekly Recurring</label>
+          <label for="bf-recurring"><svg class="ic"><use href="#i-repeat"/></svg> Weekly Recurring</label>
         </div>
       </div>
     </div>
@@ -448,9 +480,9 @@
         <label>Preference <span class="req">*</span></label>
         <div class="doc-pills">
           <input type="radio" name="halfday-pref" class="doc-pill-input" id="hd-am" value="AM" checked/>
-          <label for="hd-am">🌅 Morning</label>
+          <label for="hd-am"><svg class="ic"><use href="#i-sunrise"/></svg> Morning</label>
           <input type="radio" name="halfday-pref" class="doc-pill-input" id="hd-pm" value="PM"/>
-          <label for="hd-pm">🌇 Afternoon</label>
+          <label for="hd-pm"><svg class="ic"><use href="#i-sunset"/></svg> Afternoon</label>
         </div>
       </div>
     </div>
@@ -533,7 +565,7 @@
   <!-- ══ BOOKING SUCCESS ══ -->
   <div id="view-booking-success">
     <div class="success-wrap">
-      <div class="success-circle">🐾</div>
+      <div class="success-circle"><svg class="ic"><use href="#i-paw"/></svg></div>
       <h2>Request sent!</h2>
       <p style="margin-top:0.5rem;" id="booking-success-msg">Your boarding request has been received. We will confirm your dates within 24 hours via text or email.</p>
     </div>
