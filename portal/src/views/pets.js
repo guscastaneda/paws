@@ -281,6 +281,9 @@ function initBreedPicker(pet, WORKER_URL) {
 
   if (!pillsEl || !searchEl || !listEl || !unknownEl) return;
 
+  // Collapsed by default — list only appears when the user engages the search box
+  listEl.style.display = 'none';
+
   let allBreeds = [];
 
   fetch((WORKER_URL || '') + '/breeds')
@@ -349,7 +352,9 @@ function initBreedPicker(pet, WORKER_URL) {
     renderList('');
   });
 
-  searchEl.addEventListener('input', () => renderList(searchEl.value));
+  searchEl.addEventListener('focus', () => { listEl.style.display = 'block'; renderList(searchEl.value); });
+  searchEl.addEventListener('input', () => { listEl.style.display = 'block'; renderList(searchEl.value); });
+  searchEl.addEventListener('blur', () => { setTimeout(() => { listEl.style.display = 'none'; }, 150); });
   renderPills();
 
   window._getSelectedBreedIds = () => selected.map(b => b.id);
