@@ -21,7 +21,9 @@ async function handleGetBreeds(req, env) {
   const breeds = (data.records || []).map(r => ({
     id:      r.id,
     name:    r.fields["Breed Name"] || "",
-    species: (r.fields["Species"] || {}).name || "Dog",
+    species: typeof r.fields["Species"] === "object"
+               ? (r.fields["Species"]?.name || "Dog")
+               : (r.fields["Species"] || "Dog"),
   })).filter(b => b.name);
 
   // Deduplicate by name

@@ -523,13 +523,17 @@ async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKE
     const data = JSON.parse(text || '{}');
     if (!res.ok || data.error) throw new Error(data.error || 'Server error ' + res.status);
 
-    // Update breeds directly via /pet-breed
-    const breedIds = window._getSelectedBreedIds ? window._getSelectedBreedIds() : [];
-    await fetch(WORKER_URL + '/pet-breed', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: clientToken, clientId, petId, breedIds }),
-    });
+    // Update breeds directly via /pet-breed — only if the picker actually loaded
+    // and produced a selection. Guard against wiping breeds when the picker never
+    // initialized (empty array would otherwise clear all breeds).
+    const breedIds = window._getSelectedBreedIds ? window._getSelectedBreedIds() : null;
+    if (Array.isArray(breedIds) && (breedIds.length > 0 || window._breedPickerReady)) {
+      await fetch(WORKER_URL + '/pet-breed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: clientToken, clientId, petId, breedIds }),
+      });
+    }
 
     const modal = document.getElementById('edit-pet-modal');
     if (modal) modal.remove();

@@ -124,6 +124,7 @@ async function handleGetClient(req, env) {
           active:         isActive,
           name:           p.fields["Pet Name"]            || "",
           breed,
+          breedIds,
           dob,
           age,
           gender:         typeof p.fields["Gender"] === "object"
