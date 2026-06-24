@@ -45,6 +45,19 @@ function fmtDate(d) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+// Returns inline SVG markup for a service category/name. Accepts either a
+// category code (DC/HD/B) or a service name (Daycare/Half-Daycare/Boarding).
+function svcIcon(key, size) {
+  const px = size || 15;
+  const id =
+    (key === 'DC' || key === 'Daycare')                ? 'i-sun'  :
+    (key === 'HD' || key === 'Half-Daycare')           ? 'i-half' :
+    (key === 'B'  || key === 'Boarding')               ? 'i-home' :
+    (key === 'Recurring' || key === 'recurring')       ? 'i-repeat' :
+    'i-paw';
+  return '<svg class="ic" style="width:' + px + 'px;height:' + px + 'px;vertical-align:-0.12em;"><use href="#' + id + '"/></svg>';
+}
+
 function formatRecurringDays(svc) {
   const pluralDay = d => d + 's';
   const days = (svc.days || []).map(pluralDay).join(' · ');
@@ -85,7 +98,7 @@ function updateProgressUI(steps) {
     if (steps[k]) {
       item.classList.add('done');
       item.onclick = null;
-      icon.textContent = '✓';
+      icon.innerHTML = '<svg class="ic" style="width:15px;height:15px;"><use href="#i-check"/></svg>';
     } else {
       item.classList.remove('done');
       item.onclick = () => goToStep(k);
@@ -96,7 +109,7 @@ function updateProgressUI(steps) {
   const docsDesc = document.getElementById('step-docs-desc');
   if (docsDesc && clientData?.pets?.length > 0) {
     if (steps.docs) {
-      docsDesc.textContent = 'All documents on file ✓';
+      docsDesc.textContent = 'All documents on file';
     } else {
       const missing = [];
       (clientData.pets || []).forEach(pet => {
@@ -292,9 +305,9 @@ function buildContactCurrentInfo() {
   const d = clientData;
   const lines = [
     d.name    ? '<strong>' + d.name + '</strong>' : '',
-    d.phone   ? '📞 ' + d.phone    : '',
-    d.email   ? '✉️ '  + d.email   : '',
-    d.address ? '📍 '  + d.address : '',
+    d.phone   ? '<svg class="ic" style="width:13px;height:13px;color:var(--brand-primary);"><use href="#i-phone"/></svg> ' + d.phone    : '',
+    d.email   ? '<svg class="ic" style="width:13px;height:13px;color:var(--brand-primary);"><use href="#i-mail"/></svg> ' + d.email : '',
+    d.address ? '<svg class="ic" style="width:13px;height:13px;color:var(--brand-primary);"><use href="#i-pin"/></svg> ' + d.address : '',
     (d.addName || d.addPhone) ? '<span style="color:var(--brand-stone);">Additional: ' + [d.addName, d.addPhone].filter(Boolean).join(' · ') + '</span>' : '',
   ].filter(Boolean).join('<br>');
   el.innerHTML = lines || '<span style="color:var(--brand-stone);">No information on file yet.</span>';
@@ -307,9 +320,9 @@ function buildDocCards() {
   container.innerHTML = '';
 
   const DOC_TYPES = [
-    { type: 'Rabies Certificate', icon: '💉' },
-    { type: 'Town License',       icon: '🏛' },
-    { type: 'Vaccination Record', icon: '📋' },
+    { type: 'Rabies Certificate', icon: 'i-syringe' },
+    { type: 'Town License',       icon: 'i-building' },
+    { type: 'Vaccination Record', icon: 'i-doc' },
   ];
 
   const wrap = document.createElement('div');
@@ -326,8 +339,8 @@ function buildDocCards() {
     const header = document.createElement('div');
     header.className = 'doc-card-header ' + (allPetsOk ? 'ok' : 'missing');
     header.innerHTML =
-      '<div class="doc-card-title">' + icon + ' ' + type + '</div>' +
-      '<span class="doc-card-status ' + (allPetsOk ? 'ok' : 'missing') + '">' + (allPetsOk ? '✓ Complete' : 'Needed') + '</span>';
+      '<div class="doc-card-title"><svg class="ic"><use href="#' + icon + '"/></svg> ' + type + '</div>' +
+      '<span class="doc-card-status ' + (allPetsOk ? 'ok' : 'missing') + '">' + (allPetsOk ? 'Complete' : 'Needed') + '</span>';
 
     const body    = document.createElement('div');
     body.className = 'doc-card-body';
@@ -342,15 +355,15 @@ function buildDocCards() {
 
       const row = document.createElement('div');
       row.className = 'doc-card-pet';
-      row.innerHTML = '<div class="doc-card-pet-name">🐾 ' + pet.name + '</div>';
+      row.innerHTML = '<div class="doc-card-pet-name"><svg class="ic" style="width:14px;height:14px;color:var(--brand-primary);"><use href="#i-paw"/></svg> ' + pet.name + '</div>';
 
       const btn = document.createElement('button');
       if (hasValid) {
         btn.className   = 'btn-upload-small ok';
-        btn.textContent = '✓ On file';
+        btn.innerHTML = '<svg class="ic" style="width:12px;height:12px;"><use href="#i-check"/></svg> On file';
       } else if (expiredDoc) {
         btn.style.cssText = 'color:var(--brand-warning);border:1.5px solid var(--brand-warning);border-radius:999px;padding:0.35rem 0.75rem;background:transparent;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;';
-        btn.textContent   = '⚠️ Expired' + (expiredDoc.expiryDate ? ' · ' + fmtD(expiredDoc.expiryDate) : '');
+        btn.innerHTML     = '<svg class="ic" style="width:12px;height:12px;"><use href="#i-alert"/></svg> Expired' + (expiredDoc.expiryDate ? ' · ' + fmtD(expiredDoc.expiryDate) : '');
         btn.onclick       = () => openUploadModal(pet.id, pet.name, type);
       } else {
         btn.className   = 'btn-upload-small';
@@ -384,7 +397,7 @@ function buildDocCards() {
     banner.id = 'docs-complete-banner';
     banner.style.cssText = 'margin-top:1.25rem;background:var(--brand-success-light);border:1.5px solid rgba(46,125,50,0.25);border-radius:14px;padding:1.25rem;text-align:center;';
     banner.innerHTML =
-      '<div style="font-size:1.75rem;margin-bottom:0.5rem;">🎉</div>' +
+      '<div style="color:var(--brand-success);margin-bottom:0.5rem;display:flex;justify-content:center;"><svg class="ic" style="width:1.75rem;height:1.75rem;"><use href="#i-party"/></svg></div>' +
       '<div style="font-family:var(--font-display);font-size:1.2rem;font-weight:600;color:var(--brand-success);margin-bottom:0.35rem;">All documents on file!</div>' +
       '<p style="font-size:0.82rem;color:var(--brand-bark);margin-bottom:1rem;">You\'re all set on compliance. Head back to finish your account setup.</p>' +
       '<button class="btn-primary" style="margin-top:0;max-width:260px;margin:0 auto;display:block;" onclick="goHome()">Back to Portal</button>';
@@ -452,35 +465,35 @@ function buildDashboard() {
   if (state === 'compliant') {
     banner.innerHTML =
       '<div class="compliance-banner compliant">' +
-        '<div class="compliance-banner-icon">✅</div>' +
+        '<div class="compliance-banner-icon"><svg class="ic"><use href="#i-check"/></svg></div>' +
         '<div class="compliance-banner-body">' +
           '<div class="compliance-banner-title">All set, ' + firstName + '!</div>' +
           '<div class="compliance-banner-desc">Your account is fully up to date. Ready to book.</div>' +
         '</div>' +
       '</div>' +
-      '<button class="btn-book" id="dash-book-btn">🐾 Book a Service</button>';
+      '<button class="btn-book" id="dash-book-btn"><svg class="ic"><use href="#i-paw"/></svg> Book a Service</button>';
   } else if (state === 'warning') {
     const items = expiring.map(e => e.pet + "'s " + e.type + ' expires in ' + e.days + ' days').join(' · ');
     banner.innerHTML =
       '<div class="compliance-banner warning">' +
-        '<div class="compliance-banner-icon">⚠️</div>' +
+        '<div class="compliance-banner-icon"><svg class="ic"><use href="#i-alert"/></svg></div>' +
         '<div class="compliance-banner-body">' +
           '<div class="compliance-banner-title">Documents expiring soon</div>' +
           '<div class="compliance-banner-desc">' + items + '. Please renew before your next stay.</div>' +
         '</div>' +
       '</div>' +
-      '<button class="btn-book" id="dash-book-btn">🐾 Book a Service</button>';
+      '<button class="btn-book" id="dash-book-btn"><svg class="ic"><use href="#i-paw"/></svg> Book a Service</button>';
   } else {
     const items = missing.map(m => m.pet + ': ' + m.type).join(' · ');
     banner.innerHTML =
       '<div class="compliance-banner blocked">' +
-        '<div class="compliance-banner-icon">🔒</div>' +
+        '<div class="compliance-banner-icon"><svg class="ic"><use href="#i-lock"/></svg></div>' +
         '<div class="compliance-banner-body">' +
           '<div class="compliance-banner-title">Documents needed before booking</div>' +
           '<div class="compliance-banner-desc">' + items + '</div>' +
         '</div>' +
       '</div>' +
-      '<button class="btn-book" disabled>🔒 Booking Unavailable</button>';
+      '<button class="btn-book" disabled><svg class="ic"><use href="#i-lock"/></svg> Booking Unavailable</button>';
   }
 
   setTimeout(() => {
@@ -525,11 +538,12 @@ function buildDashboard() {
         : null;
 
       const serviceLabel =
-        appt.category === 'DC' ? '☀️ Daycare'      :
-        appt.category === 'HD' ? '🌤️ Half-Daycare' :
-        '🏡 Boarding';
+        svcIcon(appt.category) + ' ' + (
+          appt.category === 'DC' ? 'Daycare'      :
+          appt.category === 'HD' ? 'Half-Daycare' :
+          'Boarding');
 
-      let pricingLine = '';w
+      let pricingLine = '';
       if (appt.clientMessage) {
         const totalMatch = appt.clientMessage.match(/Total:\s*(\$[\d,.]+)/);
         pricingLine = totalMatch
@@ -547,7 +561,7 @@ function buildDashboard() {
 
       const statusMessage =
         appt.status === 'Waitlisted'
-          ? '<div style="font-size:0.82rem;color:#c07a2a;font-weight:500;margin-bottom:0.5rem;">📋 ' +
+          ? '<div style="font-size:0.82rem;color:#c07a2a;font-weight:500;margin-bottom:0.5rem;"><svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;"><use href="#i-doc"/></svg> ' +
             (appt.category === 'HD'
               ? 'Your half-daycare request is pending — we\'ll confirm once we pair your session with the other half of the day.'
               : 'You\'re on the waitlist for these dates. We\'ll reach out as soon as a spot opens up.') +
@@ -567,7 +581,7 @@ function buildDashboard() {
           '<div style="font-size:0.7rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);">' + serviceLabel + '</div>' +
           '<div style="display:flex;align-items:center;gap:0.5rem;">' +
             '<span style="font-size:0.72rem;font-weight:500;padding:0.2rem 0.6rem;border-radius:999px;background:' + statusBg + ';color:' + statusColor + ';">' + appt.status + '</span>' +
-            '<span id="appt-toggle-' + appt.id + '" style="font-size:0.75rem;color:var(--brand-stone);">▼</span>' +
+            '<span id="appt-toggle-' + appt.id + '" style="color:var(--brand-stone);display:inline-flex;"><svg class="ic" style="width:15px;height:15px;transform:rotate(90deg);"><use href="#i-arrow"/></svg></span>' +
           '</div>' +
         '</div>' +
         '<div style="font-size:0.92rem;font-weight:500;color:var(--brand-bark);margin-bottom:0.2rem;">' +
@@ -596,7 +610,7 @@ function buildDashboard() {
         const summary = card.querySelector('#appt-summary-' + appt.id);
         const toggle  = card.querySelector('#appt-toggle-'  + appt.id);
         if (summary) summary.style.display = 'block';
-        if (toggle)  toggle.textContent    = '▲';
+        if (toggle)  { const c = toggle.querySelector('svg'); if (c) c.style.transform = 'rotate(-90deg)'; }
       }
 
       card.addEventListener('click', () => toggleApptSummary(appt.id));
@@ -633,7 +647,7 @@ function toggleApptSummary(apptId) {
   if (!el) return;
   const isOpen = el.style.display !== 'none';
   el.style.display = isOpen ? 'none' : 'block';
-  if (toggle) toggle.textContent = isOpen ? '▼' : '▲';
+  if (toggle) { const c = toggle.querySelector('svg'); if (c) c.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(-90deg)'; }
 }
 window.toggleApptSummary = toggleApptSummary;
 
@@ -650,10 +664,7 @@ function buildRecurringServices() {
   if (!container) return;
   container.innerHTML = '';
 
-  const serviceEmoji = s =>
-    s === 'Half-Daycare' ? '🌤️' :
-    s === 'Daycare'      ? '☀️'  :
-    s === 'Boarding'     ? '🏡'  : '🔄';
+  const serviceEmoji = s => svcIcon(s);
 
   const statusStyles = {
     'Active':                 { color: 'var(--brand-success)', bg: 'var(--brand-success-light)' },
@@ -690,7 +701,7 @@ function buildRecurringServices() {
         '</div>' +
         '<div style="display:flex;align-items:center;gap:0.5rem;">' +
           '<span style="font-size:0.72rem;font-weight:500;padding:0.2rem 0.6rem;border-radius:999px;background:' + statusBg + ';color:' + statusColor + ';">' + svc.status + '</span>' +
-          '<span id="rec-toggle-' + svc.id + '" style="font-size:0.75rem;color:var(--brand-stone);">▼</span>' +
+          '<span id="rec-toggle-' + svc.id + '" style="color:var(--brand-stone);display:inline-flex;"><svg class="ic" style="width:15px;height:15px;transform:rotate(90deg);"><use href="#i-arrow"/></svg></span>' +
         '</div>' +
       '</div>' +
       '<div style="font-size:0.92rem;font-weight:500;color:var(--brand-bark);margin-bottom:0.2rem;">' + svc.pets.join(' & ') + '</div>' +
@@ -718,7 +729,7 @@ function buildRecurringServices() {
       if (!el) return;
       const isOpen = el.style.display !== 'none';
       el.style.display = isOpen ? 'none' : 'block';
-      if (toggle) toggle.textContent = isOpen ? '▼' : '▲';
+      if (toggle) { const c = toggle.querySelector('svg'); if (c) c.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(-90deg)'; }
     });
 
     container.appendChild(card);
@@ -878,7 +889,7 @@ window.openCancellationModal = function(apptId, category, startDate, endDate) {
   const existing = document.getElementById('cancellation-modal');
   if (existing) existing.remove();
 
-  const serviceLabel = category === 'DC' ? '☀️ Daycare' : category === 'HD' ? '🌤️ Half-Daycare' : '🏡 Boarding';
+  const serviceLabel = svcIcon(category) + ' ' + (category === 'DC' ? 'Daycare' : category === 'HD' ? 'Half-Daycare' : 'Boarding');
   const dateLabel    = fmtDate(startDate) + (endDate && endDate !== startDate ? ' → ' + fmtDate(endDate) : '');
   const policy       = category === 'DC' || category === 'HD'
     ? 'Cancellations must be received at least 24 hours in advance. Under 24 hours: 50% charge applies. No-show: full charge.'
@@ -1211,11 +1222,11 @@ window.submitBooking = async function() {
       document.getElementById('booking-success-msg').textContent =
         'Your recurring ' + svcLabel.toLowerCase() + ' request has been received. We\'ll confirm your schedule within 24 hours.';
       document.getElementById('booking-summary').innerHTML =
-        '<strong>🔄 Recurring ' + svcLabel + '</strong><br>' +
+        '<strong>' + svcIcon('recurring') + ' Recurring ' + svcLabel + '</strong><br>' +
         '<strong>' + petNames.join(', ') + '</strong><br>' +
-        '📅 Every ' + recurringDays.join(', ') + '<br>' +
-        (isHalfDaycare ? '🌓 ' + (halfDayPref === 'PM' ? 'Afternoon' : 'Morning') + ' preference<br>' : '') +
-        '🚗 Transport: ' + transport + '<br><br>' +
+        '<svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;"><use href="#i-cal"/></svg> Every ' + recurringDays.join(', ') + '<br>' +
+        (isHalfDaycare ? svcIcon('HD') + ' ' + (halfDayPref === 'PM' ? 'Afternoon' : 'Morning') + ' preference<br>' : '') +
+        '<svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;"><use href="#i-car"/></svg> Transport: ' + transport + '<br><br>' +
         '<span style="font-size:0.78rem;color:var(--brand-stone);">Weekly · We\'ll activate your schedule once confirmed.</span>';
 
       fetch(WORKER_URL + '/client?token=' + encodeURIComponent(clientToken)).then(r => r.ok ? r.json() : null).then(d => { if (d) clientData = d; }).catch(() => {});
@@ -1276,20 +1287,20 @@ window.submitBooking = async function() {
         estimateTotal += session;
         estimateLines.push(
           isHalfDaycare
-            ? `🌤️ Half-Daycare (${halfDayPref === 'PM' ? 'Afternoon' : 'Morning'}): $${rate}/session`
-            : numPets > 1 ? `☀️ Daycare: $${rate} x ${numPets} dogs = $${session}` : `☀️ Daycare: $${rate}/session`
+            ? `Half-Daycare (${halfDayPref === 'PM' ? 'Afternoon' : 'Morning'}): $${rate}/session`
+            : numPets > 1 ? `Daycare: $${rate} x ${numPets} dogs = $${session}` : `Daycare: $${rate}/session`
         );
       } else {
         const rate   = clientData.boardingPrice || 85;
         const nights = Math.max(1, Math.round((new Date(endDate) - new Date(startDate)) / 86400000));
         const dog1   = rate * nights;
         estimateTotal += dog1;
-        estimateLines.push(`🏡 Dog 1: $${rate} x ${nights} night${nights > 1 ? 's' : ''} = $${dog1}`);
+        estimateLines.push(`Dog 1: $${rate} x ${nights} night${nights > 1 ? 's' : ''} = $${dog1}`);
         if (numPets > 1) {
           const dog2Rate  = Math.max(0, rate - 15);
           const dog2Total = dog2Rate * nights * (numPets - 1);
           estimateTotal  += dog2Total;
-          estimateLines.push(`🏡 Dog 2: $${dog2Rate} x ${nights} night${nights > 1 ? 's' : ''} = $${dog2Total}`);
+          estimateLines.push(`Dog 2: $${dog2Rate} x ${nights} night${nights > 1 ? 's' : ''} = $${dog2Total}`);
         }
       }
 
@@ -1298,23 +1309,23 @@ window.submitBooking = async function() {
         const dog1Fee   = 5 * tripMulti;
         const dog2Fee   = numPets > 1 ? (5 * 0.5) * tripMulti * (numPets - 1) : 0;
         estimateTotal  += dog1Fee + dog2Fee;
-        let tLine = `🚙 Transport (${transport}): $${dog1Fee}`;
+        let tLine = `Transport (${transport}): $${dog1Fee}`;
         if (dog2Fee > 0) tLine += ` + $${dog2Fee} (2nd dog)`;
         estimateLines.push(tLine);
       }
 
       const pricingNote = [...estimateLines, '', `Est. Total: ~$${estimateTotal}`, '*Peak season or multi-week discounts may apply. Final price confirmed within 24hrs.'].join('\n');
-      const serviceEmoji = isHalfDaycare ? '🌤️' : isDaycare ? '☀️' : '🐾';
+      const serviceIconHtml = isHalfDaycare ? svcIcon('HD') : isDaycare ? svcIcon('DC') : svcIcon('B');
       const serviceLabel = isHalfDaycare ? 'Half-Daycare' : isDaycare ? 'Daycare' : 'Boarding';
       const dateLines    = isSingleDay
-        ? '📅 Date: ' + fmtDate(startDate) + '<br>'
-        : '📅 Start: ' + fmtDate(startDate) + (startTime ? ' · ' + startTime : '') + '<br>' +
-          '📅 End: '   + fmtDate(endDate)   + (endTime   ? ' · ' + endTime   : '') + '<br>';
+        ? '<svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;"><use href="#i-cal"/></svg> Date: ' + fmtDate(startDate) + '<br>'
+        : '<svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;"><use href="#i-cal"/></svg> Start: ' + fmtDate(startDate) + (startTime ? ' · ' + startTime : '') + '<br>' +
+          '<svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;"><use href="#i-cal"/></svg> End: '   + fmtDate(endDate)   + (endTime   ? ' · ' + endTime   : '') + '<br>';
 
       summary.innerHTML =
-        '<strong>' + serviceEmoji + ' ' + petNames.join(', ') + '</strong><br>' +
+        '<strong>' + serviceIconHtml + ' ' + petNames.join(', ') + '</strong><br>' +
         '<strong>' + serviceLabel + '</strong><br>' +
-        dateLines + '🚗 Transport: ' + transport + '<br><br>' +
+        dateLines + '<svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;"><use href="#i-car"/></svg> Transport: ' + transport + '<br><br>' +
         '<pre style="font-family:var(--font-body);font-size:0.78rem;color:var(--brand-bark);white-space:pre-wrap;margin:0;">' + pricingNote + '</pre>';
     }
 
