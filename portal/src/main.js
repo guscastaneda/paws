@@ -363,8 +363,13 @@ function buildDocCards() {
     rows.className = 'doc-card-pet-row';
 
     DOC_TYPES.forEach(({ type, icon, optional }) => {
-      const validDoc   = docs.find(d => d.type === type && !d.expired);
-      const expiredDoc = docs.find(d => d.type === type && d.expired);
+      // Spay/neuter is permanent: an uploaded copy is valid forever, so ignore any
+      // stray expired flag and never surface it as an expired document.
+      const permanentType = type === 'Spay/Neuter Certificate';
+      const validDoc   = permanentType
+        ? docs.find(d => d.type === type)
+        : docs.find(d => d.type === type && !d.expired);
+      const expiredDoc = permanentType ? null : docs.find(d => d.type === type && d.expired);
 
       const row = document.createElement('div');
       row.className = 'doc-type-row';
@@ -381,12 +386,15 @@ function buildDocCards() {
       right.className = 'doc-type-right';
 
       if (validDoc) {
-        // expiry-aware status
-        const soon = typeof validDoc.daysUntilExpiry === 'number' && validDoc.daysUntilExpiry <= 30;
+        // Spay/neuter is permanent: never show expiry or the "soon" amber state.
+        const permanent = type === 'Spay/Neuter Certificate';
+        const soon = !permanent && typeof validDoc.daysUntilExpiry === 'number' && validDoc.daysUntilExpiry <= 30;
         const status = document.createElement('span');
         status.className = 'doc-status-onfile' + (soon ? ' soon' : '');
         let detail = '';
-        if (type === 'Town License' && validDoc.expiryDate) {
+        if (permanent) {
+          detail = '';
+        } else if (type === 'Town License' && validDoc.expiryDate) {
           // Year-based license: show the license year, not a Dec-31 date.
           detail = ' · ' + validDoc.expiryDate.slice(0, 4) + ' license';
         } else if (validDoc.expiryDate) {
@@ -511,12 +519,16 @@ function openUploadModal(petId, petName, docType) {
   document.getElementById('docs-file-error').classList.remove('visible');
   document.getElementById('docs-upload-form-error').classList.remove('visible');
 
-  // Town License is year-based (calendar year per town rules), not a free date.
+  // Different doc types capture expiry differently:
+  //  - Town License: year-based (calendar year per town rules)
+  //  - Spay/Neuter Certificate: permanent, never expires — no date at all
+  //  - Everything else (Rabies, Vaccination): a real expiration date
   const isLicense   = docType === 'Town License';
+  const isPermanent = docType === 'Spay/Neuter Certificate';
   const expiryGroup = document.getElementById('docs-expiry-group');
   const yearGroup   = document.getElementById('docs-license-year-group');
   const yearSel     = document.getElementById('docs-license-year');
-  if (expiryGroup) expiryGroup.style.display = isLicense ? 'none' : '';
+  if (expiryGroup) expiryGroup.style.display = (isLicense || isPermanent) ? 'none' : '';
   if (yearGroup)   yearGroup.style.display   = isLicense ? '' : 'none';
   if (isLicense && yearSel) {
     const thisYear = new Date().getFullYear();
@@ -1436,10 +1448,14 @@ window.submitDoc = async function() {
   if (!selectedDocFile) { document.getElementById('docs-file-error').classList.add('visible'); return; }
   document.getElementById('docs-file-error').classList.remove('visible');
 
-  const isLicense = uploadContext.docType === 'Town License';
+  const isLicense   = uploadContext.docType === 'Town License';
+  const isPermanent = uploadContext.docType === 'Spay/Neuter Certificate';
   let expiry;
 
-  if (isLicense) {
+  if (isPermanent) {
+    // Spay/neuter is permanent — no expiry, ever.
+    expiry = null;
+  } else if (isLicense) {
     // Year-based: a license for year Y is valid through Dec 31 of Y (calendar-year towns).
     const year = document.getElementById('docs-license-year').value;
     if (!year) {
