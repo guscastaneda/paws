@@ -69,11 +69,11 @@ export async function handlePostRecurringRequest(req, env) {
   let clientName  = clientId;
   let clientEmail = '';
   let clientToken = '';
-  let petNames    = petIds.join(", ");
+  let petNames    = [];
 
   try {
     const cr = await atFetch(env, `/${CLIENTS_TABLE}/${clientId}`);
-    if (cr.ok) { const cd = await cr.json(); clientName = cd.fields["Client Name"] || clientId; clientEmail = cd.fields["Email Address"] || ''; }
+    if (cr.ok) { const cd = await cr.json(); clientName = cd.fields["Client Name"] || clientId; clientEmail = cd.fields["Email Address"] || ''; clientToken = cd.fields["Client Token"] || ''; }
     for (const petId of petIds) {
       const pr = await atFetch(env, `/${PETS_TABLE}/${petId}`);
       if (pr.ok) { const pd = await pr.json(); petNames.push(pd.fields["Pet Name"] || petId); }
@@ -117,8 +117,9 @@ export async function handlePostRecurringRequest(req, env) {
   const created = await res.json();
   const recId   = created.records[0].id;
 
+  const petNamesLabel = petNames.length > 0 ? petNames.join(', ') : petIds.join(', ');
   const summaryRows = [
-    ['Pet(s)',     petNames.join(', ')],
+    ['Pet(s)',     petNamesLabel],
     ['Service',   serviceLabel],
     ['Schedule',  pluralDays + prefLabel],
     ['Frequency', 'Weekly'],
@@ -135,7 +136,7 @@ export async function handlePostRecurringRequest(req, env) {
       <p style="color:#7a6a5a;font-size:0.88rem;">From: ${clientName}${clientEmail ? ' · ' + clientEmail : ''}</p>
       ${summaryTable(summaryRows)}
       <p style="font-size:0.88rem;color:#7a6a5a;">Review and activate in Airtable.</p>
-    `),
+    `, clientToken),
   });
 
 // Client confirmation
@@ -203,7 +204,7 @@ export async function handlePostRecurringPause(req, env) {
       <p style="color:#7a6a5a;font-size:0.88rem;">From: ${clientName}${clientEmail ? ' · ' + clientEmail : ''}</p>
       ${summaryTable([['Resume After', resumeLabel], ['Record ID', recurringId]])}
       <p style="font-size:0.88rem;color:#7a6a5a;">Status updated to Paused in Airtable.</p>
-    `),
+    `, clientToken),
   });
 
   // Client confirmation
@@ -250,9 +251,10 @@ export async function handlePostRecurringCancel(req, env) {
 
   let clientName  = clientId;
   let clientEmail = '';
+  let clientToken = '';
   try {
     const cr = await atFetch(env, `/${CLIENTS_TABLE}/${clientId}`);
-    if (cr.ok) { const cd = await cr.json(); clientName = cd.fields["Client Name"] || clientId; clientEmail = cd.fields["Email Address"] || ''; }
+    if (cr.ok) { const cd = await cr.json(); clientName = cd.fields["Client Name"] || clientId; clientEmail = cd.fields["Email Address"] || ''; clientToken = cd.fields["Client Token"] || ''; }
   } catch {}
 
   // Owner notification
@@ -264,7 +266,7 @@ export async function handlePostRecurringCancel(req, env) {
       <p style="color:#7a6a5a;font-size:0.88rem;">From: ${clientName}${clientEmail ? ' · ' + clientEmail : ''}</p>
       ${summaryTable([['Record ID', recurringId], ...(reason ? [['Reason', reason]] : [])])}
       <p style="font-size:0.88rem;color:#7a6a5a;">Status updated to Cancellation Requested in Airtable. Review and archive when ready.</p>
-    `),
+    `, clientToken),
   });
 
   // Client confirmation

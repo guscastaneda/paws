@@ -94,7 +94,7 @@ export async function handlePostCancellation(req, env) {
       <p style="color:#7a6a5a;font-size:0.88rem;">From: ${clientName}${clientEmail ? ' · ' + clientEmail : ''}</p>
       ${summaryTable([['Service', serviceLabel], ['Dates', dateLabel], ...(reason ? [['Reason', reason]] : [])])}
       <p style="font-size:0.88rem;color:#7a6a5a;">Status updated to Cancellation Requested in Airtable. Review and confirm.</p>
-    `),
+    `, clientToken),
   });
 
   // Client confirmation

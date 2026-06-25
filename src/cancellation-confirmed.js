@@ -139,7 +139,7 @@ async function processCancellationConfirmed(env, recordId) {
         <p style="color:#7a6a5a;font-size:0.88rem;">Client: ${clientName}${clientEmail ? ' · ' + clientEmail : ''}</p>
         ${summaryTable(summaryRows)}
         <p style="font-size:0.88rem;color:#7a6a5a;">Client confirmation email sent.</p>
-      `),
+      `, clientToken),
     });
 
     if (clientEmail) {
@@ -258,7 +258,7 @@ async function processRecurringArchived(env, recordId) {
         <h2 style="font-size:1.3rem;font-weight:600;color:#7a6a5a;margin-bottom:0.25rem;">Recurring Cancellation Confirmed</h2>
         <p style="color:#7a6a5a;font-size:0.88rem;">Client: ${clientName || 'Unknown'}${clientEmail ? ' · ' + clientEmail : ''}</p>
         ${summaryTable(summaryRows)}
-      `),
+      `, clientToken),
     });
 
     if (clientEmail) {

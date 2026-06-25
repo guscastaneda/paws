@@ -178,7 +178,7 @@ async function handlePostBooking(req, env) {
       <p style="color:#7a6a5a;font-size:0.88rem;">From: ${clientName}${clientEmail ? ' · ' + clientEmail : ''}</p>
       ${summaryTable([...summaryRows, ['Status', isWaitlist ? 'Waitlisted' : 'Requested']])}
       <p style="font-size:0.88rem;color:#7a6a5a;">Review and confirm in Airtable.</p>
-    `),
+    `, clientToken),
   });
 
   // Client confirmation
