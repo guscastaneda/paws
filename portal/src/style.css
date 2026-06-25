@@ -362,9 +362,23 @@ body::before {
 .resident.is-active .resident-photo { box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(47,125,82,0.25); }
 
 .resident-body { flex: 1; min-width: 0; }
-.resident-name { font-size: 1.1rem; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
+.resident-name {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  color: var(--ink);
+}
 .resident.is-inactive .resident-name { color: var(--muted); }
-.resident-meta { font-size: 0.79rem; color: var(--muted); margin-top: 0.1rem; }
+.resident-meta {
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  margin-top: 0.25rem;
+  text-transform: uppercase;
+}
 .resident-actions { display: flex; align-items: center; gap: 0.5rem; }
 
 .chev { transition: transform 0.32s var(--ease); color: var(--muted); width: 18px; height: 18px; }
@@ -436,8 +450,13 @@ body::before {
   background: var(--surface);
   transform: translateX(3px);
 }
-#dash-setup .check-item.done .check-icon { background: var(--green); color: #fff; }
-#dash-setup .check-arrow { opacity: 0.55; }
+/* Done state is a quiet confirmation, not a loud badge — small light mark,
+   so the row TITLE is what reads first. Incomplete items get the prominent dot. */
+#dash-setup .check-icon { width: 22px; height: 22px; border-radius: 50%; }
+#dash-setup .check-icon .ic { width: 13px; height: 13px; stroke-width: 2.25; }
+#dash-setup .check-item.done .check-icon { background: var(--green-wash); color: var(--green); }
+#dash-setup .check-item:not(.done) .check-icon { background: var(--clay); color: #fff; }
+#dash-setup .check-arrow { opacity: 0.45; }
 #dash-setup .check-item:hover .check-arrow { opacity: 1; transform: translateX(3px); }
 
 .check-icon { width: 28px; height: 28px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -445,6 +464,9 @@ body::before {
 .check-item.done .check-icon { background: var(--green); color: #fff; }
 .check-item:not(.done) .check-icon { background: var(--line); color: var(--muted); }
 .check-item.active-step .check-icon { background: var(--green); color: #fff; }
+
+#dash-setup .check-title { font-size: 0.98rem; font-weight: 600; }
+#dash-setup .check-desc { font-size: 0.8rem; }
 
 .check-text { flex: 1; }
 .check-title { font-size: 0.88rem; font-weight: 600; color: var(--ink); margin-bottom: 0.1rem; }
