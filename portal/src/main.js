@@ -332,9 +332,10 @@ function buildDocCards() {
   container.innerHTML = '';
 
   const DOC_TYPES = [
-    { type: 'Rabies Certificate', icon: 'i-syringe' },
-    { type: 'Town License',       icon: 'i-building' },
-    { type: 'Vaccination Record', icon: 'i-doc' },
+    { type: 'Rabies Certificate',        icon: 'i-syringe' },
+    { type: 'Town License',              icon: 'i-building' },
+    { type: 'Vaccination Record',        icon: 'i-doc' },
+    { type: 'Spay/Neuter Certificate',   icon: 'i-doc', optional: true },
   ];
   const REQUIRED = ['Rabies Certificate', 'Town License', 'Vaccination Record'];
   const fmtD = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -361,17 +362,18 @@ function buildDocCards() {
     const rows    = document.createElement('div');
     rows.className = 'doc-card-pet-row';
 
-    DOC_TYPES.forEach(({ type, icon }) => {
+    DOC_TYPES.forEach(({ type, icon, optional }) => {
       const validDoc   = docs.find(d => d.type === type && !d.expired);
       const expiredDoc = docs.find(d => d.type === type && d.expired);
 
       const row = document.createElement('div');
       row.className = 'doc-type-row';
 
-      // Left: doc type label
+      // Left: doc type label (optional ones get a quiet "optional" tag)
       const label = document.createElement('div');
       label.className = 'doc-type-label';
-      label.innerHTML = '<svg class="ic"><use href="#' + icon + '"/></svg> ' + type;
+      label.innerHTML = '<svg class="ic"><use href="#' + icon + '"/></svg> ' + type +
+        (optional ? '<span class="doc-optional-tag">optional</span>' : '');
       row.appendChild(label);
 
       // Right: status + action
@@ -383,8 +385,14 @@ function buildDocCards() {
         const soon = typeof validDoc.daysUntilExpiry === 'number' && validDoc.daysUntilExpiry <= 30;
         const status = document.createElement('span');
         status.className = 'doc-status-onfile' + (soon ? ' soon' : '');
-        const exp = validDoc.expiryDate ? ' · expires ' + fmtD(validDoc.expiryDate) : '';
-        status.innerHTML = '<svg class="ic"><use href="#i-check"/></svg> On file' + exp;
+        let detail = '';
+        if (type === 'Town License' && validDoc.expiryDate) {
+          // Year-based license: show the license year, not a Dec-31 date.
+          detail = ' · ' + validDoc.expiryDate.slice(0, 4) + ' license';
+        } else if (validDoc.expiryDate) {
+          detail = ' · expires ' + fmtD(validDoc.expiryDate);
+        }
+        status.innerHTML = '<svg class="ic"><use href="#i-check"/></svg> On file' + detail;
         right.appendChild(status);
 
         // View the uploaded file (opens in a new tab) when available
@@ -411,9 +419,16 @@ function buildDocCards() {
         btn.onclick   = () => openUploadModal(pet.id, pet.name, type);
         right.appendChild(btn);
       } else {
+        // Missing: optional docs get a quiet "Add" affordance; required ones get the
+        // prominent green Upload button.
         const btn = document.createElement('button');
-        btn.className   = 'btn-upload-small';
-        btn.textContent = 'Upload';
+        if (optional) {
+          btn.className   = 'btn-doc-action subtle';
+          btn.textContent = 'Add';
+        } else {
+          btn.className   = 'btn-upload-small';
+          btn.textContent = 'Upload';
+        }
         btn.onclick     = () => openUploadModal(pet.id, pet.name, type);
         right.appendChild(btn);
       }
@@ -495,6 +510,27 @@ function openUploadModal(petId, petName, docType) {
   document.getElementById('docs-expiry').value             = '';
   document.getElementById('docs-file-error').classList.remove('visible');
   document.getElementById('docs-upload-form-error').classList.remove('visible');
+
+  // Town License is year-based (calendar year per town rules), not a free date.
+  const isLicense   = docType === 'Town License';
+  const expiryGroup = document.getElementById('docs-expiry-group');
+  const yearGroup   = document.getElementById('docs-license-year-group');
+  const yearSel     = document.getElementById('docs-license-year');
+  if (expiryGroup) expiryGroup.style.display = isLicense ? 'none' : '';
+  if (yearGroup)   yearGroup.style.display   = isLicense ? '' : 'none';
+  if (isLicense && yearSel) {
+    const thisYear = new Date().getFullYear();
+    yearSel.innerHTML = '';
+    // Offer last year (early-Jan uploads of a still-valid prior license), this year, next year.
+    [thisYear - 1, thisYear, thisYear + 1].forEach(y => {
+      const o = document.createElement('option');
+      o.value = String(y);
+      o.textContent = String(y);
+      if (y === thisYear) o.selected = true;
+      yearSel.appendChild(o);
+    });
+  }
+
   const btn = document.getElementById('docs-submit');
   btn.disabled = false;
   btn.classList.remove('loading');
@@ -1400,11 +1436,25 @@ window.submitDoc = async function() {
   if (!selectedDocFile) { document.getElementById('docs-file-error').classList.add('visible'); return; }
   document.getElementById('docs-file-error').classList.remove('visible');
 
-  const expiry = document.getElementById('docs-expiry').value;
-  if (expiry && expiry < new Date().toISOString().split('T')[0]) {
-    document.getElementById('docs-upload-form-error').textContent = 'The expiration date cannot be in the past.';
-    document.getElementById('docs-upload-form-error').classList.add('visible');
-    return;
+  const isLicense = uploadContext.docType === 'Town License';
+  let expiry;
+
+  if (isLicense) {
+    // Year-based: a license for year Y is valid through Dec 31 of Y (calendar-year towns).
+    const year = document.getElementById('docs-license-year').value;
+    if (!year) {
+      document.getElementById('docs-upload-form-error').textContent = 'Please select the license year.';
+      document.getElementById('docs-upload-form-error').classList.add('visible');
+      return;
+    }
+    expiry = year + '-12-31';
+  } else {
+    expiry = document.getElementById('docs-expiry').value;
+    if (expiry && expiry < new Date().toISOString().split('T')[0]) {
+      document.getElementById('docs-upload-form-error').textContent = 'The expiration date cannot be in the past.';
+      document.getElementById('docs-upload-form-error').classList.add('visible');
+      return;
+    }
   }
 
   const btn = document.getElementById('docs-submit');

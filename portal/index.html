@@ -282,10 +282,16 @@
       <p class="step-desc" id="upload-desc">Attach the file below.</p>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" id="docs-expiry-group">
       <label>Expiration Date <span class="opt">(if applicable)</span></label>
       <input type="date" id="docs-expiry"/>
       <div class="info-box">Leave blank for documents that don't expire.</div>
+    </div>
+
+    <div class="form-group" id="docs-license-year-group" style="display:none;">
+      <label>License Year <span class="req">*</span></label>
+      <select id="docs-license-year"></select>
+      <div class="info-box">Town dog licenses run by calendar year (Jan 1 - Dec 31). Select the year this license covers.</div>
     </div>
 
     <div class="form-group">

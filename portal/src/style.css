@@ -757,6 +757,7 @@ p { font-size: 0.875rem; font-weight: 400; color: var(--muted); line-height: 1.6
 .doc-type-row:last-child { border-bottom: none; }
 .doc-type-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.84rem; color: var(--ink); font-weight: 500; }
 .doc-type-label .ic { width: 15px; height: 15px; color: var(--muted); flex-shrink: 0; }
+.doc-optional-tag { font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); background: var(--surface-sunk); padding: 0.1rem 0.4rem; border-radius: 4px; margin-left: 0.5rem; }
 .doc-type-right { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
 .doc-status-onfile.soon { color: var(--clay); }
 .btn-doc-action.subtle { color: var(--muted); border: 1px solid var(--line); padding: 0.3rem 0.7rem; }
