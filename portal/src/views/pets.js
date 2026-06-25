@@ -585,6 +585,7 @@ export function buildNewPetView() {
       <div class="form-group">
         <label>Breed <span class="opt">(optional)</span></label>
         <input type="text" id="np-breed" placeholder="e.g. Golden Retriever"/>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:0.35rem;">Can't find the breed? <a href="#" id="np-breed-unknown" style="color:var(--green);font-weight:500;">Select Mixed / Unknown</a></div>
       </div>
       <div class="form-group">
         <label>Date of Birth <span class="opt">(optional)</span></label>
@@ -641,6 +642,13 @@ export function wireNewPetForm(clientData, goHome, WORKER_URL, clientToken) {
 
   const successBack = document.getElementById('np-success-back');
   if (successBack) successBack.onclick = goHome;
+
+  const breedUnknown = document.getElementById('np-breed-unknown');
+  if (breedUnknown) breedUnknown.onclick = (e) => {
+    e.preventDefault();
+    const breedInput = document.getElementById('np-breed');
+    if (breedInput) { breedInput.value = 'Mixed / Unknown'; breedInput.focus(); }
+  };
 
   const submit = document.getElementById('np-submit');
   if (!submit) return;

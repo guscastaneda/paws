@@ -48,6 +48,14 @@
   --ok-wash:      var(--brand-success-light);
   --warn:         var(--brand-warning);
 
+  /* Soft neutral surfaces — warm off-white tints used for inset panels and
+     "done"/secondary states, replacing the clinical green-wash fill. Green is
+     now used as an ACCENT (checkmark, thin border, icon), not a flat fill. */
+  --surface:       #FBF9F5;   /* subtle warm inset, barely off the card white */
+  --surface-sunk:  #F4F1EA;   /* slightly deeper inset for nested panels */
+  --line-soft:     #EFEAE0;   /* lighter hairline for inset panels */
+  --accent-rail:   var(--green);  /* thin accent border for inset panels */
+
   /* Typography */
   --font-display: 'Fraunces', Georgia, serif;
   --font-body:    'Hanken Grotesk', system-ui, -apple-system, sans-serif;
@@ -62,7 +70,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; font-size: 17px; }
 
 body {
   font-family: var(--font-body);
@@ -330,30 +338,31 @@ body::before {
   background: var(--card);
   overflow: hidden;
   margin-bottom: 0.85rem;
+  box-shadow: 0 1px 2px rgba(35,32,27,0.04), 0 4px 14px rgba(35,32,27,0.05);
   transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
 }
-.resident:hover { border-color: var(--green); box-shadow: 0 6px 20px rgba(47,125,82,0.12); transform: translateY(-2px); }
+.resident:hover { border-color: var(--green); box-shadow: 0 8px 26px rgba(47,125,82,0.16); transform: translateY(-2px); }
 
-.resident-top { display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem 1rem; cursor: pointer; }
+.resident-top { display: flex; align-items: center; gap: 1rem; padding: 1.05rem 1.1rem; cursor: pointer; }
 
 .resident-photo {
-  width: 52px; height: 52px;
-  border-radius: 14px; flex-shrink: 0;
-  background: linear-gradient(135deg, var(--green-wash), #fff);
+  width: 58px; height: 58px;
+  border-radius: 15px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--surface-sunk), #fff);
   color: var(--green);
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--line);
-  transition: transform 0.25s var(--ease);
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
   overflow: hidden;
 }
 .resident:hover .resident-photo { transform: scale(1.04); }
-.resident-photo .ic { width: 25px; height: 25px; }
+.resident-photo .ic { width: 27px; height: 27px; }
 .resident-photo img { width: 100%; height: 100%; object-fit: cover; }
-/* active residents get a subtle ring once real photos are in */
-.resident.is-active .resident-photo { box-shadow: 0 0 0 2px var(--green-wash); }
+/* active residents get a subtle green ring */
+.resident.is-active .resident-photo { box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(47,125,82,0.25); }
 
 .resident-body { flex: 1; min-width: 0; }
-.resident-name { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
+.resident-name { font-size: 1.1rem; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
 .resident.is-inactive .resident-name { color: var(--muted); }
 .resident-meta { font-size: 0.79rem; color: var(--muted); margin-top: 0.1rem; }
 .resident-actions { display: flex; align-items: center; gap: 0.5rem; }
@@ -390,14 +399,14 @@ body::before {
 
 /* add resident */
 .add-resident {
-  width: 100%; padding: 0.8rem;
+  width: 100%; padding: 0.85rem;
   background: transparent; color: var(--green);
-  border: 1.5px dashed var(--green); border-radius: var(--r-md);
-  font-family: var(--font-body); font-size: 0.85rem; font-weight: 600;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem;
-  transition: background 0.15s, transform 0.1s;
+  border: 1.5px solid var(--green); border-radius: var(--r-md);
+  font-family: var(--font-body); font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+  transition: background 0.15s, transform 0.1s, color 0.15s;
 }
-.add-resident:hover { background: var(--green-wash); }
+.add-resident:hover { background: var(--green); color: #fff; }
 .add-resident:active { transform: scale(0.99); }
 
 /* ── CHECKLIST (account setup, demoted) ──────────────────────────────────── */
@@ -412,12 +421,24 @@ body::before {
 .check-item.done { border-color: var(--green-wash); background: var(--green-wash); cursor: default; }
 .check-item.active-step { border-color: var(--green); background: var(--green-wash); box-shadow: 0 0 0 3px rgba(47,125,82,0.12); }
 
-/* Dashboard "Your Account" section — done rows stay tappable (view/edit anytime) */
-#dash-setup .check-item.done { cursor: pointer; }
-#dash-setup .check-item.done:hover { border-color: var(--green); transform: translateX(3px); }
-#dash-setup .check-item.done:hover .check-arrow { transform: translateX(3px); }
-#dash-setup .check-arrow { opacity: 0.6; }
-#dash-setup .check-item:hover .check-arrow { opacity: 1; }
+/* Dashboard "Your Account" — a clean settings list, not a green checklist.
+   Rows are white with a consistent hairline; green lives only in the checkmark.
+   Every row is tappable (view/edit anytime), done or not. */
+#dash-setup .check-item,
+#dash-setup .check-item.done {
+  background: var(--card);
+  border: 1px solid var(--line);
+  cursor: pointer;
+}
+#dash-setup .check-item:hover,
+#dash-setup .check-item.done:hover {
+  border-color: var(--green);
+  background: var(--surface);
+  transform: translateX(3px);
+}
+#dash-setup .check-item.done .check-icon { background: var(--green); color: #fff; }
+#dash-setup .check-arrow { opacity: 0.55; }
+#dash-setup .check-item:hover .check-arrow { opacity: 1; transform: translateX(3px); }
 
 .check-icon { width: 28px; height: 28px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .check-icon .ic { width: 15px; height: 15px; }
@@ -576,15 +597,30 @@ textarea { resize: vertical; min-height: 80px; }
 .btn-ghost:active { transform: scale(0.94); }
 
 .btn-clay {
-  padding: 0.34rem 0.7rem; background: transparent; color: var(--clay);
+  padding: 0.4rem 0.8rem; background: transparent; color: var(--clay);
   border: 1.5px solid var(--clay); border-radius: 999px;
-  font-family: var(--font-body); font-size: 0.73rem; font-weight: 600; cursor: pointer;
-  white-space: nowrap; display: inline-flex; align-items: center; gap: 0.3rem;
+  font-family: var(--font-body); font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  white-space: nowrap; display: inline-flex; align-items: center; gap: 0.35rem;
   transition: background 0.15s, color 0.15s, transform 0.1s;
 }
-.btn-clay .ic { width: 13px; height: 13px; }
+.btn-clay .ic { width: 14px; height: 14px; }
 .btn-clay:hover { background: var(--clay); color: #fff; }
 .btn-clay:active { transform: scale(0.94); }
+
+/* Consistent outline action buttons — fill with their color on hover, like btn-clay.
+   btn-danger (cancellation), btn-warn (pause). Use for all inline pill actions. */
+.btn-danger, .btn-warn {
+  padding: 0.4rem 0.8rem; background: transparent; border-radius: 999px;
+  font-family: var(--font-body); font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  white-space: nowrap; display: inline-flex; align-items: center; gap: 0.35rem;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+.btn-danger { color: var(--brand-error); border: 1.5px solid var(--brand-error); }
+.btn-danger:hover { background: var(--brand-error); color: #fff; }
+.btn-warn { color: var(--warn); border: 1.5px solid var(--warn); }
+.btn-warn:hover { background: var(--warn); color: #fff; }
+.btn-danger .ic, .btn-warn .ic { width: 14px; height: 14px; }
+.btn-danger:active, .btn-warn:active { transform: scale(0.94); }
 
 /* ── FIELD ERROR ─────────────────────────────────────────────────────────── */
 .field-error { font-size: 0.75rem; color: var(--brand-error); margin-top: 0.3rem; display: none; }
