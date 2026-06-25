@@ -202,6 +202,9 @@ async function init() {
   fill('e-name',         clientData.emergencyName);
   fill('e-phone',        clientData.emergencyPhone);
   fill('e-relationship', clientData.emergencyRelationship);
+  fill('alt-name',         clientData.altCaregiverName);
+  fill('alt-phone',        clientData.altCaregiverPhone);
+  fill('alt-relationship', clientData.altCaregiverRelationship);
 
   const steps    = calcOnboardingSteps(clientData);
   const complete = updateProgressUI(steps);
@@ -1466,6 +1469,9 @@ window.submitEmergency = async function() {
   const name  = document.getElementById('e-name').value.trim();
   const phone = document.getElementById('e-phone').value.trim();
   const rel   = document.getElementById('e-relationship').value.trim();
+  const altName  = document.getElementById('alt-name').value.trim();
+  const altPhone = document.getElementById('alt-phone').value.trim();
+  const altRel   = document.getElementById('alt-relationship').value.trim();
 
   if (!name)  { document.getElementById('e-name-error').classList.add('visible');  valid = false; } else document.getElementById('e-name-error').classList.remove('visible');
   if (!phone) { document.getElementById('e-phone-error').classList.add('visible'); valid = false; } else document.getElementById('e-phone-error').classList.remove('visible');
@@ -1476,16 +1482,30 @@ window.submitEmergency = async function() {
   btn.disabled = true; btn.classList.add('loading');
   document.getElementById('e-form-error').classList.remove('visible');
 
+  // Saving the emergency section counts as confirming this info is current.
+  const nowIso = new Date().toISOString();
+  const direct = {
+    "Emergency Contact Name": name,
+    "Emergency Contact Phone": phone,
+    "Emergency Contact Relationship": rel,
+    "Alternate Caregiver Name": altName,
+    "Alternate Caregiver Phone": altPhone,
+    "Alternate Caregiver Relationship": altRel,
+    "Emergency Info Last Confirmed": nowIso,
+  };
+
   try {
     const res = await fetch(WORKER_URL + '/profile', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         token: clientToken, clientId: clientData.clientId,
-        directFields: { "Emergency Contact Name": name, "Emergency Contact Phone": phone, "Emergency Contact Relationship": rel },
+        directFields: direct,
       }),
     });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Server error'); }
     clientData.emergencyName = name; clientData.emergencyPhone = phone; clientData.emergencyRelationship = rel;
+    clientData.altCaregiverName = altName; clientData.altCaregiverPhone = altPhone; clientData.altCaregiverRelationship = altRel;
+    clientData.emergencyInfoConfirmed = nowIso;
     showView('view-contact-success');
   } catch (err) {
     document.getElementById('e-form-error').textContent = 'Error: ' + err.message;
