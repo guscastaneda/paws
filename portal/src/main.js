@@ -433,15 +433,18 @@ function handleFile(file) {
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────
 
-// Compute derived fields the dashboard logic needs but /client doesn't return:
-// per-doc daysUntilExpiry (from expiryDate) and a per-stay days-until count.
+// Compute derived fields the dashboard logic needs.
+// daysUntilExpiry now comes authoritatively from Airtable's "Days Until Expiration"
+// formula via /client; we only fall back to a local calendar-day calc if it's absent.
 function enrichClientData() {
   if (!clientData) return;
   const today = new Date(); today.setHours(0, 0, 0, 0);
 
   (clientData.pets || []).forEach(pet => {
     (pet.docs || []).forEach(doc => {
-      if (doc.expiryDate) {
+      if (typeof doc.daysUntilExpiry === 'number') {
+        // already authoritative from Airtable — leave as-is
+      } else if (doc.expiryDate) {
         const exp = new Date(doc.expiryDate + 'T12:00:00');
         doc.daysUntilExpiry = Math.round((exp - today) / 86400000);
       } else {
@@ -469,13 +472,16 @@ function getNextAppointment() {
   return upcoming[0] || null;
 }
 
-// Returns docs expiring within `within` days (default 30), expired first.
+// Returns docs expiring within `within` days (default 30), soonest first.
+// Only considers docs with a real numeric daysUntilExpiry. Treats already-expired
+// (days < 0) separately via the `expired` flag so callers can word it correctly.
 function getExpiringDocs(within = 30) {
   const out = [];
   (clientData.pets || []).forEach(pet => {
     (pet.docs || []).forEach(doc => {
-      if (doc.daysUntilExpiry !== undefined && doc.daysUntilExpiry <= within) {
-        out.push({ pet: pet.name, type: doc.type, days: doc.daysUntilExpiry, expired: doc.daysUntilExpiry < 0 });
+      const days = doc.daysUntilExpiry;
+      if (typeof days === 'number' && days <= within) {
+        out.push({ pet: pet.name, type: doc.type, days, expired: days < 0 });
       }
     });
   });
@@ -573,7 +579,7 @@ function getComplianceState() {
       const validDoc = docs.find(d => d.type === type && !d.expired);
       if (!validDoc) {
         if (!clientData.docsComplete) missing.push({ pet: pet.name, type });
-      } else if (validDoc.daysUntilExpiry !== undefined && validDoc.daysUntilExpiry <= 30) {
+      } else if (typeof validDoc.daysUntilExpiry === 'number' && validDoc.daysUntilExpiry <= 30) {
         expiring.push({ pet: pet.name, type, days: validDoc.daysUntilExpiry });
       }
     });

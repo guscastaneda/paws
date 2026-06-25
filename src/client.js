@@ -57,9 +57,13 @@ async function handleGetClient(req, env) {
               const expiredField = d.fields[FIELDS.DOC_EXPIRED] || d.fields["Is Expired?"];
               const expiryDate   = d.fields[FIELDS.DOC_EXPIRY]  || d.fields["Expiration Date"] || "";
               const uploadDate   = d.fields[FIELDS.DOC_DATE]    || d.fields["Upload Date"]      || "";
+              const daysField    = d.fields["Days Until Expiration"];
+              // Airtable's formula returns a number for dated docs, or {specialValue:"NaN"}
+              // (or undefined) when there's no expiry date — only trust real numbers.
+              const daysUntilExpiry = (typeof daysField === "number") ? daysField : null;
               const docType = (docTypeField && typeof docTypeField === "object") ? docTypeField.name : (docTypeField || "");
               const expired = expiredField === "Yes" || expiredField === true;
-              if (docType) petDocs.push({ type: docType, expired, expiryDate, uploadDate });
+              if (docType) petDocs.push({ type: docType, expired, expiryDate, uploadDate, daysUntilExpiry });
             }
           }
         }
