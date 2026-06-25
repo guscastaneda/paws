@@ -138,6 +138,14 @@ export async function handlePostPetUpdate(req, env) {
   if (fields["Fears & Triggers"])    directFields["Fears & Triggers"]    = fields["Fears & Triggers"];
   if (fields["Temperament"])         directFields["Temperament"]         = fields["Temperament"];
 
+  // Insurance: self-reported, low-stakes pet attributes — write directly like the
+  // other profile fields above (no review queue needed; provider is a constrained
+  // single-select, the rest are plain text/date).
+  if (fields["Insurance Provider"])      directFields["Insurance Provider"]      = fields["Insurance Provider"];
+  if (fields["Insurance Policy Number"]) directFields["Insurance Policy Number"] = fields["Insurance Policy Number"];
+  if (fields["Insurance Coverage"])      directFields["Insurance Coverage"]      = fields["Insurance Coverage"];
+  if (fields["Insurance Renewal Date"])  directFields["Insurance Renewal Date"]  = fields["Insurance Renewal Date"];
+
   if (fields["Spayed/Neutered"] === "Yes") directFields["Spayed/Neutered"] = true;
   else if (fields["Spayed/Neutered"] === "No") directFields["Spayed/Neutered"] = false;
 
