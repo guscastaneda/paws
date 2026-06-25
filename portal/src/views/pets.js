@@ -202,7 +202,7 @@ function openVetForm(pet, vetType, clientData, WORKER_URL, clientToken) {
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(44,31,20,0.4);z-index:100;display:flex;align-items:flex-end;justify-content:center;padding:1rem;';
 
   modal.innerHTML = `
-    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:1.75rem 1.5rem 2.5rem;max-height:85vh;overflow-y:auto;">
+    <div class="modal-scroll" style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:1.75rem 1.5rem 2.5rem;max-height:85vh;overflow-y:auto;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
         <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;">${title}</div>
         <button onclick="document.getElementById('vet-form-modal').remove()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--brand-stone);">✕</button>
@@ -400,7 +400,7 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(44,31,20,0.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(2px);';
 
   modal.innerHTML = `
-    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(44,31,20,0.15);">
+    <div class="modal-scroll" style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(44,31,20,0.15);">
       <div style="position:sticky;top:0;background:#fff;padding:1.25rem 1.5rem 0.75rem;border-bottom:1px solid var(--brand-stone-light);z-index:1;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
           <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;">Update ${pet.name}</div>
