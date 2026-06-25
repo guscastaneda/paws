@@ -432,6 +432,135 @@ function handleFile(file) {
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────
+
+// Compute derived fields the dashboard logic needs but /client doesn't return:
+// per-doc daysUntilExpiry (from expiryDate) and a per-stay days-until count.
+function enrichClientData() {
+  if (!clientData) return;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+
+  (clientData.pets || []).forEach(pet => {
+    (pet.docs || []).forEach(doc => {
+      if (doc.expiryDate) {
+        const exp = new Date(doc.expiryDate + 'T12:00:00');
+        doc.daysUntilExpiry = Math.round((exp - today) / 86400000);
+      } else {
+        doc.daysUntilExpiry = undefined;
+      }
+    });
+  });
+
+  (clientData.appointments || []).forEach(appt => {
+    if (appt.startDate) {
+      const start = new Date(appt.startDate + 'T12:00:00');
+      appt.daysUntilStart = Math.round((start - today) / 86400000);
+    } else {
+      appt.daysUntilStart = undefined;
+    }
+  });
+}
+
+// Returns the soonest upcoming, active appointment (or null).
+function getNextAppointment() {
+  const upcoming = (clientData.appointments || [])
+    .filter(a => ['Requested', 'Confirmed', 'Waitlisted'].includes(a.status))
+    .filter(a => a.daysUntilStart !== undefined && a.daysUntilStart >= 0)
+    .sort((a, b) => a.daysUntilStart - b.daysUntilStart);
+  return upcoming[0] || null;
+}
+
+// Returns docs expiring within `within` days (default 30), expired first.
+function getExpiringDocs(within = 30) {
+  const out = [];
+  (clientData.pets || []).forEach(pet => {
+    (pet.docs || []).forEach(doc => {
+      if (doc.daysUntilExpiry !== undefined && doc.daysUntilExpiry <= within) {
+        out.push({ pet: pet.name, type: doc.type, days: doc.daysUntilExpiry, expired: doc.daysUntilExpiry < 0 });
+      }
+    });
+  });
+  return out.sort((a, b) => a.days - b.days);
+}
+
+// Builds the dynamic greeting { title, sub } using the locked priority order:
+// 1) expiring/expired doc that blocks an imminent stay  2) imminent stay
+// 3) expiring doc, no imminent stay  4) incomplete onboarding  5) plain greeting
+function getDynamicGreeting() {
+  const first = clientData.firstName || 'there';
+  const hour  = new Date().getHours();
+  const tod   = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+  const nextAppt = getNextAppointment();
+  const expiring = getExpiringDocs(30);
+  const steps    = calcOnboardingSteps(clientData);
+  const onboardingComplete = ['contact', 'emergency', 'docs', 'agreement'].every(k => steps[k]);
+
+  const apptSoon = nextAppt && nextAppt.daysUntilStart <= 14;
+
+  // 1) blocker affecting an imminent stay
+  if (apptSoon && expiring.length > 0) {
+    const d = expiring[0];
+    const word = d.expired ? 'expired' : 'expires soon';
+    return {
+      title: `Hi ${first},`,
+      sub: `${d.pet}'s ${d.type.toLowerCase()} ${word}, and there's a stay coming up ${whenPhrase(nextAppt.daysUntilStart)}. Let's get it renewed so check-in goes smoothly.`,
+      tone: 'alert',
+    };
+  }
+
+  // 2) imminent stay
+  if (apptSoon) {
+    return {
+      title: `${tod}, ${first}`,
+      sub: `${petLabel(nextAppt)} ${whenPhrase(nextAppt.daysUntilStart)}. We're looking forward to it.`,
+      tone: 'normal',
+    };
+  }
+
+  // 3) expiring doc, no imminent stay
+  if (expiring.length > 0) {
+    const d = expiring[0];
+    const word = d.expired ? 'has expired' : `expires in ${d.days} day${d.days === 1 ? '' : 's'}`;
+    return {
+      title: `Hi ${first},`,
+      sub: `A quick heads-up: ${d.pet}'s ${d.type.toLowerCase()} ${word}. Uploading a new one now keeps booking easy later.`,
+      tone: 'alert',
+    };
+  }
+
+  // 4) incomplete onboarding
+  if (!onboardingComplete) {
+    return {
+      title: `Welcome, ${first}`,
+      sub: `You're almost set up. Finishing your account takes just a minute.`,
+      tone: 'normal',
+    };
+  }
+
+  // 5) plain time-of-day greeting
+  const petNames = (clientData.pets || []).filter(p => p.active).map(p => p.name);
+  const petBit = petNames.length === 1 ? ` Hope you and ${petNames[0]} are doing well.`
+               : petNames.length > 1  ? ` Hope you and the pups are doing well.` : '';
+  return {
+    title: `${tod}, ${first}`,
+    sub: `What can we do for you today?${petBit}`,
+    tone: 'normal',
+  };
+}
+
+function whenPhrase(days) {
+  if (days === 0) return 'today';
+  if (days === 1) return 'tomorrow';
+  if (days <= 7)  return `in ${days} days`;
+  return `in ${days} days`;
+}
+
+function petLabel(appt) {
+  const cat = appt.category === 'DC' ? 'Daycare' : appt.category === 'HD' ? 'Half-day' : 'A boarding stay';
+  const verb = appt.status === 'Confirmed' ? 'is confirmed' : 'is requested';
+  return `${cat} ${verb}`;
+}
+
 function getComplianceState() {
   const pets     = clientData.pets || [];
   const REQUIRED = ['Rabies Certificate', 'Town License', 'Vaccination Record'];
@@ -458,6 +587,18 @@ function getComplianceState() {
 }
 
 function buildDashboard() {
+  enrichClientData();
+
+  // ── STAGE 4a verification (temporary) — confirm greeting/alert logic on real data ──
+  try {
+    const g = getDynamicGreeting();
+    const expiring = getExpiringDocs(30);
+    const nextAppt = getNextAppointment();
+    console.log('[4a] Greeting:', g.title, '—', g.sub, '(tone:', g.tone + ')');
+    console.log('[4a] Next appointment:', nextAppt ? (nextAppt.category + ' ' + nextAppt.startDate + ' in ' + nextAppt.daysUntilStart + 'd, ' + nextAppt.status) : 'none');
+    console.log('[4a] Expiring docs (<=30d):', expiring.length ? expiring.map(e => e.pet + ' ' + e.type + ' ' + e.days + 'd').join(' | ') : 'none');
+  } catch (e) { console.warn('[4a] greeting logic error:', e); }
+
   const { state, missing, expiring } = getComplianceState();
   const banner    = document.getElementById('dash-status-banner');
   const firstName = clientData.firstName || 'there';
