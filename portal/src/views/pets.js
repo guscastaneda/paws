@@ -123,7 +123,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
         ${pet.allergies ? `<div class="detail-row"><span><span class="k">Allergies:</span> ${pet.allergies}</span></div>` : ''}
         ${pet.medications ? `<div class="detail-row"><span><span class="k">Medications:</span> ${pet.medications}</span></div>` : ''}
         ${pet.feeding ? `<div class="detail-row"><span><span class="k">Feeding:</span> ${pet.feeding}</span></div>` : ''}
-        ${pet.insurance ? `<div class="detail-row"><span><span class="k">Insurance:</span> ${pet.insurance}${pet.insuranceRenewal ? ` <span class="k">(renews ${new Date(pet.insuranceRenewal + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })})</span>` : ''}</span></div>` : ''}
+        ${pet.insurance ? `<div class="detail-row"><span><span class="k">Insurance:</span> ${pet.insurance}</span></div>` : ''}
 
         <div class="doc-label">Documents</div>
         ${docRows}
@@ -350,6 +350,23 @@ function initBreedPicker(pet, WORKER_URL) {
   window._getSelectedBreedIds = () => selected.map(b => b.id);
 }
 
+// ── Insurance provider <option> list ─────────────────────────────────────────
+// Built with string concatenation (NOT template literals) so it can be safely
+// interpolated inside the larger modal template literal without nested backticks
+// breaking the outer string.
+const INSURANCE_PROVIDERS = ['Healthy Paws','ASPCA','AKC','Embrace','Fetch','Figo','Lemonade','Liberty Mutual','MetLife','Nationwide','Pets Best','Progressive','Pumpkin','Spot','State Farm','Trupanion','USAA','Other','None / Self-pay'];
+
+function buildProviderOptions(current) {
+  const list = INSURANCE_PROVIDERS.slice();
+  // Preserve any stored value not in our canonical list (e.g. legacy free text).
+  if (current && list.indexOf(current) === -1) list.unshift(current);
+  let html = '<option value=""' + (!current ? ' selected' : '') + '>Select a provider...</option>';
+  for (const name of list) {
+    html += '<option value="' + name + '"' + (current === name ? ' selected' : '') + '>' + name + '</option>';
+  }
+  return html;
+}
+
 // ── Edit pet bottom sheet ─────────────────────────────────────────────────────
 export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
   const existing = document.getElementById('edit-pet-modal');
@@ -475,13 +492,7 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
           <div style="margin-bottom:1rem;">
             <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Insurance Provider</label>
             <select id="ep-insurance" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;background:#fff;">
-              <option value="" ${!pet.insurance ? 'selected' : ''}>Select a provider...</option>
-              ${(() => {
-                const providers = ['Healthy Paws','ASPCA','AKC','Embrace','Fetch','Figo','Lemonade','Liberty Mutual','MetLife','Nationwide','Pets Best','Progressive','Pumpkin','Spot','State Farm','Trupanion','USAA','Other','None / Self-pay'];
-                // Preserve any stored value that isn't in our canonical list (e.g. legacy free text).
-                if (pet.insurance && !providers.includes(pet.insurance)) providers.unshift(pet.insurance);
-                return providers.map(name => `<option value="${name}" ${pet.insurance === name ? 'selected' : ''}>${name}</option>`).join('');
-              })()}
+              ${buildProviderOptions(pet.insurance)}
             </select>
           </div>
 
