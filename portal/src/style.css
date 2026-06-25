@@ -192,17 +192,17 @@ body::before {
   font-family: var(--font-display);
   font-size: 2rem;
   font-weight: 400;
-  line-height: 1.1;
+  line-height: 1.12;
   letter-spacing: -0.01em;
   color: var(--ink);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.55rem;
 }
 .greeting-name em { font-style: italic; color: var(--green); }
 .greeting-sub {
   font-size: 0.88rem;
   font-weight: 400;
   color: var(--muted);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 .divider { height: 1px; background: var(--line); margin: 1.5rem 0; }
@@ -299,7 +299,7 @@ body::before {
 .appt-body .s { font-size: 0.78rem; color: var(--muted); margin-top: 0.1rem; }
 
 .upcoming-empty { text-align: center; padding: 1.25rem 0.5rem 0.5rem; }
-.upcoming-empty .ic { width: 28px; height: 28px; color: var(--muted); margin-bottom: 0.6rem; }
+.upcoming-empty > .ic { width: 28px; height: 28px; color: var(--muted); margin-bottom: 0.6rem; }
 .upcoming-empty p { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin-bottom: 0.9rem; }
 .btn-sm {
   display: inline-flex; align-items: center; gap: 0.35rem;
@@ -307,7 +307,7 @@ body::before {
   border-radius: 999px; font-family: var(--font-body); font-size: 0.8rem; font-weight: 600;
   cursor: pointer; transition: background 0.18s, transform 0.1s;
 }
-.btn-sm .ic { width: 14px; height: 14px; }
+.btn-sm .ic { width: 14px; height: 14px; color: #fff; }
 .btn-sm:hover { background: var(--green-bright); }
 .btn-sm:active { transform: scale(0.97); }
 
