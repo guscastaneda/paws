@@ -52,7 +52,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
         </div>
         <div class="nudge">
           <p>It's been a while since ${pet.name}'s last stay. We'd love a trial daycare to make sure we're still a great fit.</p>
-          <button class="btn-clay" onclick="window.location='mai'+'lto:'+'hello'+'@'+'pawsonlongmeadow.com'+'?subject=Reactivate ${encodeURIComponent(pet.name)}'"><svg class="ic"><use href="#i-msg"/></svg>Message</button>
+          <button class="btn-clay" onclick="window.location='mai'+'lto:'+'hello'+'@'+'pawsonlongmeadow.com'+'?subject=Trial daycare for ${encodeURIComponent(pet.name)}'"><svg class="ic"><use href="#i-msg"/></svg>Set up a trial</button>
         </div>`;
       container.appendChild(card);
       setTimeout(() => {
