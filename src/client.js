@@ -28,16 +28,12 @@ async function handleGetClient(req, env) {
     const petFilter = encodeURIComponent(
       `OR(${petIdList.map(id => `RECORD_ID()="${id}"`).join(",")})`
     );
+    // NOTE: we deliberately do NOT pass a fields[] allowlist here. Airtable returns
+    // HTTP 422 for the WHOLE request if any listed field name doesn't exist yet, which
+    // would silently blank the pets list (and the compliance screen). Fetching all
+    // fields is safe at our scale and means adding new pet fields never breaks the load.
     const petsRes = await atFetch(env,
-      `/${PETS_TABLE}?filterByFormula=${petFilter}` +
-      `&fields[]=Pet%20Name&fields[]=Active&fields[]=Gender&fields[]=Date%20of%20Birth` +
-      `&fields[]=Breed%20(Text)&fields[]=Breeds&fields[]=Spayed%2FNeutered` +
-      `&fields[]=Microchip%20Number&fields[]=Allergies&fields[]=Current%20Medications` +
-      `&fields[]=Feeding%20Schedule&fields[]=Fears%20%26%20Triggers&fields[]=Temperament` +
-      `&fields[]=Insurance%20Provider&fields[]=Insurance%20Policy%20Number` +
-      `&fields[]=Insurance%20Coverage&fields[]=Insurance%20Renewal%20Date` +
-      `&fields[]=Pet%20Notes&fields[]=Photo&fields[]=Compliance%20Documents` +
-      `&fields[]=Veterinarians&fields[]=Clients`
+      `/${PETS_TABLE}?filterByFormula=${petFilter}`
     );
 
     if (petsRes.ok) {
@@ -142,6 +138,8 @@ async function handleGetClient(req, env) {
                             ? (p.fields["Gender"] || {}).name || ""
                             : p.fields["Gender"] || "",
           spayedNeutered: p.fields["Spayed/Neutered"]     === true,
+          deceased:       p.fields["Deceased"]            === true,
+          dateOfDeath:    p.fields["Date of Death"]       || "",
           microchip:      p.fields["Microchip Number"]    || "",
           allergies:      p.fields["Allergies"]           || "",
           medications:    p.fields["Current Medications"] || "",
@@ -159,6 +157,9 @@ async function handleGetClient(req, env) {
           docsComplete:   hasRabies && hasTown && hasVax,
         });
       }
+    } else {
+      // Surfaces in `wrangler tail` so a failed pets fetch is never silently invisible.
+      console.error("Pets fetch failed:", petsRes.status, await petsRes.text().catch(() => ""));
     }
   }
 

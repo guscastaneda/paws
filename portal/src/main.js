@@ -345,6 +345,7 @@ function buildDocCards() {
 
   // Grouped by PET: each pet is a card, with the three document types as rows.
   clientData.pets.forEach(pet => {
+    if (pet.deceased) return; // no compliance asks for a pet that has passed
     const docs = pet.docs || [];
     const allOk = REQUIRED.every(type => docs.some(d => d.type === type && !d.expired));
 
@@ -453,7 +454,7 @@ function buildDocCards() {
 
   container.appendChild(wrap);
 
-  const allComplete = (clientData.pets || []).every(pet =>
+  const allComplete = (clientData.pets || []).filter(pet => !pet.deceased).every(pet =>
     ['Rabies Certificate', 'Town License', 'Vaccination Record'].every(type =>
       (pet.docs || []).some(d => d.type === type && !d.expired)
     )
@@ -1543,6 +1544,7 @@ function buildBookingPetPills() {
   if (!container) return;
   container.innerHTML = '';
   (clientData.pets || []).forEach((pet, i) => {
+    if (pet.deceased) return; // a pet that has passed is never shown as bookable
     const inp = document.createElement('input');
     inp.type = 'checkbox'; inp.name = 'booking-pet'; inp.value = pet.id; inp.id = 'bp-' + i; inp.className = 'booking-pet-check';
     const lbl = document.createElement('label');
@@ -1871,6 +1873,7 @@ function openMessage(opts = {}) {
   if (petSel) {
     petSel.innerHTML = '<option value="">— No specific pet —</option>';
     (clientData?.pets || []).forEach(pet => {
+      if (pet.deceased) return; // don't surface a pet that has passed in the message picker
       const o = document.createElement('option');
       o.value = pet.id;
       o.textContent = pet.name + (pet.active ? '' : ' (inactive)');

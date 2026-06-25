@@ -31,22 +31,49 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
       ? `<div class="resident-photo"><img src="${pet.photoUrl}" alt="${pet.name}"></div>`
       : `<div class="resident-photo"${pet.active ? '' : ' style="filter:grayscale(0.4);opacity:0.85;"'}><svg class="ic"><use href="#i-paw"/></svg></div>`;
 
-    const metaText = [pet.breed || 'Mixed Breed', pet.age].filter(Boolean).join(' · ');
+    // ── In memoriam: a pet that has passed. Quiet, dignified, no actions, no
+    //    nudges, no document asks — it simply rests here. This must come before
+    //    every other state so a grieving owner is never shown an Edit button,
+    //    a booking prompt, or a compliance request for their dog.
+    if (pet.deceased) {
+      const fmtMemorial = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { year: 'numeric' }) : '';
+      const passedYear = fmtMemorial(pet.dateOfDeath);
+      card.className = 'resident is-memorial';
+      card.innerHTML = `
+        <div class="resident-top" style="cursor:default;">
+          <div class="resident-photo memorial-photo">${pet.photoUrl ? `<img src="${pet.photoUrl}" alt="${pet.name}">` : `<svg class="ic"><use href="#i-paw"/></svg>`}</div>
+          <div class="resident-body">
+            <div class="resident-name">${pet.name}</div>
+            <div class="memorial-line">In loving memory${passedYear ? ' · ' + passedYear : ''}</div>
+          </div>
+        </div>`;
+      container.appendChild(card);
+      return;
+    }
+
+    // Gender with spay/neuter shown in parens, e.g. "Male (neutered)".
+    let genderTerm = '';
+    if (pet.gender) {
+      genderTerm = pet.gender + (pet.spayedNeutered ? ' (' + (pet.gender.toLowerCase() === 'female' ? 'spayed' : 'neutered') + ')' : '');
+    } else if (pet.spayedNeutered) {
+      genderTerm = 'Spayed/neutered';
+    }
+    // Age shown as-is (e.g. "9.2 yrs").
+    const ageText = pet.age || '';
+    // Line 1 under the name: age + gender. Line 2: breed(s).
+    const ageGenderLine = [ageText, genderTerm].filter(Boolean).join(', ');
+    const breedLine = pet.breed || 'Mixed Breed';
     const statusChip = pet.active
       ? '<span class="chip active"><span class="dot"></span>Active</span>'
       : '<span class="chip inactive"><span class="dot"></span>Inactive</span>';
 
-    // ── Inactive: header + nudge, no expand ──
+    // ── Inactive: header, no expand ──
     if (!pet.active) {
-      // Two very different cases share active=false:
-      //   - Lapsed: pet has stayed before → reactivation trial nudge.
-      //   - New: pet has never stayed (still awaiting first stay / approval) →
-      //     a welcome note, NOT an "it's been a while" message.
+      // A brand-new pet (never stayed) still gets a gentle welcome with a way to
+      // arrange the first visit. The "it's been a while" lapsed-reactivation nudge
+      // has been removed from the card per design.
       const nudgeHtml = pet.hasStayed
-        ? `<div class="nudge">
-          <p>It's been a while since ${pet.name}'s last stay. We'd love a trial daycare to make sure we're still a great fit.</p>
-          <button class="btn-clay" onclick="openMessage({ topic: 'pet', petId: '${pet.id}', prefillBody: 'I would like to set up a trial daycare for ${pet.name.replace(/'/g, "\\'")} — it has been a while since their last stay.' })"><svg class="ic"><use href="#i-msg"/></svg>Set up a trial</button>
-        </div>`
+        ? ''
         : `<div class="nudge nudge-welcome">
           <p>${pet.name} is all set up. The first visit is a quick trial daycare we arrange together. Reach out and we'll find a day that works.</p>
           <button class="btn-green" onclick="openMessage({ topic: 'pet', petId: '${pet.id}', prefillBody: 'We just finished setting up ${pet.name.replace(/'/g, "\\'")} and would like to arrange a first trial daycare visit.' })"><svg class="ic"><use href="#i-msg"/></svg>Arrange a first visit</button>
@@ -56,11 +83,12 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
           ${photoHtml}
           <div class="resident-body">
             <div class="resident-name">${pet.name}</div>
-            <div class="resident-meta">${metaText}</div>
+            ${ageGenderLine ? `<div class="resident-meta">${ageGenderLine}</div>` : ''}
+            <div class="resident-breed">${breedLine}</div>
           </div>
           <div class="resident-actions">
             ${statusChip}
-            <button class="btn-ghost" id="edit-pet-btn-${pet.id}"><svg class="ic"><use href="#i-edit"/></svg>Edit</button>
+            <button class="btn-ghost quiet" id="edit-pet-btn-${pet.id}"><svg class="ic"><use href="#i-edit"/></svg>Edit</button>
           </div>
         </div>
         ${nudgeHtml}`;
@@ -73,11 +101,6 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
     }
 
     // ── Active: full resident card with animated expand ──
-    const snBadge = pet.spayedNeutered
-      ? `<span style="font-size:0.68rem;background:var(--green-wash);color:var(--green-deep);padding:0.15rem 0.5rem;border-radius:999px;font-weight:600;"><svg class="ic" style="width:11px;height:11px;vertical-align:-0.1em;"><use href="#i-check"/></svg> Spayed/Neutered</span>`
-      : '';
-    const genderText = pet.gender ? ` <span style="font-size:0.78rem;color:var(--muted);font-weight:400;">${pet.gender}</span>` : '';
-
     // ── Doc rows ──
     const REQUIRED_DOCS = ['Rabies Certificate', 'Town License', 'Vaccination Record'];
     const docRows = REQUIRED_DOCS.map(type => {
@@ -105,13 +128,13 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
       <div class="resident-top" onclick="togglePetCard('${pet.id}')">
         ${photoHtml}
         <div class="resident-body">
-          <div class="resident-name">${pet.name}${genderText}</div>
-          <div class="resident-meta">${metaText}</div>
-          ${snBadge ? `<div style="margin-top:0.3rem;">${snBadge}</div>` : ''}
+          <div class="resident-name">${pet.name}</div>
+          ${ageGenderLine ? `<div class="resident-meta">${ageGenderLine}</div>` : ''}
+          <div class="resident-breed">${breedLine}</div>
         </div>
         <div class="resident-actions">
           ${statusChip}
-          <button class="btn-ghost" id="edit-pet-btn-${pet.id}" onclick="event.stopPropagation()"><svg class="ic"><use href="#i-edit"/></svg>Edit</button>
+          <button class="btn-ghost quiet" id="edit-pet-btn-${pet.id}" onclick="event.stopPropagation()"><svg class="ic"><use href="#i-edit"/></svg>Edit</button>
           <svg class="ic chev"><use href="#i-arrow"/></svg>
         </div>
       </div>
