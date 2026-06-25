@@ -16,10 +16,14 @@ function showView(id) {
   const bookingCard        = document.getElementById('booking-card');
   const bookingSuccessCard = document.getElementById('booking-success-card');
   const newPetCard         = document.getElementById('new-pet-card');
+  const messageCard        = document.getElementById('message-card');
+  const messageSuccessCard = document.getElementById('message-success-card');
 
   if (bookingCard)        bookingCard.style.display        = 'none';
   if (bookingSuccessCard) bookingSuccessCard.style.display = 'none';
   if (newPetCard)         newPetCard.style.display         = 'none';
+  if (messageCard)        messageCard.style.display        = 'none';
+  if (messageSuccessCard) messageSuccessCard.style.display = 'none';
 
   if (id === 'view-booking') {
     if (mainCard)    mainCard.style.display    = 'none';
@@ -27,6 +31,12 @@ function showView(id) {
   } else if (id === 'view-booking-success') {
     if (mainCard)            mainCard.style.display           = 'none';
     if (bookingSuccessCard)  bookingSuccessCard.style.display = 'block';
+  } else if (id === 'view-message') {
+    if (mainCard)     mainCard.style.display     = 'none';
+    if (messageCard)  messageCard.style.display  = 'block';
+  } else if (id === 'view-message-success') {
+    if (mainCard)            mainCard.style.display           = 'none';
+    if (messageSuccessCard)  messageSuccessCard.style.display = 'block';
   } else {
     if (mainCard) mainCard.style.display = '';
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -760,9 +770,9 @@ function buildDashboard() {
     }
   }
 
-  // Message Us → email
+  // Message Us → in-portal message form
   const msgBtn = document.getElementById('dash-message-btn');
-  if (msgBtn) msgBtn.onclick = () => { window.location = 'mai' + 'lto:' + 'hello' + '@' + 'pawsonlongmeadow.com'; };
+  if (msgBtn) msgBtn.onclick = () => openMessage();
 
   // ── 5 · Account setup (demoted) — show only if onboarding incomplete ──
   renderAccountSetup();
@@ -1463,7 +1473,7 @@ window.submitBooking = async function() {
     const names = inactiveSelected.map(p => p.name).join(', ');
     document.getElementById('booking-form-error').innerHTML =
       names + (inactiveSelected.length === 1 ? ' hasn\'t' : ' haven\'t') + ' stayed with us in a while, so we\'d love to set up a quick trial daycare before booking again. ' +
-      '<a href="mai' + 'lto:' + 'hello' + '@' + 'pawsonlongmeadow.com?subject=' + encodeURIComponent('Trial daycare for ' + names) + '" style="color:var(--green);font-weight:600;">Set up a trial</a>';
+      '<a href="#" onclick="openMessage({ topic: \'trial\', petId: \'' + inactiveSelected[0].id + '\', prefillBody: \'I would like to set up a trial daycare for ' + names.replace(/'/g, "\\'") + '.\' }); return false;" style="color:var(--green);font-weight:600;">Set up a trial</a>';
     document.getElementById('booking-form-error').classList.add('visible');
     return;
   }
@@ -1690,6 +1700,98 @@ window.bookAnother = function() {
   // Reset layout
   updateBookingFormLayout();
   showView('view-booking');
+};
+
+// ── Message Us ──────────────────────────────────────────────────────────────
+// Opens the in-portal message form. Optional opts: { topic, petId } to pre-fill
+// (used by the inactive-pet trial nudge).
+function openMessage(opts = {}) {
+  const topicSel = document.getElementById('msg-topic');
+  const petSel   = document.getElementById('msg-pet');
+  const petRow   = document.getElementById('msg-pet-row');
+  const bodyEl   = document.getElementById('msg-body');
+  const errEl    = document.getElementById('msg-body-error');
+  const btn      = document.getElementById('msg-submit');
+
+  // Reset
+  if (bodyEl) bodyEl.value = opts.prefillBody || '';
+  if (errEl)  errEl.classList.remove('visible');
+  if (btn)  { btn.disabled = false; btn.classList.remove('loading'); }
+
+  // Build the topic options. Add a "trial" option only when arriving from the nudge,
+  // so it stays out of the normal menu.
+  if (topicSel) {
+    const hasTrial = !!topicSel.querySelector('option[value="trial"]');
+    if (opts.topic === 'trial' && !hasTrial) {
+      const o = document.createElement('option');
+      o.value = 'trial'; o.textContent = 'Set up a trial';
+      topicSel.insertBefore(o, topicSel.firstChild);
+    }
+    if (opts.topic !== 'trial' && hasTrial) {
+      topicSel.querySelector('option[value="trial"]').remove();
+    }
+    topicSel.value = opts.topic || 'general';
+  }
+
+  // Populate pet dropdown from the client's pets
+  if (petSel) {
+    petSel.innerHTML = '<option value="">— No specific pet —</option>';
+    (clientData?.pets || []).forEach(pet => {
+      const o = document.createElement('option');
+      o.value = pet.id;
+      o.textContent = pet.name + (pet.active ? '' : ' (inactive)');
+      petSel.appendChild(o);
+    });
+    petSel.value = opts.petId || '';
+  }
+
+  // Show the pet row for topics where it's relevant (pet update or trial)
+  if (petRow && topicSel) {
+    const showPet = ['pet', 'trial'].includes(topicSel.value);
+    petRow.style.display = showPet ? '' : 'none';
+    topicSel.onchange = () => {
+      petRow.style.display = ['pet', 'trial'].includes(topicSel.value) ? '' : 'none';
+    };
+  }
+
+  showView('view-message');
+}
+window.openMessage = openMessage;
+
+window.submitMessage = async function() {
+  const topic   = document.getElementById('msg-topic')?.value || 'general';
+  const petId   = document.getElementById('msg-pet')?.value || '';
+  const bodyEl  = document.getElementById('msg-body');
+  const errEl   = document.getElementById('msg-body-error');
+  const btn     = document.getElementById('msg-submit');
+  const message = (bodyEl?.value || '').trim();
+
+  if (!message) {
+    if (errEl) errEl.classList.add('visible');
+    bodyEl?.focus();
+    return;
+  }
+  if (errEl) errEl.classList.remove('visible');
+
+  if (btn) { btn.disabled = true; btn.classList.add('loading'); }
+  try {
+    const res = await fetch(WORKER_URL + '/message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: clientToken,
+        clientId: clientData?.clientId,
+        topic,
+        petId: petId || undefined,
+        message,
+      }),
+    });
+    if (!res.ok) throw new Error('Request failed');
+    showView('view-message-success');
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.classList.remove('loading'); }
+    if (errEl) { errEl.textContent = 'Something went wrong sending your message. Please try again, or text us.'; errEl.classList.add('visible'); }
+  }
 };
 
 init();

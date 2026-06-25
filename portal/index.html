@@ -350,10 +350,14 @@
       <p>The Company invoices weekly via Venmo Business or such other method as agreed. Payment is due upon receipt. Peak season reservations require a 25% deposit. Late balances over 14 days may incur a $25 late fee. A $35 fee applies to returned payments or chargebacks.</p>
 
       <h5 style="margin-top:1.25rem;margin-bottom:0.35rem;">7. Cancellation Policy</h5>
-      <p><strong>Grace Period:</strong> Cancellations made within 4 hours of booking are never charged a fee, regardless of the dates booked.</p>
-      <p><strong>Daycare &amp; Half-Daycare:</strong> Cancellations made more than 24 hours before the scheduled date incur no charge. Cancellations made 24 hours or less in advance, or no-shows, are charged the full session rate.</p>
-      <p><strong>Boarding &amp; House Sitting:</strong> Cancellations made 7 or more days before the start date incur no charge. Cancellations made between 48 hours and 7 days before the start date are charged 50% of the total reservation price. Cancellations made less than 48 hours before the start date, or no-shows, are charged the full reservation amount.</p>
-      <p><strong>Peak Season:</strong> During peak season these windows tighten: 14 or more days' notice incurs no charge, 7–14 days' notice incurs a 50% charge, and less than 7 days' notice — or a no-show — incurs the full charge.</p>
+      <div style="background:var(--surface);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:0.7rem 0.9rem;margin:0.5rem 0 0.75rem;">
+        <p style="margin:0 0 0.3rem;"><strong style="color:var(--green-deep);">The short version.</strong> Cancel daycare 24+ hours ahead, or boarding 7+ days ahead, for no charge. Cancel inside those windows and a partial fee applies; a no-show is charged in full. Peak-season windows are wider. Cancel within 4 hours of booking and you're never charged. The full terms below control.</p>
+      </div>
+      <p><strong>Grace Period:</strong> Cancellations made within 4 hours of booking are never charged a fee, regardless of the dates booked. This overrides every tier below.</p>
+      <p><strong>Daycare &amp; Half-Day Daycare:</strong> 24 or more hours' notice incurs no charge. Less than 24 hours' notice is charged 50% of the session rate. A no-show (the Pet does not arrive and no cancellation was made) is charged the full session rate.</p>
+      <p><strong>Boarding &amp; House Sitting:</strong> 7 or more days' notice before the start date incurs no charge. Notice of 48 hours to 7 days is charged 50% of the total reservation. Less than 48 hours' notice, or a no-show, is charged the full reservation amount.</p>
+      <p><strong>Peak Season:</strong> During peak season these windows tighten: 14 or more days' notice incurs no charge, 7 to 14 days' notice is charged 50%, and less than 7 days' notice, or a no-show, is charged the full amount. Any peak-season deposit is applied against the amount owed.</p>
+      <p style="font-size:0.78rem;color:var(--muted);">Fees are calculated on the locked final price of the booking, which already reflects any peak-season surcharge. Where a cancellation falls exactly on a stated boundary, the tier more favorable to you applies.</p>
 
       <h5 style="margin-top:1.25rem;margin-bottom:0.35rem;">8. Photo & Video Release</h5>
       <p>The Client grants the Company permission to photograph and video record the Pet during services and to use such materials for business purposes including the Company's website and social media. The Client's name and identifying information will not be used without separate written consent. This release may be revoked at any time by written notice.</p>
@@ -575,6 +579,56 @@
       Request Another Service
     </button>
     <button class="btn-primary" style="margin-top:0.6rem;background:transparent;color:var(--brand-primary);box-shadow:none;border:1.5px solid var(--brand-primary);" onclick="goHome()">
+      Back to Portal
+    </button>
+  </div>
+</div>
+
+<div class="card" id="message-card" style="display:none;">
+  <!-- ══ MESSAGE US ══ -->
+  <div id="view-message">
+    <div class="step-header">
+      <button class="step-back" onclick="goHome()"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-arrow"/></svg> Back</button>
+      <div class="step-title">Message <em>Us</em></div>
+      <p class="step-desc">Send us a note and we will get back to you. For anything urgent, please text.</p>
+    </div>
+
+    <div class="form-group">
+      <label for="msg-topic">What's this about?</label>
+      <select id="msg-topic">
+        <option value="general">General question</option>
+        <option value="booking">Booking question</option>
+        <option value="pet">Update about my pet</option>
+        <option value="other">Something else</option>
+      </select>
+    </div>
+
+    <div class="form-group" id="msg-pet-row" style="display:none;">
+      <label for="msg-pet">About which pet? <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+      <select id="msg-pet">
+        <option value="">— No specific pet —</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="msg-body">Your message <span class="req">*</span></label>
+      <textarea id="msg-body" rows="6" placeholder="How can we help?"></textarea>
+      <div class="field-error" id="msg-body-error">Please enter a message.</div>
+    </div>
+
+    <button class="btn-primary" id="msg-submit" onclick="submitMessage()">Send Message</button>
+  </div>
+</div>
+
+<div class="card" id="message-success-card" style="display:none;">
+  <!-- ══ MESSAGE SUCCESS ══ -->
+  <div id="view-message-success">
+    <div class="success-wrap">
+      <div class="success-circle"><svg class="ic"><use href="#i-msg"/></svg></div>
+      <h2>Message sent!</h2>
+      <p style="margin-top:0.5rem;">Thanks for reaching out. We will get back to you soon. For anything urgent, please text us.</p>
+    </div>
+    <button class="btn-primary" style="margin-top:1rem;background:transparent;color:var(--brand-primary);box-shadow:none;border:1.5px solid var(--brand-primary);" onclick="goHome()">
       Back to Portal
     </button>
   </div>

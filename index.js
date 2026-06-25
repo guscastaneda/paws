@@ -9,6 +9,7 @@ import { handlePostCancellation } from './src/cancellation.js';
 import { handlePostCancellationConfirmed, handlePostRecurringArchived } from './src/cancellation-confirmed.js';
 import { handlePostCompliance }      from "./src/compliance.js";
 import { handlePostBooking }         from "./src/booking.js";
+import { handlePostMessage }         from "./src/message.js";
 import { handleGetAdminClients }     from "./src/admin.js";
 import { handlePostRecurringRequest, handlePostRecurringPause, handlePostRecurringCancel } from './src/recurring.js';
 import { handleSetupClient }         from './src/setup-client.js';
@@ -36,6 +37,7 @@ export default {
     if (path === '/cancellation-confirmed' && method === 'POST') return handlePostCancellationConfirmed(req, env);
     if (path === '/recurring-archived'     && method === 'POST') return handlePostRecurringArchived(req, env);
     if (path === "/booking"    && method === "POST") return handlePostBooking(req, env);
+    if (path === "/message"    && method === "POST") return handlePostMessage(req, env);
     if (path === "/pet"        && method === "POST") return handlePostPet(req, env);
     if (path === "/vet"        && method === "POST") return handlePostVet(req, env);
     if (path === "/pet-update" && method === "POST") return handlePostPetUpdate(req, env);
