@@ -304,6 +304,41 @@ function goToStep(step) {
   if (step === 'docs')    buildDocCards();
   if (step === 'booking') { buildBookingPetPills(); updateBookingFormLayout(); }
   if (step === 'contact') buildContactCurrentInfo();
+  if (step === 'agreement') renderAgreementState();
+}
+
+// Show either the signed-confirmation banner (boxed green check + consent date)
+// or the signing form, depending on whether the client has already signed.
+function renderAgreementState() {
+  const signed   = !!clientData.agreementSigned;
+  const banner   = document.getElementById('agreement-signed-banner');
+  const form     = document.getElementById('agreement-sign-form');
+  const stepDesc = document.querySelector('#view-agreement .step-desc');
+
+  if (banner) banner.style.display = signed ? 'flex' : 'none';
+  if (form)   form.style.display   = signed ? 'none' : 'block';
+  if (stepDesc) stepDesc.textContent = signed
+    ? 'You have signed our service agreement. The full terms are below for your reference.'
+    : 'Please read and sign our service agreement below.';
+
+  if (signed) {
+    const fmt = d => {
+      if (!d) return '';
+      const dt = new Date(d + 'T12:00:00');
+      return isNaN(dt) ? '' : dt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    };
+    const dateStr = fmt(clientData.agreementSignedDate);
+    const onDate  = document.getElementById('consent-on-date');
+    const signedBy = document.getElementById('consent-signed-by');
+    if (onDate)  onDate.textContent = dateStr ? 'provided on ' + dateStr : '';
+    if (signedBy) {
+      const parts = [];
+      if (clientData.agreementSignedName) parts.push('Signed by ' + clientData.agreementSignedName);
+      if (clientData.agreementVersion)    parts.push('Version ' + clientData.agreementVersion);
+      signedBy.textContent = parts.join(' · ');
+      signedBy.style.display = parts.length ? 'block' : 'none';
+    }
+  }
 }
 
 window.goHome   = goHome;
@@ -772,11 +807,19 @@ function renderAccountSetup() {
   const keys  = ['contact', 'emergency', 'docs', 'agreement'];
   const allDone = keys.every(k => steps[k]);
 
+  // Format the agreement consent date (e.g. "March 3, 2026") if we have it.
+  const fmtConsent = d => {
+    if (!d) return '';
+    const dt = new Date(d + 'T12:00:00');
+    return isNaN(dt) ? '' : dt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+  const consentDate = fmtConsent(clientData.agreementSignedDate);
+
   const META = {
     contact:   { title: 'Contact Information',  doneDesc: 'Name, phone, email & address',          todoDesc: 'Add your name, phone, email & address',   icon: 'i-user' },
     emergency: { title: 'Emergency Contact',    doneDesc: 'On file',                               todoDesc: 'Someone to reach if you\'re both away',    icon: 'i-phone' },
     docs:      { title: 'Compliance Documents', doneDesc: 'All documents on file',                 todoDesc: 'Rabies, town license & vaccination per pet', icon: 'i-doc' },
-    agreement: { title: 'Client Agreement',     doneDesc: 'Signed',                                todoDesc: 'Review and sign the service agreement',    icon: 'i-shield' },
+    agreement: { title: 'Client Agreement',     doneDesc: consentDate ? 'Consent provided on ' + consentDate : 'Signed', todoDesc: 'Review and sign the service agreement', icon: 'i-shield' },
   };
 
   const rows = keys.map(k => {
@@ -1354,6 +1397,13 @@ window.submitAgreement = async function() {
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     clientData.agreementSigned = true;
+    // Reflect the signature locally so a same-session revisit to the agreement
+    // step shows the full "consent provided on [date]" confirmation. On the next
+    // full load these come authoritatively from Airtable.
+    clientData.agreementSignedName = document.getElementById('agree-name').value.trim();
+    if (!clientData.agreementSignedDate) {
+      clientData.agreementSignedDate = new Date().toISOString().slice(0, 10);
+    }
     showView('view-contact-success');
   } catch {
     document.getElementById('ag-form-error').textContent = 'Something went wrong. Please try again.';

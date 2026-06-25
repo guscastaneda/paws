@@ -833,11 +833,42 @@ p { font-size: 0.875rem; font-weight: 400; color: var(--muted); line-height: 1.6
 /* Refined scrollbar for scrollable modal panels. Cosmetic only — scrolling works
    regardless. On mobile, native overlay scrollbars already auto-hide; this mainly
    tidies the desktop appearance. Degrades gracefully where unsupported. */
-.modal-scroll { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
-.modal-scroll::-webkit-scrollbar { width: 8px; }
+.modal-scroll { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }.modal-scroll::-webkit-scrollbar { width: 8px; }
 .modal-scroll::-webkit-scrollbar-track { background: transparent; }
 .modal-scroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
 .modal-scroll::-webkit-scrollbar-thumb:hover { background: var(--muted); background-clip: padding-box; border: 2px solid transparent; }
+
+/* Consent confirmation — affirmative "you've signed" banner with a filled green
+   box-check. Neutral surface + green accent rail (no green-wash fill). */
+.consent-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-left: 3px solid var(--green);
+  border-radius: 0 12px 12px 0;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1.25rem;
+}
+.consent-check {
+  width: 26px; height: 26px;
+  color: var(--green);
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+}
+.consent-title {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.consent-sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+}
 
 /* ── COMPLIANCE BANNERS ──────────────────────────────────────────────────── */
 .compliance-banner { border-radius: var(--r-md); padding: 1.1rem 1.25rem; margin-bottom: 0.25rem; display: flex; align-items: flex-start; gap: 0.85rem; }
