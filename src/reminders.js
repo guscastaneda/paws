@@ -102,15 +102,29 @@ function planForDoc(doc, ctx, today) {
   const subStatus = (typeof f["Submission Status"] === "object" ? f["Submission Status"]?.name : f["Submission Status"]) || "";
   if (subStatus !== "Accepted") return null;
 
-  // Resolve pet → must be active and not deceased.
+  // Resolve pet. Skip with a specific, status-like reason for each case.
   const petLink = f["Pet"] || [];
   const petId = petLink.length ? (typeof petLink[0] === "object" ? petLink[0].id : petLink[0]) : null;
   const pet = petId ? ctx.petById[petId] : null;
-  if (!pet || !pet.active || pet.deceased) return { skip: true, reason: "pet inactive/deceased/missing", docId: doc.id };
+  if (!pet)          return { skip: true, reason: "doc not linked to a pet", docId: doc.id };
+  if (pet.deceased)  return { skip: true, reason: "pet is deceased", docId: doc.id, pet: pet.name };
+  if (!pet.active)   return { skip: true, reason: "pet is inactive", docId: doc.id, pet: pet.name };
 
-  // Resolve client → must be active and have an email.
+  // Resolve client. In this business, onboarding happens via a texted magic link
+  // and email is captured during onboarding — so "no active client with email"
+  // means the client simply hasn't onboarded yet. That's expected, not an error:
+  // reminders should only ever go to onboarded clients.
   const client = pet.clientIds.map(id => ctx.clientById[id]).find(c => c && c.active && c.email);
-  if (!client) return { skip: true, reason: "no active client with email", docId: doc.id, pet: pet.name };
+  if (!client) {
+    const linked = pet.clientIds.map(id => ctx.clientById[id]).filter(Boolean);
+    const hasActive = linked.some(c => c.active);
+    const reason = !linked.length
+      ? "pet not linked to a client"
+      : !hasActive
+        ? "client is inactive"
+        : "client not yet onboarded (no email on file)";
+    return { skip: true, reason, docId: doc.id, pet: pet.name };
+  }
 
   const stage = (typeof f[ "Last Reminder Stage"] === "object" ? f["Last Reminder Stage"]?.name : f["Last Reminder Stage"]) || "";
   const expiryStr = f["Expiration Date"] || "";
@@ -184,6 +198,12 @@ async function handleRunReminders(req, env) {
 
   try {
     const { toSend, skipped, scanned } = await computePlan(env, today);
+
+    // Tally skips by reason so categories read as status at a glance, rather
+    // than a flat list. e.g. { "client not yet onboarded ...": 11, "pet is deceased": 1 }
+    const skipTally = {};
+    for (const s of skipped) skipTally[s.reason] = (skipTally[s.reason] || 0) + 1;
+
     return jsonRes({
       mode: "DRY_RUN",
       note: "No emails sent and no stages written. This is a preview of what the live job would do.",
@@ -201,7 +221,8 @@ async function handleRunReminders(req, env) {
         stageChange: (p.currentStage || "(none)") + " → " + p.newStage,
       })),
       skippedCount: skipped.length,
-      skipped: skipped.slice(0, 25),
+      skippedByReason: skipTally,
+      skipped: skipped.slice(0, 50),
     });
   } catch (err) {
     return errRes("Reminder dry-run failed: " + err.message, 500);
