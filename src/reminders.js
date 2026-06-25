@@ -38,10 +38,13 @@ const STAGE_DEC = "December nudge";
 async function fetchAll(env, table, params = "") {
   const out = [];
   let offset = "";
+  let pages = 0;
   do {
-    const sep = params ? "&" : "";
-    const url = `/${table}?pageSize=100${params ? "&" + params : ""}${offset ? sep + "offset=" + offset : ""}`;
-    const res = await atFetch(env, url);
+    if (++pages > 12) break; // safety stop: 12 pages = 1200 records, far beyond our data
+    const qs = new URLSearchParams(params);
+    qs.set("pageSize", "100");
+    if (offset) qs.set("offset", offset);
+    const res = await atFetch(env, `/${table}?${qs.toString()}`);
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(`Airtable read failed (${table}): ${JSON.stringify(err)}`);
