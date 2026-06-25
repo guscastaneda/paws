@@ -1473,7 +1473,7 @@ window.submitBooking = async function() {
     const names = inactiveSelected.map(p => p.name).join(', ');
     document.getElementById('booking-form-error').innerHTML =
       names + (inactiveSelected.length === 1 ? ' hasn\'t' : ' haven\'t') + ' stayed with us in a while, so we\'d love to set up a quick trial daycare before booking again. ' +
-      '<a href="#" onclick="openMessage({ topic: \'trial\', petId: \'' + inactiveSelected[0].id + '\', prefillBody: \'I would like to set up a trial daycare for ' + names.replace(/'/g, "\\'") + '.\' }); return false;" style="color:var(--green);font-weight:600;">Set up a trial</a>';
+      '<a href="#" onclick="openMessage({ topic: \'pet\', petId: \'' + inactiveSelected[0].id + '\', prefillBody: \'I would like to set up a trial daycare for ' + names.replace(/'/g, "\\'") + ' — it has been a while since their last stay.\' }); return false;" style="color:var(--green);font-weight:600;">Set up a trial</a>';
     document.getElementById('booking-form-error').classList.add('visible');
     return;
   }
@@ -1702,36 +1702,69 @@ window.bookAnother = function() {
   showView('view-booking');
 };
 
+// ── Booking helper ────────────────────────────────────────────────────────────
+// Opens the booking flow with an optional service pre-selected.
+function openBooking(service) {
+  if (service) {
+    document.querySelectorAll('input[name="booking-service"]').forEach(el => {
+      el.checked = el.value === service;
+    });
+  }
+  goToStep('booking');
+}
+window.openBooking = openBooking;
+
 // ── Message Us ──────────────────────────────────────────────────────────────
-// Opens the in-portal message form. Optional opts: { topic, petId } to pre-fill
-// (used by the inactive-pet trial nudge).
+// Topics split into two kinds:
+//   - REDIRECT topics (trial, availability) funnel into the booking flow — no
+//     free-text, because these belong in the structured request flow.
+//   - FREE-TEXT topics (pet, stay, billing, other) open the message box, since
+//     they have no structured home and genuinely need a written note.
+const MSG_REDIRECTS = {
+  trial: {
+    service: 'daycare',
+    text: 'New dogs start with a trial daycare so we can make sure everyone is a good fit. Request a daycare visit below and we will confirm within 24 hours. If a date does not work, we will suggest one that does.',
+    btnLabel: 'Request a daycare visit',
+  },
+  availability: {
+    service: 'daycare',
+    text: 'The fastest way to check availability is to send a request for the dates you want. We confirm or suggest an alternative within 24 hours. Pick your service and dates below.',
+    btnLabel: 'Request a service',
+  },
+};
+
+// Topic-aware quick-fill chips. Each pre-fills the message box (it does NOT send).
+const MSG_CHIPS = {
+  pet: [
+    { label: 'New medication', text: 'I want to update you on a new medication: ' },
+    { label: 'Vet / contact change', text: 'My vet or emergency contact info has changed: ' },
+    { label: 'Behavior or diet update', text: 'A quick update on behavior/diet: ' },
+  ],
+  stay: [
+    { label: 'Question about my dates', text: 'I have a question about my upcoming stay: ' },
+    { label: 'Feeding / meds during stay', text: 'For my upcoming stay, here are the feeding/medication instructions: ' },
+    { label: 'Pickup / drop-off timing', text: 'A note about pickup/drop-off timing for my stay: ' },
+  ],
+  billing: [
+    { label: 'Invoice question', text: 'I have a question about an invoice: ' },
+    { label: 'Document question', text: 'I have a question about my documents: ' },
+  ],
+  other: [],
+};
+
+const MSG_PET_TOPICS = ['pet', 'stay']; // topics where the pet selector is useful
+
+// Opens the in-portal message form. Optional opts: { topic, petId, prefillBody }
 function openMessage(opts = {}) {
   const topicSel = document.getElementById('msg-topic');
   const petSel   = document.getElementById('msg-pet');
-  const petRow   = document.getElementById('msg-pet-row');
   const bodyEl   = document.getElementById('msg-body');
   const errEl    = document.getElementById('msg-body-error');
   const btn      = document.getElementById('msg-submit');
 
-  // Reset
   if (bodyEl) bodyEl.value = opts.prefillBody || '';
   if (errEl)  errEl.classList.remove('visible');
   if (btn)  { btn.disabled = false; btn.classList.remove('loading'); }
-
-  // Build the topic options. Add a "trial" option only when arriving from the nudge,
-  // so it stays out of the normal menu.
-  if (topicSel) {
-    const hasTrial = !!topicSel.querySelector('option[value="trial"]');
-    if (opts.topic === 'trial' && !hasTrial) {
-      const o = document.createElement('option');
-      o.value = 'trial'; o.textContent = 'Set up a trial';
-      topicSel.insertBefore(o, topicSel.firstChild);
-    }
-    if (opts.topic !== 'trial' && hasTrial) {
-      topicSel.querySelector('option[value="trial"]').remove();
-    }
-    topicSel.value = opts.topic || 'general';
-  }
 
   // Populate pet dropdown from the client's pets
   if (petSel) {
@@ -1745,21 +1778,62 @@ function openMessage(opts = {}) {
     petSel.value = opts.petId || '';
   }
 
-  // Show the pet row for topics where it's relevant (pet update or trial)
-  if (petRow && topicSel) {
-    const showPet = ['pet', 'trial'].includes(topicSel.value);
-    petRow.style.display = showPet ? '' : 'none';
-    topicSel.onchange = () => {
-      petRow.style.display = ['pet', 'trial'].includes(topicSel.value) ? '' : 'none';
-    };
+  if (topicSel) {
+    topicSel.value = opts.topic || 'trial';
+    topicSel.onchange = () => renderMessageTopic(topicSel.value);
   }
+  renderMessageTopic(opts.topic || 'trial', opts);
 
   showView('view-message');
 }
 window.openMessage = openMessage;
 
+// Switches the form between redirect mode and free-text mode based on topic.
+function renderMessageTopic(topic, opts = {}) {
+  const redirectPanel = document.getElementById('msg-redirect');
+  const freetextPanel = document.getElementById('msg-freetext');
+  const petRow        = document.getElementById('msg-pet-row');
+  const chipsWrap     = document.getElementById('msg-chips');
+  const redirect      = MSG_REDIRECTS[topic];
+
+  if (redirect) {
+    // Redirect mode: explain + button into booking flow. No message box.
+    if (redirectPanel) redirectPanel.style.display = 'block';
+    if (freetextPanel) freetextPanel.style.display = 'none';
+    document.getElementById('msg-redirect-text').textContent = redirect.text;
+    document.getElementById('msg-redirect-btn-label').textContent = redirect.btnLabel;
+    document.getElementById('msg-redirect-btn').onclick = () => openBooking(redirect.service);
+    return;
+  }
+
+  // Free-text mode
+  if (redirectPanel) redirectPanel.style.display = 'none';
+  if (freetextPanel) freetextPanel.style.display = 'block';
+  if (petRow) petRow.style.display = MSG_PET_TOPICS.includes(topic) ? '' : 'none';
+
+  // Build quick-fill chips for this topic
+  if (chipsWrap) {
+    const chips = MSG_CHIPS[topic] || [];
+    chipsWrap.innerHTML = '';
+    chipsWrap.style.display = chips.length ? 'flex' : 'none';
+    chips.forEach(chip => {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'msg-chip';
+      el.textContent = chip.label;
+      el.onclick = () => {
+        const bodyEl = document.getElementById('msg-body');
+        if (bodyEl) { bodyEl.value = chip.text; bodyEl.focus(); }
+        chipsWrap.querySelectorAll('.msg-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+      };
+      chipsWrap.appendChild(el);
+    });
+  }
+}
+
 window.submitMessage = async function() {
-  const topic   = document.getElementById('msg-topic')?.value || 'general';
+  const topic   = document.getElementById('msg-topic')?.value || 'other';
   const petId   = document.getElementById('msg-pet')?.value || '';
   const bodyEl  = document.getElementById('msg-body');
   const errEl   = document.getElementById('msg-body-error');
@@ -1767,7 +1841,7 @@ window.submitMessage = async function() {
   const message = (bodyEl?.value || '').trim();
 
   if (!message) {
-    if (errEl) errEl.classList.add('visible');
+    if (errEl) { errEl.textContent = 'Please enter a message.'; errEl.classList.add('visible'); }
     bodyEl?.focus();
     return;
   }

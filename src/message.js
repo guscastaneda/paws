@@ -36,11 +36,12 @@ function esc(s) {
 }
 
 const TOPIC_LABELS = {
-  general:  'General question',
-  booking:  'Booking question',
-  pet:      'Update about my pet',
-  trial:    'Set up a trial',
-  other:    'Something else',
+  trial:        'Set up a trial',
+  availability: 'Availability / booking',
+  pet:          'About my pet',
+  stay:         'About an upcoming stay',
+  billing:      'Billing or documents',
+  other:        'Something else',
 };
 
 // ── POST /message ─────────────────────────────────────────────────────────────

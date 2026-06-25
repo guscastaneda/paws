@@ -438,6 +438,7 @@ body::before {
 
 /* inactive nudge */
 .nudge { margin: 0 1rem 1rem; padding: 0.9rem 1rem; background: var(--clay-wash); border-radius: var(--r-sm); display: flex; align-items: center; gap: 0.85rem; }
+.nudge-welcome { background: var(--surface); border: 1px solid var(--line-soft); border-left: 3px solid var(--green); border-radius: 0 var(--r-sm) var(--r-sm) 0; }
 .nudge p { font-size: 0.82rem; color: var(--ink); line-height: 1.45; }
 .nudge .btn-clay { flex-shrink: 0; }
 @media (max-width: 480px) {
@@ -677,6 +678,18 @@ select { min-height: 3rem; }
 .btn-clay .ic { width: 14px; height: 14px; }
 .btn-clay:hover { background: var(--clay); color: #fff; }
 .btn-clay:active { transform: scale(0.94); }
+.btn-green {
+  padding: 0.4rem 0.8rem; background: transparent; color: var(--green);
+  border: 1.5px solid var(--green); border-radius: 999px;
+  font-family: var(--font-body); font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  white-space: nowrap; display: inline-flex; align-items: center; gap: 0.35rem;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+.btn-green .ic { width: 14px; height: 14px; }
+.btn-green:hover { background: var(--green); color: #fff; }
+.btn-green:active { transform: scale(0.94); }
+.nudge-welcome .btn-green { flex-shrink: 0; }
+@media (max-width: 480px) { .nudge-welcome .btn-green { justify-content: center; width: 100%; } }
 
 /* Consistent outline action buttons — fill with their color on hover, like btn-clay.
    btn-danger (cancellation), btn-warn (pause). Use for all inline pill actions. */
@@ -697,6 +710,15 @@ select { min-height: 3rem; }
 .field-hint { font-size: 0.78rem; color: var(--muted); margin-top: 0.4rem; line-height: 1.5; }
 .field-error { font-size: 0.75rem; color: var(--brand-error); margin-top: 0.3rem; display: none; }
 .field-error.visible { display: block; }
+.msg-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.msg-chip {
+  padding: 0.45rem 0.85rem; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 999px;
+  font-family: var(--font-body); font-size: 0.82rem; font-weight: 500; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.msg-chip:hover { border-color: var(--green); }
+.msg-chip.active { background: var(--green-wash); border-color: rgba(47,125,82,0.35); color: var(--green-deep); }
 .form-error {
   background: var(--brand-error-light); border: 1px solid rgba(178,58,46,0.2);
   border-radius: var(--r-sm); padding: 0.8rem 1rem; font-size: 0.85rem;

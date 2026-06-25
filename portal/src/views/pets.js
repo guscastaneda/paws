@@ -36,8 +36,21 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
       ? '<span class="chip active"><span class="dot"></span>Active</span>'
       : '<span class="chip inactive"><span class="dot"></span>Inactive</span>';
 
-    // ── Inactive: header + reactivation nudge, no expand ──
+    // ── Inactive: header + nudge, no expand ──
     if (!pet.active) {
+      // Two very different cases share active=false:
+      //   - Lapsed: pet has stayed before → reactivation trial nudge.
+      //   - New: pet has never stayed (still awaiting first stay / approval) →
+      //     a welcome note, NOT an "it's been a while" message.
+      const nudgeHtml = pet.hasStayed
+        ? `<div class="nudge">
+          <p>It's been a while since ${pet.name}'s last stay. We'd love a trial daycare to make sure we're still a great fit.</p>
+          <button class="btn-clay" onclick="openMessage({ topic: 'pet', petId: '${pet.id}', prefillBody: 'I would like to set up a trial daycare for ${pet.name.replace(/'/g, "\\'")} — it has been a while since their last stay.' })"><svg class="ic"><use href="#i-msg"/></svg>Set up a trial</button>
+        </div>`
+        : `<div class="nudge nudge-welcome">
+          <p>${pet.name} is all set up. The first visit is a quick trial daycare we arrange together. Reach out and we'll find a day that works.</p>
+          <button class="btn-green" onclick="openMessage({ topic: 'pet', petId: '${pet.id}', prefillBody: 'We just finished setting up ${pet.name.replace(/'/g, "\\'")} and would like to arrange a first trial daycare visit.' })"><svg class="ic"><use href="#i-msg"/></svg>Arrange a first visit</button>
+        </div>`;
       card.innerHTML = `
         <div class="resident-top" style="cursor:default;">
           ${photoHtml}
@@ -50,10 +63,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
             <button class="btn-ghost" id="edit-pet-btn-${pet.id}"><svg class="ic"><use href="#i-edit"/></svg>Edit</button>
           </div>
         </div>
-        <div class="nudge">
-          <p>It's been a while since ${pet.name}'s last stay. We'd love a trial daycare to make sure we're still a great fit.</p>
-          <button class="btn-clay" onclick="openMessage({ topic: 'trial', petId: '${pet.id}', prefillBody: 'I would like to set up a trial daycare for ${pet.name.replace(/'/g, "\\'")}.' })"><svg class="ic"><use href="#i-msg"/></svg>Set up a trial</button>
-        </div>`;
+        ${nudgeHtml}`;
       container.appendChild(card);
       setTimeout(() => {
         const editBtn = document.getElementById('edit-pet-btn-' + pet.id);
