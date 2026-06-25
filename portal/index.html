@@ -124,53 +124,48 @@
 
   <!-- ══ DASHBOARD ══ -->
   <div id="view-dashboard" class="view">
-    <!-- Compliance status banner injected by buildDashboard() -->
-    <div id="dash-status-banner"></div>
 
-    <!-- Upcoming appointments - shown if any exist -->
-    <div id="dash-appointments" style="display:none;margin-bottom:0.5rem;">
-      <div class="section-header" style="margin-top:1.25rem;">
-        <div class="section-title">Future Requests</div>
+    <!-- 1 · Dynamic greeting + conditional alert (injected by buildDashboard) -->
+    <div id="dash-greeting"></div>
+    <div id="dash-alert"></div>
+
+    <!-- 2 · Primary action -->
+    <div class="stagger d1" style="margin-top:1.25rem;">
+      <button class="hero-cta" id="dash-request-btn"><svg class="ic"><use href="#i-cal"/></svg> Request a Service</button>
+      <div class="subactions" id="dash-subactions">
+        <a class="subaction" onclick="goToStep('docs')"><svg class="ic"><use href="#i-upload"/></svg><span class="lab">Upload Documents</span></a>
+        <a class="subaction" onclick="goToStep('contact')"><svg class="ic"><use href="#i-user"/></svg><span class="lab">Update My Info</span></a>
+        <a class="subaction" id="dash-message-btn"><svg class="ic"><use href="#i-msg"/></svg><span class="lab">Message Us</span></a>
+      </div>
+    </div>
+
+    <!-- 3 · Upcoming (rich appointment cards; empty state injected when none) -->
+    <div id="dash-appointments" class="stagger d2" style="margin-top:1.5rem;">
+      <div class="section-header">
+        <div class="section-title">Upcoming</div>
       </div>
       <div id="dash-appt-cards" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
-      <div class="divider"></div>
     </div>
-    <!-- Recurring services -->
-    <div id="dash-recurring" style="display:none;margin-bottom:0.5rem;">
-      <div class="section-header" style="margin-top:1.25rem;">
-        <div class="section-title">Recurring Services</div>
+
+    <!-- 3b · Recurring services -->
+    <div id="dash-recurring" class="stagger d2" style="display:none;margin-top:1.5rem;">
+      <div class="section-header">
+        <div class="section-title">Recurring</div>
       </div>
       <div id="dash-recurring-cards" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
-      <div class="divider"></div>
     </div>
-    <div class="section-header" style="margin-top:1.25rem;">
-      <div class="section-title">Your Pets</div>
-    </div>
-    <div class="pet-cards" id="dash-pet-cards"></div>
 
-    <div class="divider"></div>
+    <!-- 4 · Your Pack -->
+    <div class="stagger d3" style="margin-top:1.5rem;">
+      <div class="section-header">
+        <div class="section-title">Your Pack</div>
+      </div>
+      <div class="pet-cards" id="dash-pet-cards"></div>
+    </div>
 
-    <div class="section-header">
-      <div class="section-title">Quick Actions</div>
-    </div>
-    <div class="quick-actions">
-      <a class="action-btn" onclick="goToStep('docs')">
-        <span class="action-btn-icon"><svg class="ic"><use href="#i-upload"/></svg></span>
-        <span class="action-btn-label">Upload Document</span>
-      </a>
-      <a class="action-btn" onclick="goToStep('contact')">
-        <span class="action-btn-icon"><svg class="ic"><use href="#i-user"/></svg></span>
-        <span class="action-btn-label">Update Info</span>
-      </a>
-      <a class="action-btn" onclick="goToStep('emergency')">
-        <span class="action-btn-icon"><svg class="ic"><use href="#i-alert"/></svg></span>
-        <span class="action-btn-label">Emergency Contact</span>
-      </a>
-      <a class="action-btn" onclick="goToStep('agreement')">
-        <span class="action-btn-icon"><svg class="ic"><use href="#i-doc"/></svg></span>
-        <span class="action-btn-label">View Agreement</span>
-      </a>
-    </div>
+    <!-- 5 · Account setup (demoted; injected by buildDashboard, hidden when complete) -->
+    <div id="dash-setup" class="stagger d4" style="display:none;margin-top:1.5rem;"></div>
+
   </div>
 
   <!-- ══ STEP: CONTACT INFO ══ -->

@@ -586,61 +586,102 @@ function getComplianceState() {
   return { state: 'blocked', missing, expiring };
 }
 
+// Demoted account-setup card on the dashboard — real onboarding steps, shown
+// only when something is incomplete. Mirrors the onboarding step titles.
+function renderAccountSetup() {
+  const host = document.getElementById('dash-setup');
+  if (!host) return;
+  const steps = calcOnboardingSteps(clientData);
+  const keys  = ['contact', 'emergency', 'docs', 'agreement'];
+  const allDone = keys.every(k => steps[k]);
+
+  if (allDone) { host.style.display = 'none'; host.innerHTML = ''; return; }
+
+  const META = {
+    contact:   { title: 'Contact Information',   desc: 'Your name, phone, email & address',   icon: 'i-user' },
+    emergency: { title: 'Emergency Contact',     desc: 'Someone to reach if you\'re both away', icon: 'i-phone' },
+    docs:      { title: 'Compliance Documents',  desc: 'Rabies, town license & vaccination per pet', icon: 'i-doc' },
+    agreement: { title: 'Client Agreement',      desc: 'Review and sign the service agreement', icon: 'i-doc' },
+  };
+
+  const rows = keys.map(k => {
+    const done = steps[k];
+    const m = META[k];
+    return '<a class="check-item' + (done ? ' done' : '') + '"' + (done ? '' : ' onclick="goToStep(\'' + k + '\')"') + '>' +
+      '<div class="check-icon"><svg class="ic"><use href="#' + (done ? 'i-check' : m.icon) + '"/></svg></div>' +
+      '<div class="check-text"><div class="check-title">' + m.title + '</div>' +
+      '<div class="check-desc">' + (done ? 'Done' : m.desc) + '</div></div>' +
+      (done ? '' : '<svg class="ic check-arrow"><use href="#i-arrow"/></svg>') +
+    '</a>';
+  }).join('');
+
+  host.style.display = 'block';
+  host.innerHTML =
+    '<div class="section-header"><div class="section-title">Account setup</div></div>' +
+    '<div class="checklist">' + rows + '</div>';
+}
+
 function buildDashboard() {
   enrichClientData();
 
-  // ── STAGE 4a verification (temporary) — confirm greeting/alert logic on real data ──
-  try {
-    const g = getDynamicGreeting();
-    const expiring = getExpiringDocs(30);
-    const nextAppt = getNextAppointment();
-    console.log('[4a] Greeting:', g.title, '—', g.sub, '(tone:', g.tone + ')');
-    console.log('[4a] Next appointment:', nextAppt ? (nextAppt.category + ' ' + nextAppt.startDate + ' in ' + nextAppt.daysUntilStart + 'd, ' + nextAppt.status) : 'none');
-    console.log('[4a] Expiring docs (<=30d):', expiring.length ? expiring.map(e => e.pet + ' ' + e.type + ' ' + e.days + 'd').join(' | ') : 'none');
-  } catch (e) { console.warn('[4a] greeting logic error:', e); }
-
   const { state, missing, expiring } = getComplianceState();
-  const banner    = document.getElementById('dash-status-banner');
   const firstName = clientData.firstName || 'there';
 
-  if (state === 'compliant') {
-    banner.innerHTML =
-      '<div class="compliance-banner compliant">' +
-        '<div class="compliance-banner-icon"><svg class="ic"><use href="#i-check"/></svg></div>' +
-        '<div class="compliance-banner-body">' +
-          '<div class="compliance-banner-title">All set, ' + firstName + '!</div>' +
-          '<div class="compliance-banner-desc">Your account is fully up to date. Ready to book.</div>' +
-        '</div>' +
-      '</div>' +
-      '<button class="btn-book" id="dash-book-btn"><svg class="ic"><use href="#i-paw"/></svg> Book a Service</button>';
-  } else if (state === 'warning') {
-    const items = expiring.map(e => e.pet + "'s " + e.type + ' expires in ' + e.days + ' days').join(' · ');
-    banner.innerHTML =
-      '<div class="compliance-banner warning">' +
-        '<div class="compliance-banner-icon"><svg class="ic"><use href="#i-alert"/></svg></div>' +
-        '<div class="compliance-banner-body">' +
-          '<div class="compliance-banner-title">Documents expiring soon</div>' +
-          '<div class="compliance-banner-desc">' + items + '. Please renew before your next stay.</div>' +
-        '</div>' +
-      '</div>' +
-      '<button class="btn-book" id="dash-book-btn"><svg class="ic"><use href="#i-paw"/></svg> Book a Service</button>';
-  } else {
-    const items = missing.map(m => m.pet + ': ' + m.type).join(' · ');
-    banner.innerHTML =
-      '<div class="compliance-banner blocked">' +
-        '<div class="compliance-banner-icon"><svg class="ic"><use href="#i-lock"/></svg></div>' +
-        '<div class="compliance-banner-body">' +
-          '<div class="compliance-banner-title">Documents needed before booking</div>' +
-          '<div class="compliance-banner-desc">' + items + '</div>' +
-        '</div>' +
-      '</div>' +
-      '<button class="btn-book" disabled><svg class="ic"><use href="#i-lock"/></svg> Booking Unavailable</button>';
+  // ── 1 · Dynamic greeting ──
+  const greeting = getDynamicGreeting();
+  const greetEl  = document.getElementById('dash-greeting');
+  if (greetEl) {
+    greetEl.innerHTML =
+      '<div class="greeting-name">' + greeting.title.replace(firstName, '<em>' + firstName + '</em>') + '</div>' +
+      '<div class="greeting-sub">' + greeting.sub + '</div>';
   }
 
-  setTimeout(() => {
-    const bookBtn = document.getElementById('dash-book-btn');
-    if (bookBtn && !bookBtn.disabled) bookBtn.onclick = () => goToStep('booking');
-  }, 0);
+  // ── 1b · Conditional alert strip (missing docs block booking; expiring docs warn) ──
+  const alertEl = document.getElementById('dash-alert');
+  if (alertEl) {
+    if (state === 'blocked') {
+      const items = missing.map(m => m.pet + ': ' + m.type).join(' · ');
+      alertEl.innerHTML =
+        '<div class="alert-strip err">' +
+          '<svg class="ic"><use href="#i-lock"/></svg>' +
+          '<div class="body"><b>Documents needed before booking.</b> ' + items + '</div>' +
+        '</div>';
+    } else if (state === 'warning') {
+      const items = expiring.map(e =>
+        e.days < 0 ? (e.pet + "'s " + e.type + ' has expired')
+                   : (e.pet + "'s " + e.type + ' expires in ' + e.days + ' day' + (e.days === 1 ? '' : 's'))
+      ).join(' · ');
+      alertEl.innerHTML =
+        '<div class="alert-strip warn">' +
+          '<svg class="ic"><use href="#i-alert"/></svg>' +
+          '<div class="body"><b>Renew before your next stay.</b> ' + items + '</div>' +
+        '</div>';
+    } else {
+      alertEl.innerHTML = '';
+    }
+  }
+
+  // ── 2 · Hero "Request a Service" — disabled when blocked ──
+  const requestBtn = document.getElementById('dash-request-btn');
+  if (requestBtn) {
+    if (state === 'blocked') {
+      requestBtn.disabled = true;
+      requestBtn.innerHTML = '<svg class="ic"><use href="#i-lock"/></svg> Complete Documents to Request';
+      requestBtn.onclick = () => goToStep('docs');
+      requestBtn.disabled = false; // keep tappable so it routes to docs
+    } else {
+      requestBtn.disabled = false;
+      requestBtn.innerHTML = '<svg class="ic"><use href="#i-cal"/></svg> Request a Service';
+      requestBtn.onclick = () => goToStep('booking');
+    }
+  }
+
+  // Message Us → email
+  const msgBtn = document.getElementById('dash-message-btn');
+  if (msgBtn) msgBtn.onclick = () => { window.location = 'mai' + 'lto:' + 'hello' + '@' + 'pawsonlongmeadow.com'; };
+
+  // ── 5 · Account setup (demoted) — show only if onboarding incomplete ──
+  renderAccountSetup();
 
   // ── Upcoming appointments ──
   const appts       = clientData.appointments || [];
@@ -771,7 +812,20 @@ function buildDashboard() {
       apptCards.appendChild(toggleBtn);
     }
   } else {
-    apptSection.style.display = 'none';
+    // Empty state — invite action instead of hiding
+    apptSection.style.display = 'block';
+    const activePetName = (clientData.pets || []).find(p => p.active)?.name;
+    const onCal = activePetName ? activePetName + ' on the calendar' : 'a visit on the calendar';
+    apptCards.innerHTML =
+      '<div class="upcoming-empty">' +
+        '<svg class="ic"><use href="#i-cal"/></svg>' +
+        '<p>No visits planned. Request a service to get ' + onCal + '.</p>' +
+        '<button class="btn-sm" id="dash-empty-request"><svg class="ic"><use href="#i-cal"/></svg>Request a Service</button>' +
+      '</div>';
+    setTimeout(() => {
+      const eb = document.getElementById('dash-empty-request');
+      if (eb) eb.onclick = () => goToStep('booking');
+    }, 0);
   }
 
   // ── Recurring services ──
