@@ -389,7 +389,6 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
           <button class="edit-pet-tab" data-tab="vet" onclick="switchEditPetTab('vet')" style="flex:1;padding:0.6rem 0.35rem;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--font-body);font-size:0.78rem;font-weight:400;color:var(--brand-stone);cursor:pointer;">Vet</button>
           <button class="edit-pet-tab" data-tab="insurance" onclick="switchEditPetTab('insurance')" style="flex:1;padding:0.6rem 0.35rem;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--font-body);font-size:0.78rem;font-weight:400;color:var(--brand-stone);cursor:pointer;">Insurance</button>
         </div>
-        </div>
       </div>
 
       <div style="padding:1.25rem 1.5rem 2rem;">
@@ -458,7 +457,6 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
             <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Temperament</label>
             <textarea id="ep-temperament" placeholder="e.g. friendly with other dogs, reactive on leash, shy with strangers at first" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;min-height:70px;resize:vertical;">${pet.temperament || ''}</textarea>
           </div>
-        </div>
         </div>
 
         <!-- Tab: Vet Info -->
