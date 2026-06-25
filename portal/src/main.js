@@ -1567,15 +1567,18 @@ window.submitContact = async function() {
 
   const payload = {
     token: clientToken, clientId: clientData.clientId,
-    updates: [
-      { field: 'Client Name',            current: clientData.name     || '', proposed: name },
-      { field: 'Phone Number',           current: clientData.phone    || '', proposed: phone },
-      { field: 'Email Address',          current: clientData.email    || '', proposed: email },
-      { field: 'Address',                current: clientData.address  || '', proposed: document.getElementById('c-address').value.trim() },
-      { field: 'Additional Owner Name',  current: clientData.addName  || '', proposed: document.getElementById('c-add-name').value.trim() },
-      { field: 'Additional Owner Phone', current: clientData.addPhone || '', proposed: document.getElementById('c-add-phone').value.trim() },
-      { field: 'Additional Owner Email', current: clientData.addEmail || '', proposed: document.getElementById('c-add-email').value.trim() },
-    ].filter(u => u.proposed !== u.current && (u.proposed || u.current)),
+    // Contact info is the client correcting their own account details, so it
+    // writes straight to the Clients table (same direct path as email/emergency),
+    // no review queue. Only blank-out is guarded against on required fields above.
+    directFields: {
+      'Client Name':            name,
+      'Phone Number':           phone,
+      'Email Address':          email,
+      'Address':                document.getElementById('c-address').value.trim(),
+      'Additional Owner Name':  document.getElementById('c-add-name').value.trim(),
+      'Additional Owner Phone': document.getElementById('c-add-phone').value.trim(),
+      'Additional Owner Email': document.getElementById('c-add-email').value.trim(),
+    },
     markEmailConfirmed: true,
   };
 
@@ -1586,6 +1589,10 @@ window.submitContact = async function() {
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Server error'); }
     clientData.emailConfirmed = true;
     clientData.email = email; clientData.name = name; clientData.phone = phone;
+    clientData.address = document.getElementById('c-address').value.trim();
+    clientData.addName = document.getElementById('c-add-name').value.trim();
+    clientData.addPhone = document.getElementById('c-add-phone').value.trim();
+    clientData.addEmail = document.getElementById('c-add-email').value.trim();
     showView('view-contact-success');
   } catch (err) {
     document.getElementById('c-form-error').textContent = 'Error: ' + err.message;
