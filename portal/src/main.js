@@ -405,6 +405,40 @@ function buildDocCards() {
   }
 }
 
+// Soft-warning modal for booking protection: a doc is valid through the stay but
+// expiring soon after. Returns a promise: true = request anyway, false = go upload.
+function showCoverageWarning(warnItems) {
+  return new Promise(resolve => {
+    const existing = document.getElementById('coverage-modal');
+    if (existing) existing.remove();
+
+    const lines = warnItems.map(w =>
+      w.pet + "'s " + w.type.toLowerCase() + ' expires in ' + w.days + ' day' + (w.days === 1 ? '' : 's')
+    ).join('<br>');
+
+    const modal = document.createElement('div');
+    modal.id = 'coverage-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(35,32,27,0.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);';
+    modal.innerHTML =
+      '<div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:1.9rem 1.5rem 2.5rem;">' +
+        '<div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.9rem;">' +
+          '<svg class="ic" style="width:22px;height:22px;color:var(--warn);"><use href="#i-alert"/></svg>' +
+          '<div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;">A document expires soon</div>' +
+        '</div>' +
+        '<div style="font-size:0.9rem;color:var(--ink);line-height:1.6;margin-bottom:0.5rem;">' + lines + '</div>' +
+        '<div style="font-size:0.85rem;color:var(--muted);line-height:1.6;margin-bottom:1.5rem;">This stay is covered, but the document expires shortly after. We recommend uploading a current copy now so future bookings stay easy.</div>' +
+        '<button id="coverage-upload" class="btn-primary" style="margin-bottom:0.6rem;">Upload documents now</button>' +
+        '<button id="coverage-proceed" class="btn-primary" style="background:transparent;color:var(--green);box-shadow:none;border:1.5px solid var(--green);">Request anyway</button>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+    const close = (val) => { modal.remove(); resolve(val); };
+    modal.querySelector('#coverage-upload').onclick  = () => close(false);
+    modal.querySelector('#coverage-proceed').onclick = () => close(true);
+    modal.addEventListener('click', e => { if (e.target === modal) close(false); });
+  });
+}
+
 function openUploadModal(petId, petName, docType) {
   uploadContext = { petId, petName, docType };
   selectedDocFile = null;
@@ -565,6 +599,45 @@ function petLabel(appt) {
   const cat = appt.category === 'DC' ? 'Daycare' : appt.category === 'HD' ? 'Half-day' : 'A boarding stay';
   const verb = appt.status === 'Confirmed' ? 'is confirmed' : 'is requested';
   return `${cat} ${verb}`;
+}
+
+// Booking protection (Option B): for a requested stay, check whether each selected
+// pet's required documents stay valid through the stay. Returns:
+//   { block: [...], warn: [...] }
+// block = docs that expire BEFORE OR DURING the stay (dog would be uncovered) — hard stop.
+// warn  = docs valid through the stay but expiring soon after (<=30 days) — soft heads-up.
+// `coverageEndDate` is the last day coverage is needed (stay end, or single day).
+// For ongoing recurring services with no end date, pass null — then any required doc
+// expiring within 30 days is a warning (it will lapse mid-service), never a hard block.
+function checkDocCoverage(petIds, coverageEndDate) {
+  const REQUIRED_DOCS = ['Rabies Certificate', 'Town License', 'Vaccination Record'];
+  const block = [];
+  const warn  = [];
+  const pets  = (clientData.pets || []).filter(p => petIds.includes(p.id) && p.active);
+
+  pets.forEach(pet => {
+    REQUIRED_DOCS.forEach(type => {
+      // The currently-valid doc of this type (already-expired/missing is caught elsewhere)
+      const doc = (pet.docs || []).find(d => d.type === type && !d.expired);
+      if (!doc || !doc.expiryDate) return;
+
+      if (coverageEndDate) {
+        // Dated stay: does the doc expire on or before the last day of the stay?
+        if (doc.expiryDate <= coverageEndDate) {
+          block.push({ pet: pet.name, type, expiry: doc.expiryDate });
+        } else if (typeof doc.daysUntilExpiry === 'number' && doc.daysUntilExpiry <= 30) {
+          warn.push({ pet: pet.name, type, days: doc.daysUntilExpiry });
+        }
+      } else {
+        // Ongoing recurring: warn if expiring within 30 days (will lapse mid-service)
+        if (typeof doc.daysUntilExpiry === 'number' && doc.daysUntilExpiry <= 30) {
+          warn.push({ pet: pet.name, type, days: doc.daysUntilExpiry });
+        }
+      }
+    });
+  });
+
+  return { block, warn };
 }
 
 function getComplianceState() {
@@ -766,7 +839,7 @@ function buildDashboard() {
       const canCancel = ['Requested', 'Confirmed', 'Waitlisted'].includes(appt.status);
 
       const card = document.createElement('div');
-      card.style.cssText = 'padding:0.85rem 1rem;border-radius:12px;border:1.5px solid var(--brand-stone-light);background:#fff;cursor:pointer;';
+      card.style.cssText = 'padding:1.05rem 1.1rem;border-radius:14px;border:1px solid var(--line);background:#fff;cursor:pointer;box-shadow:0 1px 2px rgba(35,32,27,0.04),0 4px 14px rgba(35,32,27,0.05);';
       card.innerHTML =
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem;">' +
           '<div style="font-size:0.7rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);">' + serviceLabel + '</div>' +
@@ -783,16 +856,15 @@ function buildDashboard() {
           (appt.endTime   ? ' → ' + appt.endTime : '') +
         '</div>' +
         pricingLine +
-        '<div id="appt-summary-' + appt.id + '" style="display:none;margin-top:0.75rem;padding:0.75rem;background:var(--brand-sage-light);border-radius:10px;">' +
+        '<div id="appt-summary-' + appt.id + '" style="display:none;margin-top:0.75rem;padding:0.85rem 0.95rem;background:var(--surface);border:1px solid var(--line-soft);border-left:3px solid var(--green);border-radius:10px;">' +
           statusMessage +
           (appt.clientMessage
             ? '<pre style="font-family:var(--font-body);font-size:0.78rem;color:var(--brand-bark);white-space:pre-wrap;margin:0;line-height:1.6;">' + appt.clientMessage + '</pre>'
             : (!statusMessage ? '<div style="font-size:0.78rem;color:var(--brand-stone);font-style:italic;">Pricing summary will appear here once confirmed.</div>' : '')) +
           (canCancel
-            ? '<div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--brand-stone-light);">' +
-                '<button onclick="openCancellationModal(\'' + appt.id + '\', \'' + (appt.category || 'B') + '\', \'' + appt.startDate + '\', \'' + (appt.endDate || '') + '\')" ' +
-                'style="padding:0.35rem 0.75rem;background:transparent;color:#c0392b;border:1.5px solid #c0392b;border-radius:999px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;">' +
-                'Request Cancellation</button>' +
+            ? '<div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--line-soft);">' +
+                '<button class="btn-danger" onclick="openCancellationModal(\'' + appt.id + '\', \'' + (appt.category || 'B') + '\', \'' + appt.startDate + '\', \'' + (appt.endDate || '') + '\')">' +
+                '<svg class="ic"><use href="#i-alert"/></svg>Request Cancellation</button>' +
               '</div>'
             : '') +
         '</div>';
@@ -883,7 +955,7 @@ function buildRecurringServices() {
     const canCancel = svc.status === 'Active' || svc.status === 'Paused' || svc.status === 'Requested';
 
     const card = document.createElement('div');
-    card.style.cssText = 'padding:0.85rem 1rem;border-radius:12px;border:1.5px solid var(--brand-stone-light);background:#fff;cursor:pointer;';
+    card.style.cssText = 'padding:1.05rem 1.1rem;border-radius:14px;border:1px solid var(--line);background:#fff;cursor:pointer;box-shadow:0 1px 2px rgba(35,32,27,0.04),0 4px 14px rgba(35,32,27,0.05);';
 
     const pauseInfo = svc.status === 'Paused' && svc.pauseUntil
       ? '<div style="font-size:0.75rem;color:#c07a2a;margin-top:0.2rem;">Paused until ' + fmtDate(svc.pauseUntil) + '</div>'
@@ -911,17 +983,17 @@ function buildRecurringServices() {
       '<div style="font-size:0.92rem;font-weight:500;color:var(--brand-bark);margin-bottom:0.2rem;">' + svc.pets.join(' & ') + '</div>' +
       '<div style="font-size:0.78rem;font-weight:300;color:var(--brand-stone);">' + formatRecurringDays(svc) + '</div>' +
       pauseInfo +
-      '<div id="rec-summary-' + svc.id + '" style="display:none;margin-top:0.75rem;padding:0.75rem;background:var(--brand-sage-light);border-radius:10px;">' +
+      '<div id="rec-summary-' + svc.id + '" style="display:none;margin-top:0.75rem;padding:0.85rem 0.95rem;background:var(--surface);border:1px solid var(--line-soft);border-left:3px solid var(--green);border-radius:10px;">' +
         statusNote +
         (canPause || canCancel
           ? '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">' +
               (canPause
-                ? '<button onclick="openRecurringPauseModal(\'' + svc.id + '\', \'' + svc.service + '\')" ' +
-                  'style="padding:0.35rem 0.75rem;background:transparent;color:#c07a2a;border:1.5px solid #c07a2a;border-radius:999px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;">Pause Service</button>'
+                ? '<button class="btn-warn" onclick="openRecurringPauseModal(\'' + svc.id + '\', \'' + svc.service + '\')">' +
+                  '<svg class="ic"><use href="#i-clock"/></svg>Pause Service</button>'
                 : '') +
               (canCancel
-                ? '<button onclick="openRecurringCancelModal(\'' + svc.id + '\', \'' + svc.service + '\', \'' + svc.pets.join(', ') + '\')" ' +
-                  'style="padding:0.35rem 0.75rem;background:transparent;color:#c0392b;border:1.5px solid #c0392b;border-radius:999px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;">Cancel Service</button>'
+                ? '<button class="btn-danger" onclick="openRecurringCancelModal(\'' + svc.id + '\', \'' + svc.service + '\', \'' + svc.pets.join(', ') + '\')">' +
+                  '<svg class="ic"><use href="#i-alert"/></svg>Cancel Service</button>'
                 : '') +
             '</div>'
           : '') +
@@ -1358,9 +1430,10 @@ function buildBookingPetPills() {
     const inp = document.createElement('input');
     inp.type = 'checkbox'; inp.name = 'booking-pet'; inp.value = pet.id; inp.id = 'bp-' + i; inp.className = 'booking-pet-check';
     const lbl = document.createElement('label');
-    lbl.htmlFor = 'bp-' + i; lbl.textContent = pet.name;
+    lbl.htmlFor = 'bp-' + i; lbl.textContent = pet.name + (pet.active ? '' : ' (inactive)');
     container.appendChild(inp); container.appendChild(lbl);
-    if (clientData.pets.length === 1) inp.checked = true;
+    // Auto-select only when there's a single ACTIVE pet
+    if (clientData.pets.length === 1 && pet.active) inp.checked = true;
   });
 }
 
@@ -1378,6 +1451,18 @@ window.submitBooking = async function() {
   const notes         = document.getElementById('booking-notes').value.trim();
 
   const REQUIRED_DOCS = ['Rabies Certificate', 'Town License', 'Vaccination Record'];
+
+  // Inactive pet → can't request a normal stay; route to a trial conversation instead.
+  const inactiveSelected = (clientData.pets || []).filter(p => selectedPets.includes(p.id) && !p.active);
+  if (inactiveSelected.length > 0) {
+    const names = inactiveSelected.map(p => p.name).join(', ');
+    document.getElementById('booking-form-error').innerHTML =
+      names + (inactiveSelected.length === 1 ? ' hasn\'t' : ' haven\'t') + ' stayed with us in a while, so we\'d love to set up a quick trial daycare before booking again. ' +
+      '<a href="mai' + 'lto:' + 'hello' + '@' + 'pawsonlongmeadow.com?subject=' + encodeURIComponent('Trial daycare for ' + names) + '" style="color:var(--green);font-weight:600;">Set up a trial</a>';
+    document.getElementById('booking-form-error').classList.add('visible');
+    return;
+  }
+
   const blockedPets   = (clientData.pets || []).filter(pet => {
     if (!pet.active) return false;
     return REQUIRED_DOCS.some(type => !(pet.docs || []).some(d => d.type === type && !d.expired));
@@ -1401,6 +1486,13 @@ window.submitBooking = async function() {
     if (!recurringDays.length) { showErr('booking-days-error', 'Please select at least one day.'); valid = false; } else hideErr('booking-days-error');
     if (!transport) { showErr('booking-transport-error', 'Please select a transport option.'); valid = false; } else hideErr('booking-transport-error');
     if (!valid) return;
+
+    // Booking protection — ongoing service, so warn (never hard-block) on docs expiring soon
+    const recCoverage = checkDocCoverage(selectedPets, null);
+    if (recCoverage.warn.length > 0) {
+      const proceed = await showCoverageWarning(recCoverage.warn);
+      if (!proceed) { goToStep('docs'); return; }
+    }
 
     btn.disabled = true; btn.classList.add('loading');
     document.getElementById('booking-form-error').classList.remove('visible');
@@ -1459,6 +1551,22 @@ window.submitBooking = async function() {
   if (!transport) showErr('booking-transport-error', 'Please select a transport option.'); else hideErr('booking-transport-error');
   if (!isSingleDay && startDate && endDate && endDate < startDate) showErr('booking-end-date-error', 'End date must be after start date.');
   if (!valid) return;
+
+  // ── Booking protection (Option B) — doc coverage through the stay ──
+  const coverageEndDate = isSingleDay ? startDate : endDate;
+  const coverage = checkDocCoverage(selectedPets, coverageEndDate);
+  if (coverage.block.length > 0) {
+    const items = coverage.block.map(b => b.pet + "'s " + b.type.toLowerCase() + ' (expires ' + fmtDate(b.expiry) + ')').join('; ');
+    document.getElementById('booking-form-error').innerHTML =
+      'A required document expires on or before this stay ends, so the dog would be uncovered: ' + items +
+      '. Please upload a current copy before requesting these dates.';
+    document.getElementById('booking-form-error').classList.add('visible');
+    return;
+  }
+  if (coverage.warn.length > 0) {
+    const proceed = await showCoverageWarning(coverage.warn);
+    if (!proceed) { goToStep('docs'); return; }
+  }
 
   btn.disabled = true; btn.classList.add('loading');
   document.getElementById('booking-form-error').classList.remove('visible');
