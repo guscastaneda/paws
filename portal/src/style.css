@@ -141,7 +141,7 @@ body::before {
 .card {
   background: var(--card);
   border-radius: var(--card-radius);
-  padding: 1.6rem 1.4rem;
+  padding: 1.9rem 1.6rem;
   max-width: 600px;
   margin: 0 auto 1rem;
   box-shadow: var(--card-shadow);
@@ -224,7 +224,7 @@ body::before {
 .alert-strip {
   display: flex; align-items: flex-start; gap: 0.7rem;
   padding: 0.8rem 0.95rem; border-radius: var(--r-sm);
-  margin-bottom: 1rem;
+  margin-top: 1.1rem; margin-bottom: 0;
 }
 .alert-strip.warn  { background: var(--warning-wash, var(--brand-warning-light)); border: 1px solid rgba(180,105,14,0.2); }
 .alert-strip.err   { background: var(--brand-error-light); border: 1px solid rgba(178,58,46,0.2); }
@@ -266,7 +266,7 @@ body::before {
 .hero-cta .ic { width: 20px; height: 20px; }
 
 /* ── SECONDARY ACTION ROW ────────────────────────────────────────────────── */
-.subactions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-top: 0.7rem; }
+.subactions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-top: 0.85rem; }
 .subactions.has-four { grid-template-columns: repeat(2, 1fr); }
 .subaction {
   display: flex; flex-direction: column; align-items: center; gap: 0.45rem;
@@ -283,7 +283,7 @@ body::before {
 .subaction .lab { font-size: 0.74rem; font-weight: 600; line-height: 1.2; }
 
 /* ── SECTION HEADER ──────────────────────────────────────────────────────── */
-.section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.85rem; }
+.section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; }
 .section-title { font-family: var(--font-display); font-size: 1.35rem; font-weight: 500; letter-spacing: -0.01em; color: var(--ink); }
 .section-link { font-size: 0.8rem; color: var(--green); font-weight: 500; text-decoration: none; transition: color 0.15s; }
 .section-link:hover { color: var(--green-bright); }
