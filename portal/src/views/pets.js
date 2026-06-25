@@ -474,7 +474,15 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
 
           <div style="margin-bottom:1rem;">
             <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Insurance Provider</label>
-            <input id="ep-insurance" type="text" value="${pet.insurance || ''}" placeholder="e.g. Healthy Paws, Trupanion, Lemonade" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;">
+            <select id="ep-insurance" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;background:#fff;">
+              <option value="" ${!pet.insurance ? 'selected' : ''}>Select a provider...</option>
+              ${(() => {
+                const providers = ['Healthy Paws','ASPCA','AKC','Embrace','Fetch','Figo','Lemonade','Liberty Mutual','MetLife','Nationwide','Pets Best','Progressive','Pumpkin','Spot','State Farm','Trupanion','USAA','Other','None / Self-pay'];
+                // Preserve any stored value that isn't in our canonical list (e.g. legacy free text).
+                if (pet.insurance && !providers.includes(pet.insurance)) providers.unshift(pet.insurance);
+                return providers.map(name => `<option value="${name}" ${pet.insurance === name ? 'selected' : ''}>${name}</option>`).join('');
+              })()}
+            </select>
           </div>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
