@@ -89,7 +89,9 @@ function updateProgressUI(steps) {
   const done = keys.filter(k => steps[k]).length;
   const pct  = Math.round((done / keys.length) * 100);
 
-  document.getElementById('ob-progress-fill').style.width = pct + '%';
+  const fillEl = document.getElementById('ob-progress-fill');
+  fillEl.style.width = pct + '%';
+  fillEl.style.opacity = pct === 0 ? '0' : '1';
   document.getElementById('ob-progress-text').textContent = done + ' of ' + keys.length + ' complete';
 
   keys.forEach((k, i) => {
