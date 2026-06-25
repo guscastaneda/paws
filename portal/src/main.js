@@ -592,8 +592,10 @@ function getComplianceState() {
   return { state: 'blocked', missing, expiring };
 }
 
-// Demoted account-setup card on the dashboard — real onboarding steps, shown
-// only when something is incomplete. Mirrors the onboarding step titles.
+// Permanent "Your Account" section at the bottom of the dashboard. Always visible.
+// Each item (contact, emergency, documents, agreement) is tappable to view or edit,
+// whether complete or not — so clients can always reach these, not just during setup.
+// Title shifts: "Finish setting up" while incomplete, "Your Account" once done.
 function renderAccountSetup() {
   const host = document.getElementById('dash-setup');
   if (!host) return;
@@ -601,29 +603,30 @@ function renderAccountSetup() {
   const keys  = ['contact', 'emergency', 'docs', 'agreement'];
   const allDone = keys.every(k => steps[k]);
 
-  if (allDone) { host.style.display = 'none'; host.innerHTML = ''; return; }
-
   const META = {
-    contact:   { title: 'Contact Information',   desc: 'Your name, phone, email & address',   icon: 'i-user' },
-    emergency: { title: 'Emergency Contact',     desc: 'Someone to reach if you\'re both away', icon: 'i-phone' },
-    docs:      { title: 'Compliance Documents',  desc: 'Rabies, town license & vaccination per pet', icon: 'i-doc' },
-    agreement: { title: 'Client Agreement',      desc: 'Review and sign the service agreement', icon: 'i-doc' },
+    contact:   { title: 'Contact Information',  doneDesc: 'Name, phone, email & address',          todoDesc: 'Add your name, phone, email & address',   icon: 'i-user' },
+    emergency: { title: 'Emergency Contact',    doneDesc: 'On file',                               todoDesc: 'Someone to reach if you\'re both away',    icon: 'i-phone' },
+    docs:      { title: 'Compliance Documents', doneDesc: 'All documents on file',                 todoDesc: 'Rabies, town license & vaccination per pet', icon: 'i-doc' },
+    agreement: { title: 'Client Agreement',     doneDesc: 'Signed',                                todoDesc: 'Review and sign the service agreement',    icon: 'i-shield' },
   };
 
   const rows = keys.map(k => {
     const done = steps[k];
     const m = META[k];
-    return '<a class="check-item' + (done ? ' done' : '') + '"' + (done ? '' : ' onclick="goToStep(\'' + k + '\')"') + '>' +
+    // Every row is tappable — done rows route to the same step to view/update.
+    return '<a class="check-item' + (done ? ' done' : '') + '" onclick="goToStep(\'' + k + '\')">' +
       '<div class="check-icon"><svg class="ic"><use href="#' + (done ? 'i-check' : m.icon) + '"/></svg></div>' +
       '<div class="check-text"><div class="check-title">' + m.title + '</div>' +
-      '<div class="check-desc">' + (done ? 'Done' : m.desc) + '</div></div>' +
-      (done ? '' : '<svg class="ic check-arrow"><use href="#i-arrow"/></svg>') +
+      '<div class="check-desc">' + (done ? m.doneDesc : m.todoDesc) + '</div></div>' +
+      '<svg class="ic check-arrow"><use href="#i-arrow"/></svg>' +
     '</a>';
   }).join('');
 
+  const title = allDone ? 'Your Account' : 'Finish setting up';
+
   host.style.display = 'block';
   host.innerHTML =
-    '<div class="section-header"><div class="section-title">Account setup</div></div>' +
+    '<div class="section-header"><div class="section-title">' + title + '</div></div>' +
     '<div class="checklist">' + rows + '</div>';
 }
 

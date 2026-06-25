@@ -190,12 +190,12 @@ body::before {
 /* ── GREETING ────────────────────────────────────────────────────────────── */
 .greeting-name {
   font-family: var(--font-display);
-  font-size: 2rem;
+  font-size: 2.35rem;
   font-weight: 400;
-  line-height: 1.12;
-  letter-spacing: -0.01em;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
   color: var(--ink);
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.6rem;
 }
 .greeting-name em { font-style: italic; color: var(--green); }
 .greeting-sub {
@@ -411,6 +411,13 @@ body::before {
 .check-item:hover:not(.done) { border-color: var(--green); background: var(--green-wash); transform: translateX(3px); }
 .check-item.done { border-color: var(--green-wash); background: var(--green-wash); cursor: default; }
 .check-item.active-step { border-color: var(--green); background: var(--green-wash); box-shadow: 0 0 0 3px rgba(47,125,82,0.12); }
+
+/* Dashboard "Your Account" section — done rows stay tappable (view/edit anytime) */
+#dash-setup .check-item.done { cursor: pointer; }
+#dash-setup .check-item.done:hover { border-color: var(--green); transform: translateX(3px); }
+#dash-setup .check-item.done:hover .check-arrow { transform: translateX(3px); }
+#dash-setup .check-arrow { opacity: 0.6; }
+#dash-setup .check-item:hover .check-arrow { opacity: 1; }
 
 .check-icon { width: 28px; height: 28px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .check-icon .ic { width: 15px; height: 15px; }
