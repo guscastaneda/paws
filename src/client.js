@@ -157,6 +157,7 @@ async function handleGetClient(req, env) {
   const linkedApptRefs = f["Appointments"] || f["fldihTexoIBjRsFdJ"] || [];
   const linkedApptIds  = linkedApptRefs.map(r => typeof r === "object" ? r.id : r).filter(Boolean);
   let appointments = [];
+  const stayedPetIds = new Set();
 
   if (linkedApptIds.length > 0) {
     const today     = new Date().toISOString().split("T")[0];
@@ -171,6 +172,19 @@ async function handleGetClient(req, env) {
         const batchData = await batchRes.json();
         allApptRecords.push(...(batchData.records || []));
       }
+    }
+
+    // A pet "has stayed" if it's linked to any appointment that represents a real
+    // stay: Confirmed/Completed status, or any stay whose end date is in the past.
+    // This distinguishes a lapsed returning pet from a brand-new, never-stayed pet.
+    for (const a of allApptRecords) {
+      const af     = a.fields || {};
+      const status = (typeof af["Status"] === "object" ? af["Status"].name : af["Status"]) || "";
+      const endDate = af["End Date"] || af["Start Date"] || "";
+      const isRealStay = status === "Confirmed" || status === "Completed" || (endDate && endDate < today);
+      if (!isRealStay) continue;
+      const apptPets = (af["Pets"] || []).map(p => typeof p === "object" ? p.id : p).filter(Boolean);
+      apptPets.forEach(id => stayedPetIds.add(id));
     }
 
     appointments = allApptRecords
@@ -198,6 +212,11 @@ async function handleGetClient(req, env) {
         return isActive && isFuture;
       })
       .sort((a, b) => a.startDate.localeCompare(b.startDate));
+  }
+
+  // Tag each pet with whether it has ever had a real stay (lapsed vs brand-new).
+  for (const pet of pets) {
+    pet.hasStayed = stayedPetIds.has(pet.id);
   }
 
   // ── Service prices ────────────────────────────────────────────────────────────
