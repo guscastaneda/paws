@@ -1240,9 +1240,12 @@ window.submitCancellation = async function(apptId, category) {
 // ── AGREEMENT ─────────────────────────────────────────────────────────────────
 function toggleAgreeBtn() {
   const name    = document.getElementById('agree-name')?.value.trim();
-  const checked = document.getElementById('agree-check')?.checked;
+  const checkEl = document.getElementById('agree-check');
+  const checked = checkEl?.checked;
   const btn     = document.getElementById('ag-submit');
   if (btn) btn.disabled = !(name?.length >= 3 && checked);
+  const row = checkEl?.closest('.checkbox-row');
+  if (row) row.classList.toggle('checked', !!checked);
 }
 window.toggleAgreeBtn = toggleAgreeBtn;
 
