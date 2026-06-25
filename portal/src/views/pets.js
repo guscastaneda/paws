@@ -123,6 +123,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
         ${pet.allergies ? `<div class="detail-row"><span><span class="k">Allergies:</span> ${pet.allergies}</span></div>` : ''}
         ${pet.medications ? `<div class="detail-row"><span><span class="k">Medications:</span> ${pet.medications}</span></div>` : ''}
         ${pet.feeding ? `<div class="detail-row"><span><span class="k">Feeding:</span> ${pet.feeding}</span></div>` : ''}
+        ${pet.insurance ? `<div class="detail-row"><span><span class="k">Insurance:</span> ${pet.insurance}</span></div>` : ''}
 
         <div class="doc-label">Documents</div>
         ${docRows}
@@ -438,6 +439,22 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
             <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Temperament</label>
             <textarea id="ep-temperament" placeholder="e.g. friendly with other dogs, reactive on leash, shy with strangers at first" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;min-height:70px;resize:vertical;">${pet.temperament || ''}</textarea>
           </div>
+
+          <div style="margin-bottom:0.75rem;">
+            <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Pet Insurance <span style="font-weight:300;text-transform:none;letter-spacing:0;">(optional)</span></label>
+            <input id="ep-insurance" type="text" value="${pet.insurance || ''}" placeholder="e.g. Healthy Paws, Trupanion, Lemonade" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;">
+          </div>
+
+          <div style="background:var(--surface,#FBF9F5);border:1px solid var(--line-soft,#EFEAE0);border-left:3px solid var(--green,#2F7D52);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1rem;">
+            <div style="font-family:var(--font-body);font-size:0.82rem;font-weight:600;color:var(--ink,#23201B);margin-bottom:0.3rem;">No insurance yet? We strongly recommend it.</div>
+            <p style="font-size:0.8rem;line-height:1.5;color:var(--muted,#857C6E);margin:0 0 0.6rem;">Gus has used Healthy Paws since 2018. When his own dog Ollie needed IVDD spinal surgery, an eye ulcer treated, and bladder stones removed, insurance covered the bulk of the cost. A single emergency can run into the thousands; coverage turns that into a manageable monthly premium. We recommend it whether or not you use our links below.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.6rem;">
+              <a href="REPLACE_WITH_HEALTHY_PAWS_AFFILIATE_LINK" target="_blank" rel="noopener noreferrer sponsored" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;font-weight:600;color:var(--green,#2F7D52);text-decoration:none;border:1.5px solid var(--green,#2F7D52);border-radius:999px;padding:0.4rem 0.85rem;">Healthy Paws (our pick)</a>
+              <a href="REPLACE_WITH_TRUPANION_AFFILIATE_LINK" target="_blank" rel="noopener noreferrer sponsored" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;font-weight:500;color:var(--muted,#857C6E);text-decoration:none;border:1px solid var(--line,#E6E0D6);border-radius:999px;padding:0.4rem 0.85rem;">Trupanion</a>
+              <a href="REPLACE_WITH_LEMONADE_AFFILIATE_LINK" target="_blank" rel="noopener noreferrer sponsored" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;font-weight:500;color:var(--muted,#857C6E);text-decoration:none;border:1px solid var(--line,#E6E0D6);border-radius:999px;padding:0.4rem 0.85rem;">Lemonade</a>
+            </div>
+            <p style="font-size:0.68rem;line-height:1.4;color:var(--muted,#857C6E);margin:0;font-style:italic;">We may earn a referral fee if you sign up through these links, at no extra cost to you. We'd recommend pet insurance regardless.</p>
+          </div>
         </div>
 
         <!-- Tab: Vet Info -->
@@ -501,6 +518,7 @@ async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKE
     'Feeding Schedule':    document.getElementById('ep-feeding')?.value.trim() || '',
     'Fears & Triggers':    document.getElementById('ep-fears')?.value.trim() || '',
     'Temperament':         document.getElementById('ep-temperament')?.value.trim() || '',
+    'Insurance Provider':  document.getElementById('ep-insurance')?.value.trim() || '',
     'Vet Clinic':          document.getElementById('ep-vet-clinic')?.value.trim() || '',
     'Vet Phone':           document.getElementById('ep-vet-phone')?.value.trim() || '',
     'Vet Email':           document.getElementById('ep-vet-email')?.value.trim() || '',

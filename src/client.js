@@ -34,6 +34,7 @@ async function handleGetClient(req, env) {
       `&fields[]=Breed%20(Text)&fields[]=Breeds&fields[]=Spayed%2FNeutered` +
       `&fields[]=Microchip%20Number&fields[]=Allergies&fields[]=Current%20Medications` +
       `&fields[]=Feeding%20Schedule&fields[]=Fears%20%26%20Triggers&fields[]=Temperament` +
+      `&fields[]=Insurance%20Provider` +
       `&fields[]=Pet%20Notes&fields[]=Photo&fields[]=Compliance%20Documents` +
       `&fields[]=Veterinarians&fields[]=Clients`
     );
@@ -146,6 +147,7 @@ async function handleGetClient(req, env) {
           feeding:        p.fields["Feeding Schedule"]    || "",
           fears:          p.fields["Fears & Triggers"]    || "",
           temperament:    p.fields["Temperament"]         || "",
+          insurance:      p.fields["Insurance Provider"]   || "",
           notes:          p.fields["Pet Notes"]           || "",
           photoUrl,
           vets,
