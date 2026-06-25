@@ -548,6 +548,132 @@ function showCoverageWarning(warnItems) {
   });
 }
 
+// Is the emergency info stale? True if never confirmed or confirmed > 6 months ago.
+function emergencyInfoIsStale() {
+  const last = clientData.emergencyInfoConfirmed;
+  if (!last) return true;
+  const lastMs = new Date(last).getTime();
+  if (isNaN(lastMs)) return true;
+  const sixMonthsMs = 1000 * 60 * 60 * 24 * 183; // ~6 months
+  return (Date.now() - lastMs) > sixMonthsMs;
+}
+
+// Overnight booking gate. Shown before a Boarding/House-Sitting request when the
+// emergency info is stale. Confirms the welfare contact + alternate caregiver are
+// current, and requires an alternate caregiver on file (the "who takes the dog if
+// we can't reach you" safeguard) before an overnight stay can be requested.
+// Resolves: 'proceed' (confirmed, date stamped), 'update' (go fix info), 'cancel'.
+function showEmergencyConfirm() {
+  return new Promise(resolve => {
+    const existing = document.getElementById('emergency-confirm-modal');
+    if (existing) existing.remove();
+
+    const esc = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const hasAlt = !!(clientData.altCaregiverName && clientData.altCaregiverName.trim());
+
+    const contactLine = clientData.emergencyName
+      ? esc(clientData.emergencyName) + (clientData.emergencyPhone ? ' · ' + esc(clientData.emergencyPhone) : '')
+      : '<span style="color:var(--muted);">Not on file</span>';
+    const altLine = hasAlt
+      ? esc(clientData.altCaregiverName) + (clientData.altCaregiverPhone ? ' · ' + esc(clientData.altCaregiverPhone) : '')
+      : '<span style="color:var(--clay);">Not on file — required for boarding</span>';
+
+    // When an alternate caregiver is missing, we can't let "still good" pass — an
+    // overnight stay needs that safeguard. We steer them to add it instead.
+    const confirmBtn = hasAlt
+      ? '<button id="ec-confirm" class="btn-primary" style="margin-bottom:0.6rem;">Yes, still correct</button>'
+      : '<button id="ec-update" class="btn-primary" style="margin-bottom:0.6rem;">Add alternate caregiver</button>';
+    const updateBtn = hasAlt
+      ? '<button id="ec-update" class="btn-primary" style="background:transparent;color:var(--green);box-shadow:none;border:1.5px solid var(--green);">Update contacts</button>'
+      : '';
+    const intro = hasAlt
+      ? 'Before an overnight stay, a quick check that this is still right if we ever can\'t reach you.'
+      : 'Before an overnight stay, we need a local alternate caregiver on file — someone who could take your dog home if we couldn\'t reach you.';
+
+    const modal = document.createElement('div');
+    modal.id = 'emergency-confirm-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(35,32,27,0.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);';
+    modal.innerHTML =
+      '<div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:1.9rem 1.5rem 2.5rem;">' +
+        '<div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;margin-bottom:0.6rem;">Quick check before your stay</div>' +
+        '<div style="font-size:0.88rem;color:var(--muted);line-height:1.6;margin-bottom:1.1rem;">' + intro + '</div>' +
+        '<div style="background:var(--surface);border:1px solid var(--line-soft);border-left:3px solid var(--green);border-radius:0 10px 10px 0;padding:0.85rem 1rem;margin-bottom:1.3rem;font-size:0.9rem;line-height:1.6;">' +
+          '<div style="margin-bottom:0.55rem;"><span style="font-size:0.72rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.1rem;">Emergency contact</span>' + contactLine + '</div>' +
+          '<div><span style="font-size:0.72rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.1rem;">Alternate caregiver</span>' + altLine + '</div>' +
+        '</div>' +
+        confirmBtn + updateBtn +
+      '</div>';
+
+    document.body.appendChild(modal);
+    const close = (val) => { modal.remove(); resolve(val); };
+    const confirmEl = modal.querySelector('#ec-confirm');
+    const updateEl  = modal.querySelector('#ec-update');
+    if (confirmEl) confirmEl.onclick = () => close('proceed');
+    if (updateEl)  updateEl.onclick  = () => close('update');
+    modal.addEventListener('click', e => { if (e.target === modal) close('cancel'); });
+  });
+}
+
+// Stamp Emergency Info Last Confirmed (used when the client confirms via the gate).
+async function stampEmergencyConfirmed() {
+  const nowIso = new Date().toISOString();
+  try {
+    const res = await fetch(WORKER_URL + '/profile', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: clientToken, clientId: clientData.clientId,
+        directFields: { "Emergency Info Last Confirmed": nowIso },
+      }),
+    });
+    if (res.ok) clientData.emergencyInfoConfirmed = nowIso;
+    return res.ok;
+  } catch { return false; }
+}
+
+// Calendar-style date tile (month abbreviation over a large day numeral), like the
+// iOS calendar icon. Used to anchor the upcoming appointment card on its Start Date.
+function dateTile(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T12:00:00');
+  if (isNaN(d)) return '';
+  const month = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+  const day   = d.getDate();
+  return '' +
+    '<div class="appt-date-tile" aria-hidden="true">' +
+      '<div class="appt-date-tile-month">' + month + '</div>' +
+      '<div class="appt-date-tile-day">' + day + '</div>' +
+    '</div>';
+}
+
+// "Before your visit" card markup — practical drop-off guidance for overnight stays.
+// Neutral surface with a green accent rail (house style; no green-wash fill).
+function buildBeforeVisitCard() {
+  const li = t => '<li style="margin-bottom:0.3rem;">' + t + '</li>';
+  return '' +
+    '<div style="background:var(--surface);border:1px solid var(--line-soft);border-left:3px solid var(--green);border-radius:0 12px 12px 0;padding:1rem 1.15rem;">' +
+      '<div style="font-family:var(--font-display);font-size:1.1rem;font-weight:600;color:var(--ink);margin-bottom:0.6rem;">Before your visit</div>' +
+      '<div style="font-size:0.85rem;font-weight:600;color:var(--ink);margin-bottom:0.3rem;">Please bring</div>' +
+      '<ul style="margin:0 0 0.85rem;padding-left:1.1rem;font-size:0.86rem;color:var(--ink);line-height:1.5;">' +
+        li('Enough food for the full stay, portioned and labeled') +
+        li('Any current medications, with written instructions') +
+        li('Their own collar or harness with current rabies &amp; license tags') +
+        li('One comfort item — a bed, blanket, or toy that smells like home') +
+      '</ul>' +
+      '<div style="font-size:0.85rem;font-weight:600;color:var(--ink);margin-bottom:0.3rem;">Please leave at home</div>' +
+      '<ul style="margin:0 0 0.85rem;padding-left:1.1rem;font-size:0.86rem;color:var(--ink);line-height:1.5;">' +
+        li('Retractable leashes') +
+        li('High-value chews or a pile of toys — these can cause guarding in a group') +
+        li('Food bowls — we provide those') +
+        li('Anything irreplaceable') +
+      '</ul>' +
+      '<div style="font-size:0.85rem;font-weight:600;color:var(--ink);margin-bottom:0.3rem;">Drop-off &amp; pickup</div>' +
+      '<div style="font-size:0.86rem;color:var(--ink);line-height:1.5;">' +
+        'We schedule drop-off and pickup within these windows: Early morning (7:30–9AM), Noon (11:30AM–12:30PM), or Late Afternoon (4:00–5:30PM). ' +
+        'Let us know your preferred window, and tell us about any feeding, medication, or behavior changes since your last visit.' +
+      '</div>' +
+    '</div>';
+}
+
 function openUploadModal(petId, petName, docType) {
   uploadContext = { petId, petName, docType };
   selectedDocFile = null;
@@ -983,21 +1109,26 @@ function buildDashboard() {
       const card = document.createElement('div');
       card.style.cssText = 'padding:1.05rem 1.1rem;border-radius:14px;border:1px solid var(--line);background:#fff;cursor:pointer;box-shadow:0 1px 2px rgba(35,32,27,0.04),0 4px 14px rgba(35,32,27,0.05);';
       card.innerHTML =
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem;">' +
-          '<div style="font-size:0.7rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);">' + serviceLabel + '</div>' +
-          '<div style="display:flex;align-items:center;gap:0.5rem;">' +
-            '<span style="font-size:0.72rem;font-weight:500;padding:0.2rem 0.6rem;border-radius:999px;background:' + statusBg + ';color:' + statusColor + ';">' + appt.status + '</span>' +
-            '<span id="appt-toggle-' + appt.id + '" style="color:var(--brand-stone);display:inline-flex;"><svg class="ic" style="width:15px;height:15px;transform:rotate(90deg);"><use href="#i-arrow"/></svg></span>' +
+        '<div style="display:flex;gap:0.9rem;align-items:flex-start;">' +
+          dateTile(appt.startDate) +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem;">' +
+              '<div style="font-size:0.7rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);">' + serviceLabel + '</div>' +
+              '<div style="display:flex;align-items:center;gap:0.5rem;">' +
+                '<span style="font-size:0.72rem;font-weight:500;padding:0.2rem 0.6rem;border-radius:999px;background:' + statusBg + ';color:' + statusColor + ';">' + appt.status + '</span>' +
+                '<span id="appt-toggle-' + appt.id + '" style="color:var(--brand-stone);display:inline-flex;"><svg class="ic" style="width:15px;height:15px;transform:rotate(90deg);"><use href="#i-arrow"/></svg></span>' +
+              '</div>' +
+            '</div>' +
+            '<div style="font-size:0.92rem;font-weight:500;color:var(--brand-bark);margin-bottom:0.2rem;">' +
+              fmtDate(appt.startDate) + (appt.endDate && appt.endDate !== appt.startDate ? ' → ' + fmtDate(appt.endDate) : '') +
+            '</div>' +
+            '<div style="font-size:0.78rem;font-weight:300;color:var(--brand-stone);">' +
+              (appt.startTime ? appt.startTime : '') +
+              (appt.endTime   ? ' → ' + appt.endTime : '') +
+            '</div>' +
+            pricingLine +
           '</div>' +
         '</div>' +
-        '<div style="font-size:0.92rem;font-weight:500;color:var(--brand-bark);margin-bottom:0.2rem;">' +
-          fmtDate(appt.startDate) + (appt.endDate && appt.endDate !== appt.startDate ? ' → ' + fmtDate(appt.endDate) : '') +
-        '</div>' +
-        '<div style="font-size:0.78rem;font-weight:300;color:var(--brand-stone);">' +
-          (appt.startTime ? appt.startTime : '') +
-          (appt.endTime   ? ' → ' + appt.endTime : '') +
-        '</div>' +
-        pricingLine +
         '<div id="appt-summary-' + appt.id + '" style="display:none;margin-top:0.75rem;padding:0.85rem 0.95rem;background:var(--surface);border:1px solid var(--line-soft);border-left:3px solid var(--green);border-radius:10px;">' +
           statusMessage +
           (appt.clientMessage
@@ -1756,6 +1887,16 @@ window.submitBooking = async function() {
     if (!proceed) { goToStep('docs'); return; }
   }
 
+  // Overnight stays (Boarding / House Sitting) need current emergency info and a
+  // local alternate caregiver. Only prompt when the info is stale (never confirmed
+  // or >6 months), so weekly daycare regulars are never nagged.
+  if (!isSingleDay && emergencyInfoIsStale()) {
+    const choice = await showEmergencyConfirm();
+    if (choice === 'update') { goToStep('emergency'); return; }
+    if (choice !== 'proceed') return; // cancelled / dismissed
+    await stampEmergencyConfirmed();
+  }
+
   btn.disabled = true; btn.classList.add('loading');
   document.getElementById('booking-form-error').classList.remove('visible');
 
@@ -1827,6 +1968,19 @@ window.submitBooking = async function() {
         '<strong>' + serviceLabel + '</strong><br>' +
         dateLines + '<svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;"><use href="#i-car"/></svg> Transport: ' + transport + '<br><br>' +
         '<pre style="font-family:var(--font-body);font-size:0.78rem;color:var(--brand-bark);white-space:pre-wrap;margin:0;">' + pricingNote + '</pre>';
+    }
+
+    // "Before your visit" — practical drop-off guidance. Most relevant for overnight
+    // stays (Boarding / House Sitting); shown there, skipped for same-day daycare.
+    const bvCard = document.getElementById('before-visit-card');
+    if (bvCard) {
+      if (!isSingleDay) {
+        bvCard.style.display = 'block';
+        bvCard.innerHTML = buildBeforeVisitCard();
+      } else {
+        bvCard.style.display = 'none';
+        bvCard.innerHTML = '';
+      }
     }
 
     fetch(WORKER_URL + '/client?token=' + encodeURIComponent(clientToken)).then(r => r.ok ? r.json() : null).then(d => { if (d) clientData = d; }).catch(() => {});
