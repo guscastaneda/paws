@@ -123,7 +123,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
         ${pet.allergies ? `<div class="detail-row"><span><span class="k">Allergies:</span> ${pet.allergies}</span></div>` : ''}
         ${pet.medications ? `<div class="detail-row"><span><span class="k">Medications:</span> ${pet.medications}</span></div>` : ''}
         ${pet.feeding ? `<div class="detail-row"><span><span class="k">Feeding:</span> ${pet.feeding}</span></div>` : ''}
-        ${pet.insurance ? `<div class="detail-row"><span><span class="k">Insurance:</span> ${pet.insurance}</span></div>` : ''}
+        ${pet.insurance ? `<div class="detail-row"><span><span class="k">Insurance:</span> ${pet.insurance}${pet.insuranceRenewal ? ` <span class="k">(renews ${new Date(pet.insuranceRenewal + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })})</span>` : ''}</span></div>` : ''}
 
         <div class="doc-label">Documents</div>
         ${docRows}
@@ -367,9 +367,11 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
           <button onclick="document.getElementById('edit-pet-modal').remove()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--brand-stone);">✕</button>
         </div>
         <div style="display:flex;gap:0;">
-          <button class="edit-pet-tab active" data-tab="basic" onclick="switchEditPetTab('basic')" style="flex:1;padding:0.6rem 0.5rem;background:none;border:none;border-bottom:2px solid var(--brand-primary);font-family:var(--font-body);font-size:0.8rem;font-weight:500;color:var(--brand-primary);cursor:pointer;">Basic Info</button>
-          <button class="edit-pet-tab" data-tab="health" onclick="switchEditPetTab('health')" style="flex:1;padding:0.6rem 0.5rem;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--font-body);font-size:0.8rem;font-weight:400;color:var(--brand-stone);cursor:pointer;">Health & Behavior</button>
-          <button class="edit-pet-tab" data-tab="vet" onclick="switchEditPetTab('vet')" style="flex:1;padding:0.6rem 0.5rem;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--font-body);font-size:0.8rem;font-weight:400;color:var(--brand-stone);cursor:pointer;">Vet Info</button>
+          <button class="edit-pet-tab active" data-tab="basic" onclick="switchEditPetTab('basic')" style="flex:1;padding:0.6rem 0.35rem;background:none;border:none;border-bottom:2px solid var(--brand-primary);font-family:var(--font-body);font-size:0.78rem;font-weight:500;color:var(--brand-primary);cursor:pointer;">Basic</button>
+          <button class="edit-pet-tab" data-tab="health" onclick="switchEditPetTab('health')" style="flex:1;padding:0.6rem 0.35rem;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--font-body);font-size:0.78rem;font-weight:400;color:var(--brand-stone);cursor:pointer;">Health</button>
+          <button class="edit-pet-tab" data-tab="vet" onclick="switchEditPetTab('vet')" style="flex:1;padding:0.6rem 0.35rem;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--font-body);font-size:0.78rem;font-weight:400;color:var(--brand-stone);cursor:pointer;">Vet</button>
+          <button class="edit-pet-tab" data-tab="insurance" onclick="switchEditPetTab('insurance')" style="flex:1;padding:0.6rem 0.35rem;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--font-body);font-size:0.78rem;font-weight:400;color:var(--brand-stone);cursor:pointer;">Insurance</button>
+        </div>
         </div>
       </div>
 
@@ -439,22 +441,7 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
             <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Temperament</label>
             <textarea id="ep-temperament" placeholder="e.g. friendly with other dogs, reactive on leash, shy with strangers at first" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;min-height:70px;resize:vertical;">${pet.temperament || ''}</textarea>
           </div>
-
-          <div style="margin-bottom:0.75rem;">
-            <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Pet Insurance <span style="font-weight:300;text-transform:none;letter-spacing:0;">(optional)</span></label>
-            <input id="ep-insurance" type="text" value="${pet.insurance || ''}" placeholder="e.g. Healthy Paws, Trupanion, Lemonade" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;">
-          </div>
-
-          <div style="background:var(--surface,#FBF9F5);border:1px solid var(--line-soft,#EFEAE0);border-left:3px solid var(--green,#2F7D52);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1rem;">
-            <div style="font-family:var(--font-body);font-size:0.82rem;font-weight:600;color:var(--ink,#23201B);margin-bottom:0.3rem;">No insurance yet? We strongly recommend it.</div>
-            <p style="font-size:0.8rem;line-height:1.5;color:var(--muted,#857C6E);margin:0 0 0.6rem;">Gus has used Healthy Paws since 2018. When his own dog Ollie needed IVDD spinal surgery, an eye ulcer treated, and bladder stones removed, insurance covered the bulk of the cost. A single emergency can run into the thousands; coverage turns that into a manageable monthly premium. We recommend it whether or not you use our links below.</p>
-            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.6rem;">
-              <a href="REPLACE_WITH_HEALTHY_PAWS_AFFILIATE_LINK" target="_blank" rel="noopener noreferrer sponsored" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;font-weight:600;color:var(--green,#2F7D52);text-decoration:none;border:1.5px solid var(--green,#2F7D52);border-radius:999px;padding:0.4rem 0.85rem;">Healthy Paws (our pick)</a>
-              <a href="REPLACE_WITH_TRUPANION_AFFILIATE_LINK" target="_blank" rel="noopener noreferrer sponsored" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;font-weight:500;color:var(--muted,#857C6E);text-decoration:none;border:1px solid var(--line,#E6E0D6);border-radius:999px;padding:0.4rem 0.85rem;">Trupanion</a>
-              <a href="REPLACE_WITH_LEMONADE_AFFILIATE_LINK" target="_blank" rel="noopener noreferrer sponsored" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;font-weight:500;color:var(--muted,#857C6E);text-decoration:none;border:1px solid var(--line,#E6E0D6);border-radius:999px;padding:0.4rem 0.85rem;">Lemonade</a>
-            </div>
-            <p style="font-size:0.68rem;line-height:1.4;color:var(--muted,#857C6E);margin:0;font-style:italic;">We may earn a referral fee if you sign up through these links, at no extra cost to you. We'd recommend pet insurance regardless.</p>
-          </div>
+        </div>
         </div>
 
         <!-- Tab: Vet Info -->
@@ -478,6 +465,43 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
           <div style="margin-bottom:1.25rem;">
             <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Address</label>
             <input id="ep-vet-address" type="text" value="${pet.vets?.[0]?.address || ''}" placeholder="350 S Huntington Ave, Boston MA" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;">
+          </div>
+        </div>
+
+        <!-- Tab: Insurance -->
+        <div id="edit-tab-insurance" style="display:none;">
+          <p style="font-size:0.8rem;color:var(--brand-stone);font-weight:300;margin-bottom:1rem;">Pet insurance is optional but strongly recommended. Changes go to review before being applied.</p>
+
+          <div style="margin-bottom:1rem;">
+            <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Insurance Provider</label>
+            <input id="ep-insurance" type="text" value="${pet.insurance || ''}" placeholder="e.g. Healthy Paws, Trupanion, Lemonade" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;">
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+            <div>
+              <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Policy Number</label>
+              <input id="ep-insurance-policy" type="text" value="${pet.insurancePolicy || ''}" placeholder="Policy / member ID" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Renewal Date</label>
+              <input id="ep-insurance-renewal" type="date" value="${pet.insuranceRenewal || ''}" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;">
+            </div>
+          </div>
+
+          <div style="margin-bottom:1.25rem;">
+            <label style="display:block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--brand-stone);margin-bottom:0.4rem;">Coverage <span style="font-weight:300;text-transform:none;letter-spacing:0;">(plan, reimbursement, deductible)</span></label>
+            <textarea id="ep-insurance-coverage" placeholder="e.g. 90% reimbursement, $250 annual deductible, unlimited annual max" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid var(--brand-stone-light);border-radius:10px;font-family:var(--font-body);font-size:0.9rem;outline:none;box-sizing:border-box;min-height:60px;resize:vertical;">${pet.insuranceCoverage || ''}</textarea>
+          </div>
+
+          <div style="background:var(--surface,#FBF9F5);border:1px solid var(--line-soft,#EFEAE0);border-left:3px solid var(--green,#2F7D52);border-radius:10px;padding:0.85rem 1rem;margin-bottom:0.5rem;">
+            <div style="font-family:var(--font-body);font-size:0.82rem;font-weight:600;color:var(--ink,#23201B);margin-bottom:0.3rem;">No insurance yet? We strongly recommend it.</div>
+            <p style="font-size:0.8rem;line-height:1.5;color:var(--muted,#857C6E);margin:0 0 0.6rem;">Gus has used Healthy Paws since 2018. When his own dog Ollie needed IVDD spinal surgery, an eye ulcer treated, and bladder stones removed, insurance covered the bulk of the cost. A single emergency can run into the thousands; coverage turns that into a manageable monthly premium. We recommend it whether or not you use our links below.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.6rem;">
+              <a href="REPLACE_WITH_HEALTHY_PAWS_AFFILIATE_LINK" target="_blank" rel="noopener noreferrer sponsored" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;font-weight:600;color:var(--green,#2F7D52);text-decoration:none;border:1.5px solid var(--green,#2F7D52);border-radius:999px;padding:0.4rem 0.85rem;">Healthy Paws (our pick)</a>
+              <a href="REPLACE_WITH_TRUPANION_AFFILIATE_LINK" target="_blank" rel="noopener noreferrer sponsored" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;font-weight:500;color:var(--muted,#857C6E);text-decoration:none;border:1px solid var(--line,#E6E0D6);border-radius:999px;padding:0.4rem 0.85rem;">Trupanion</a>
+              <a href="REPLACE_WITH_LEMONADE_AFFILIATE_LINK" target="_blank" rel="noopener noreferrer sponsored" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;font-weight:500;color:var(--muted,#857C6E);text-decoration:none;border:1px solid var(--line,#E6E0D6);border-radius:999px;padding:0.4rem 0.85rem;">Lemonade</a>
+            </div>
+            <p style="font-size:0.68rem;line-height:1.4;color:var(--muted,#857C6E);margin:0;font-style:italic;">We may earn a referral fee if you sign up through these links, at no extra cost to you. We'd recommend pet insurance regardless.</p>
           </div>
         </div>
 
@@ -518,7 +542,10 @@ async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKE
     'Feeding Schedule':    document.getElementById('ep-feeding')?.value.trim() || '',
     'Fears & Triggers':    document.getElementById('ep-fears')?.value.trim() || '',
     'Temperament':         document.getElementById('ep-temperament')?.value.trim() || '',
-    'Insurance Provider':  document.getElementById('ep-insurance')?.value.trim() || '',
+    'Insurance Provider':       document.getElementById('ep-insurance')?.value.trim() || '',
+    'Insurance Policy Number':  document.getElementById('ep-insurance-policy')?.value.trim() || '',
+    'Insurance Coverage':       document.getElementById('ep-insurance-coverage')?.value.trim() || '',
+    'Insurance Renewal Date':   document.getElementById('ep-insurance-renewal')?.value || '',
     'Vet Clinic':          document.getElementById('ep-vet-clinic')?.value.trim() || '',
     'Vet Phone':           document.getElementById('ep-vet-phone')?.value.trim() || '',
     'Vet Email':           document.getElementById('ep-vet-email')?.value.trim() || '',
@@ -563,7 +590,7 @@ async function submitEditPetClosure(petId, petName, clientId, clientToken, WORKE
 }
 
 window.switchEditPetTab = function (tab) {
-  ['basic', 'health', 'vet'].forEach(t => {
+  ['basic', 'health', 'vet', 'insurance'].forEach(t => {
     const panel = document.getElementById('edit-tab-' + t);
     const btn   = document.querySelector(`.edit-pet-tab[data-tab="${t}"]`);
     if (panel) panel.style.display = t === tab ? 'block' : 'none';
