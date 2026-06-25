@@ -575,6 +575,7 @@ input[type="text"], input[type="email"], input[type="tel"], input[type="date"], 
 input[type="date"] {
   min-height: 3rem;
   -webkit-appearance: none;
+  appearance: none;
   line-height: 1.2;
   display: block;
 }
@@ -743,15 +744,27 @@ p { font-size: 0.875rem; font-weight: 400; color: var(--muted); line-height: 1.6
 /* ── DOC CARDS ───────────────────────────────────────────────────────────── */
 .doc-cards { display: flex; flex-direction: column; gap: 1rem; }
 .doc-card { border-radius: var(--r-md); border: 1px solid var(--line); overflow: hidden; background: #fff; }
-.doc-card-header { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1rem; background: var(--paper); border-bottom: 1px solid var(--line); }
-.doc-card-header.ok { background: var(--green-wash); border-bottom-color: var(--green-wash); }
-.doc-card-header.missing { background: var(--brand-warning-light); border-bottom-color: rgba(180,105,14,0.15); }
+.doc-card-header { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1rem; background: var(--surface); border-bottom: 1px solid var(--line-soft); }
+.doc-card-header.ok { background: var(--surface); border-left: 3px solid var(--green); }
+.doc-card-header.missing { background: var(--surface); border-left: 3px solid var(--clay); }
 .doc-card-title { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; font-weight: 600; color: var(--ink); }
 .doc-card-title .ic { width: 16px; height: 16px; }
-.doc-card-status { font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 999px; }
-.doc-card-status.ok { background: var(--green-wash); color: var(--green-deep); }
-.doc-card-status.missing { background: var(--brand-warning-light); color: var(--warn); }
+.doc-card-status { font-size: 0.72rem; font-weight: 600; }
+.doc-card-status.ok { background: transparent; color: var(--green); }
+.doc-card-status.missing { background: transparent; color: var(--clay); }
 .doc-card-body { padding: 0.75rem 1rem; }
+.doc-type-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--line-soft); }
+.doc-type-row:last-child { border-bottom: none; }
+.doc-type-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.84rem; color: var(--ink); font-weight: 500; }
+.doc-type-label .ic { width: 15px; height: 15px; color: var(--muted); flex-shrink: 0; }
+.doc-type-right { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
+.doc-status-onfile.soon { color: var(--clay); }
+.btn-doc-action.subtle { color: var(--muted); border: 1px solid var(--line); padding: 0.3rem 0.7rem; }
+.btn-doc-action.subtle:hover { border-color: var(--green); color: var(--green); }
+@media (max-width: 480px) {
+  .doc-type-row { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+  .doc-type-right { width: 100%; justify-content: space-between; }
+}
 .doc-card-pet-row { display: flex; flex-direction: column; gap: 0.5rem; }
 .doc-card-pet { display: flex; align-items: center; justify-content: space-between; font-size: 0.83rem; }
 .doc-card-pet-name { display: flex; align-items: center; gap: 0.4rem; color: var(--ink); font-weight: 400; }
@@ -763,7 +776,25 @@ p { font-size: 0.875rem; font-weight: 400; color: var(--muted); line-height: 1.6
 }
 .btn-upload-small:hover { background: var(--green-bright); }
 .btn-upload-small:active { transform: scale(0.95); }
-.btn-upload-small.ok { background: transparent; color: var(--green); border: 1.5px solid var(--green-wash); }
+/* On-file is a STATUS, not an action: quiet label, no button chrome */
+.doc-status-onfile {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.78rem; font-weight: 600; color: var(--green);
+  background: transparent; border: none; padding: 0; cursor: default;
+}
+.doc-status-onfile .ic { width: 13px; height: 13px; }
+/* Re-upload affordance for expired/replace: a real bordered action button */
+.btn-doc-action {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.35rem 0.75rem; border-radius: 999px;
+  font-family: var(--font-body); font-size: 0.75rem; font-weight: 600; cursor: pointer;
+  background: transparent; transition: background 0.15s, color 0.15s, transform 0.1s;
+  text-decoration: none;
+}
+.btn-doc-action .ic { width: 12px; height: 12px; }
+.btn-doc-action.warn { color: var(--clay); border: 1.5px solid var(--clay); }
+.btn-doc-action.warn:hover { background: var(--clay); color: #fff; }
+.btn-doc-action:active { transform: scale(0.95); }
 
 /* ── COMPLIANCE BANNERS ──────────────────────────────────────────────────── */
 .compliance-banner { border-radius: var(--r-md); padding: 1.1rem 1.25rem; margin-bottom: 0.25rem; display: flex; align-items: flex-start; gap: 0.85rem; }

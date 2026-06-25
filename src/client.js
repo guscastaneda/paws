@@ -63,7 +63,12 @@ async function handleGetClient(req, env) {
               const daysUntilExpiry = (typeof daysField === "number") ? daysField : null;
               const docType = (docTypeField && typeof docTypeField === "object") ? docTypeField.name : (docTypeField || "");
               const expired = expiredField === "Yes" || expiredField === true;
-              if (docType) petDocs.push({ type: docType, expired, expiryDate, uploadDate, daysUntilExpiry });
+              // Attachment URL for the uploaded file (View action in the portal)
+              const fileField = d.fields[FIELDS.DOC_FILE] || d.fields["Document File"] || [];
+              const fileUrl   = Array.isArray(fileField) && fileField.length > 0
+                ? (fileField[0].url || "")
+                : "";
+              if (docType) petDocs.push({ type: docType, expired, expiryDate, uploadDate, daysUntilExpiry, fileUrl });
             }
           }
         }

@@ -336,58 +336,93 @@ function buildDocCards() {
     { type: 'Town License',       icon: 'i-building' },
     { type: 'Vaccination Record', icon: 'i-doc' },
   ];
+  const REQUIRED = ['Rabies Certificate', 'Town License', 'Vaccination Record'];
+  const fmtD = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   const wrap = document.createElement('div');
   wrap.className = 'doc-cards';
 
-  DOC_TYPES.forEach(({ type, icon }) => {
-    const allPetsOk = clientData.pets.every(pet =>
-      (pet.docs || []).some(d => d.type === type && !d.expired)
-    );
+  // Grouped by PET: each pet is a card, with the three document types as rows.
+  clientData.pets.forEach(pet => {
+    const docs = pet.docs || [];
+    const allOk = REQUIRED.every(type => docs.some(d => d.type === type && !d.expired));
 
     const card = document.createElement('div');
     card.className = 'doc-card';
 
     const header = document.createElement('div');
-    header.className = 'doc-card-header ' + (allPetsOk ? 'ok' : 'missing');
+    header.className = 'doc-card-header ' + (allOk ? 'ok' : 'missing');
     header.innerHTML =
-      '<div class="doc-card-title"><svg class="ic"><use href="#' + icon + '"/></svg> ' + type + '</div>' +
-      '<span class="doc-card-status ' + (allPetsOk ? 'ok' : 'missing') + '">' + (allPetsOk ? 'Complete' : 'Needed') + '</span>';
+      '<div class="doc-card-title"><svg class="ic"><use href="#i-paw"/></svg> ' + pet.name + '</div>' +
+      '<span class="doc-card-status ' + (allOk ? 'ok' : 'missing') + '">' + (allOk ? 'Complete' : 'Action needed') + '</span>';
 
     const body    = document.createElement('div');
     body.className = 'doc-card-body';
-    const petRows = document.createElement('div');
-    petRows.className = 'doc-card-pet-row';
+    const rows    = document.createElement('div');
+    rows.className = 'doc-card-pet-row';
 
-    clientData.pets.forEach(pet => {
-      const docs       = pet.docs || [];
-      const hasValid   = docs.some(d => d.type === type && !d.expired);
+    DOC_TYPES.forEach(({ type, icon }) => {
+      const validDoc   = docs.find(d => d.type === type && !d.expired);
       const expiredDoc = docs.find(d => d.type === type && d.expired);
-      const fmtD       = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
       const row = document.createElement('div');
-      row.className = 'doc-card-pet';
-      row.innerHTML = '<div class="doc-card-pet-name"><svg class="ic" style="width:14px;height:14px;color:var(--brand-primary);"><use href="#i-paw"/></svg> ' + pet.name + '</div>';
+      row.className = 'doc-type-row';
 
-      const btn = document.createElement('button');
-      if (hasValid) {
-        btn.className   = 'btn-upload-small ok';
-        btn.innerHTML = '<svg class="ic" style="width:12px;height:12px;"><use href="#i-check"/></svg> On file';
+      // Left: doc type label
+      const label = document.createElement('div');
+      label.className = 'doc-type-label';
+      label.innerHTML = '<svg class="ic"><use href="#' + icon + '"/></svg> ' + type;
+      row.appendChild(label);
+
+      // Right: status + action
+      const right = document.createElement('div');
+      right.className = 'doc-type-right';
+
+      if (validDoc) {
+        // expiry-aware status
+        const soon = typeof validDoc.daysUntilExpiry === 'number' && validDoc.daysUntilExpiry <= 30;
+        const status = document.createElement('span');
+        status.className = 'doc-status-onfile' + (soon ? ' soon' : '');
+        const exp = validDoc.expiryDate ? ' · expires ' + fmtD(validDoc.expiryDate) : '';
+        status.innerHTML = '<svg class="ic"><use href="#i-check"/></svg> On file' + exp;
+        right.appendChild(status);
+
+        // View the uploaded file (opens in a new tab) when available
+        if (validDoc.fileUrl) {
+          const view = document.createElement('a');
+          view.className = 'btn-doc-action subtle';
+          view.textContent = 'View';
+          view.href   = validDoc.fileUrl;
+          view.target = '_blank';
+          view.rel    = 'noopener noreferrer';
+          right.appendChild(view);
+        }
+
+        // Replace action (re-opens upload modal). No delete.
+        const replace = document.createElement('button');
+        replace.className = 'btn-doc-action subtle';
+        replace.textContent = 'Replace';
+        replace.onclick = () => openUploadModal(pet.id, pet.name, type);
+        right.appendChild(replace);
       } else if (expiredDoc) {
-        btn.style.cssText = 'color:var(--brand-warning);border:1.5px solid var(--brand-warning);border-radius:999px;padding:0.35rem 0.75rem;background:transparent;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;';
-        btn.innerHTML     = '<svg class="ic" style="width:12px;height:12px;"><use href="#i-alert"/></svg> Expired' + (expiredDoc.expiryDate ? ' · ' + fmtD(expiredDoc.expiryDate) : '');
-        btn.onclick       = () => openUploadModal(pet.id, pet.name, type);
+        const btn = document.createElement('button');
+        btn.className = 'btn-doc-action warn';
+        btn.innerHTML = '<svg class="ic"><use href="#i-alert"/></svg> Expired' + (expiredDoc.expiryDate ? ' · ' + fmtD(expiredDoc.expiryDate) : '');
+        btn.onclick   = () => openUploadModal(pet.id, pet.name, type);
+        right.appendChild(btn);
       } else {
+        const btn = document.createElement('button');
         btn.className   = 'btn-upload-small';
         btn.textContent = 'Upload';
         btn.onclick     = () => openUploadModal(pet.id, pet.name, type);
+        right.appendChild(btn);
       }
 
-      row.appendChild(btn);
-      petRows.appendChild(row);
+      row.appendChild(right);
+      rows.appendChild(row);
     });
 
-    body.appendChild(petRows);
+    body.appendChild(rows);
     card.appendChild(header);
     card.appendChild(body);
     wrap.appendChild(card);
@@ -407,11 +442,11 @@ function buildDocCards() {
   if (allComplete) {
     const banner = document.createElement('div');
     banner.id = 'docs-complete-banner';
-    banner.style.cssText = 'margin-top:1.25rem;background:var(--brand-success-light);border:1.5px solid rgba(46,125,50,0.25);border-radius:14px;padding:1.25rem;text-align:center;';
+    banner.style.cssText = 'margin-top:1.25rem;background:var(--surface);border:1px solid var(--line-soft);border-left:3px solid var(--green);border-radius:14px;padding:1.25rem;text-align:center;';
     banner.innerHTML =
-      '<div style="color:var(--brand-success);margin-bottom:0.5rem;display:flex;justify-content:center;"><svg class="ic" style="width:1.75rem;height:1.75rem;"><use href="#i-party"/></svg></div>' +
-      '<div style="font-family:var(--font-display);font-size:1.2rem;font-weight:600;color:var(--brand-success);margin-bottom:0.35rem;">All documents on file!</div>' +
-      '<p style="font-size:0.82rem;color:var(--brand-bark);margin-bottom:1rem;">You\'re all set on compliance. Head back to finish your account setup.</p>' +
+      '<div style="color:var(--green);margin-bottom:0.5rem;display:flex;justify-content:center;"><svg class="ic" style="width:1.75rem;height:1.75rem;"><use href="#i-party"/></svg></div>' +
+      '<div style="font-family:var(--font-display);font-size:1.2rem;font-weight:600;color:var(--green-deep);margin-bottom:0.35rem;">All documents on file!</div>' +
+      '<p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem;">You\'re all set on compliance. Head back to finish your account setup.</p>' +
       '<button class="btn-primary" style="margin-top:0;max-width:260px;margin:0 auto;display:block;" onclick="goHome()">Back to Portal</button>';
     container.appendChild(banner);
   }
