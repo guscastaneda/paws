@@ -15,6 +15,7 @@ import { handlePostRecurringRequest, handlePostRecurringPause, handlePostRecurri
 import { handleSetupClient }         from './src/setup-client.js';
 import { handlePostPet, handlePostVet, handlePostPetUpdate, handlePostPetBreed } from "./src/pet.js";
 import { handleGetBreeds }           from './src/breeds.js';
+import { handleRunReminders }        from "./src/reminders.js";
 
 export default {
   async fetch(req, env) {
@@ -45,6 +46,19 @@ export default {
     if (path === "/admin/clients" && method === "GET") return handleGetAdminClients(req, env);
     if (path === '/setup-client') return handleSetupClient(req, env);
     if (path === '/breeds' && req.method === 'GET') return handleGetBreeds(req, env);
+    if (path === "/run-reminders") return handleRunReminders(req, env);
     return env.ASSETS.fetch(req);
+  },
+
+  // Cron entry point. Wired now so Stage 3 only needs a schedule in wrangler.toml.
+  // In Stage 1 the engine is dry-run only, so this is a safe no-op preview: it
+  // computes the plan and logs it, but sends nothing and writes nothing.
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(
+      handleRunReminders(
+        new Request("https://internal/run-reminders?key=" + (env.REMINDER_KEY || "")),
+        env
+      )
+    );
   },
 };
