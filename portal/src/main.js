@@ -1102,7 +1102,7 @@ window.openRecurringCancelModal = function(recurringId, serviceName, petNames) {
         <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;">Cancel ${serviceName}</div>
         <button onclick="document.getElementById('recurring-modal').remove()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--brand-stone);">✕</button>
       </div>
-      <div style="background:var(--brand-sage-light);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.85rem;">
+      <div style="background:var(--surface);border:1px solid var(--line-soft);border-left:3px solid var(--green);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1rem;font-size:0.85rem;">
         <div style="font-weight:500;color:var(--brand-bark);">${serviceName} · ${petNames}</div>
       </div>
       <div style="background:#fff3f3;border:1.5px solid #f5c6c6;border-radius:10px;padding:0.75rem 1rem;margin-bottom:1.25rem;font-size:0.78rem;color:#c0392b;line-height:1.6;">
@@ -1180,7 +1180,7 @@ window.openCancellationModal = function(apptId, category, startDate, endDate) {
         <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;">Request Cancellation</div>
         <button onclick="document.getElementById('cancellation-modal').remove()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--brand-stone);">✕</button>
       </div>
-      <div style="background:var(--brand-sage-light);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.85rem;">
+      <div style="background:var(--surface);border:1px solid var(--line-soft);border-left:3px solid var(--green);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1rem;font-size:0.85rem;">
         <div style="font-weight:500;color:var(--brand-bark);">${serviceLabel} · ${dateLabel}</div>
       </div>
       <div style="background:#fff3f3;border:1.5px solid #f5c6c6;border-radius:10px;padding:0.75rem 1rem;margin-bottom:1.25rem;font-size:0.78rem;color:#c0392b;line-height:1.6;">

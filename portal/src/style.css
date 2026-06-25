@@ -320,13 +320,13 @@ body::before {
 .btn-sm:active { transform: scale(0.97); }
 
 /* ── STATUS CHIP ─────────────────────────────────────────────────────────── */
-.chip { font-size: 0.67rem; font-weight: 600; letter-spacing: 0.03em; padding: 0.22rem 0.6rem; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.3rem; }
+.chip { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.02em; padding: 0.2rem 0; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; }
 .chip .dot { width: 6px; height: 6px; border-radius: 50%; position: relative; }
-.chip.active { background: var(--ok-wash); color: var(--green-deep); }
+.chip.active { background: transparent; color: var(--green); }
 .chip.active .dot { background: var(--green); }
 .chip.active .dot::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--green); animation: pulse 2.4s var(--ease) infinite; }
 @keyframes pulse { 0% { transform: scale(1); opacity: 0.7; } 70% { transform: scale(3); opacity: 0; } 100% { transform: scale(3); opacity: 0; } }
-.chip.inactive { background: var(--line); color: var(--muted); }
+.chip.inactive { background: transparent; color: var(--muted); }
 .chip.inactive .dot { background: var(--muted); }
 
 /* ── RESIDENT (PET) CARDS ────────────────────────────────────────────────── */
@@ -343,7 +343,30 @@ body::before {
 }
 .resident:hover { border-color: var(--green); box-shadow: 0 8px 26px rgba(47,125,82,0.16); transform: translateY(-2px); }
 
-.resident-top { display: flex; align-items: center; gap: 1rem; padding: 1.05rem 1.1rem; cursor: pointer; }
+.resident-top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "photo body actions";
+  align-items: center;
+  gap: 0.9rem 1rem;
+  padding: 1.05rem 1.1rem;
+  cursor: pointer;
+}
+.resident-photo { grid-area: photo; }
+.resident-body  { grid-area: body; }
+.resident-actions { grid-area: actions; }
+
+/* On narrow screens, actions drop to their own full-width row beneath the name,
+   so the breed/meta never gets crushed into a sliver of a column. */
+@media (max-width: 480px) {
+  .resident-top {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "photo body"
+      "actions actions";
+  }
+  .resident-actions { justify-content: flex-end; margin-top: 0.25rem; }
+}
 
 .resident-photo {
   width: 58px; height: 58px;
@@ -361,7 +384,7 @@ body::before {
 /* active residents get a subtle green ring */
 .resident.is-active .resident-photo { box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(47,125,82,0.25); }
 
-.resident-body { flex: 1; min-width: 0; }
+.resident-body { min-width: 0; }
 .resident-name {
   font-family: var(--font-display);
   font-size: 1.5rem;
@@ -378,8 +401,11 @@ body::before {
   color: var(--muted);
   margin-top: 0.25rem;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.resident-actions { display: flex; align-items: center; gap: 0.5rem; }
+.resident-actions { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
 
 .chev { transition: transform 0.32s var(--ease); color: var(--muted); width: 18px; height: 18px; }
 .resident.open .chev { transform: rotate(90deg); }
@@ -408,8 +434,13 @@ body::before {
 .doc-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0.75rem 0 0.3rem; }
 
 /* inactive nudge */
-.nudge { margin: 0 1rem 1rem; padding: 0.7rem 0.85rem; background: var(--clay-wash); border-radius: var(--r-sm); display: flex; align-items: center; gap: 0.75rem; }
-.nudge p { font-size: 0.79rem; color: var(--ink); line-height: 1.4; }
+.nudge { margin: 0 1rem 1rem; padding: 0.9rem 1rem; background: var(--clay-wash); border-radius: var(--r-sm); display: flex; align-items: center; gap: 0.85rem; }
+.nudge p { font-size: 0.82rem; color: var(--ink); line-height: 1.45; }
+.nudge .btn-clay { flex-shrink: 0; }
+@media (max-width: 480px) {
+  .nudge { flex-direction: column; align-items: stretch; }
+  .nudge .btn-clay { justify-content: center; width: 100%; }
+}
 
 /* add resident */
 .add-resident {
@@ -530,15 +561,28 @@ label .opt { color: var(--muted); font-weight: 400; text-transform: none; letter
 input[type="text"], input[type="email"], input[type="tel"], input[type="date"], textarea, select {
   width: 100%; padding: 0.7rem 0.9rem;
   border: 1.5px solid var(--line); border-radius: var(--r-sm);
-  font-family: var(--font-body); font-size: 0.9rem; font-weight: 400;
+  font-family: var(--font-body); font-size: 1rem; font-weight: 400;
   color: var(--ink); background: #fff; appearance: none;
   transition: border-color 0.2s, box-shadow 0.2s; outline: none;
 }
+/* iOS Safari renders empty date inputs nearly collapsed; force a real height and
+   keep the field looking like a field before a date is chosen. font-size:1rem also
+   prevents iOS auto-zoom on focus (it zooms when inputs are < 16px). */
+input[type="date"] {
+  min-height: 3rem;
+  -webkit-appearance: none;
+  line-height: 1.2;
+  display: block;
+}
+input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+input[type="date"]:not(:focus):invalid,
+input[type="date"][value=""] { color: var(--muted); }
 input:focus, textarea:focus, select:focus {
   border-color: var(--green);
   box-shadow: 0 0 0 3px rgba(47,125,82,0.1);
 }
 textarea { resize: vertical; min-height: 80px; }
+select { min-height: 3rem; }
 
 /* ── FILE DROP ───────────────────────────────────────────────────────────── */
 .file-drop {
