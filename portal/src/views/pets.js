@@ -11,7 +11,7 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
 
   const pets = clientData.pets || [];
   if (pets.length === 0) {
-    container.innerHTML = '<p style="font-size:0.85rem;color:var(--brand-stone);font-weight:300;">No pets on file yet. <a href="#" id="add-first-pet" style="color:var(--brand-primary);font-weight:500;">Register your pet →</a></p>';
+    container.innerHTML = '<p style="font-size:0.85rem;color:var(--muted);">No pets on file yet. <a href="#" id="add-first-pet" style="color:var(--green);font-weight:600;">Register your pet</a></p>';
     setTimeout(() => {
       const link = document.getElementById('add-first-pet');
       if (link) link.onclick = (e) => { e.preventDefault(); goToStep('new-pet'); };
@@ -19,32 +19,41 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
     return;
   }
 
+  const fmtDate = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+
   pets.forEach(pet => {
     const card = document.createElement('div');
-    card.className = 'pet-profile-card';
+    card.className = 'resident ' + (pet.active ? 'is-active' : 'is-inactive');
     card.id = 'pet-card-' + pet.id;
 
+    // ── Photo tile: real image (Polly) or paw fallback ──
+    const photoHtml = pet.photoUrl
+      ? `<div class="resident-photo"><img src="${pet.photoUrl}" alt="${pet.name}"></div>`
+      : `<div class="resident-photo"${pet.active ? '' : ' style="filter:grayscale(0.4);opacity:0.85;"'}><svg class="ic"><use href="#i-paw"/></svg></div>`;
+
+    const metaText = [pet.breed || 'Mixed Breed', pet.age].filter(Boolean).join(' · ');
+    const statusChip = pet.active
+      ? '<span class="chip active"><span class="dot"></span>Active</span>'
+      : '<span class="chip inactive"><span class="dot"></span>Inactive</span>';
+
+    // ── Inactive: header + reactivation nudge, no expand ──
     if (!pet.active) {
       card.innerHTML = `
-    <div class="pet-card" style="flex-direction:column;align-items:stretch;gap:0;opacity:0.75;">
-      <div style="display:flex;align-items:center;gap:0.85rem;">
-        <div style="width:52px;height:52px;border-radius:50%;background:var(--brand-stone-light);border:2px solid var(--brand-stone-light);display:flex;align-items:center;justify-content:center;color:var(--brand-stone);">
-          <svg class="ic" style="width:24px;height:24px;"><use href="#i-paw"/></svg>
+        <div class="resident-top" style="cursor:default;">
+          ${photoHtml}
+          <div class="resident-body">
+            <div class="resident-name">${pet.name}</div>
+            <div class="resident-meta">${metaText}</div>
+          </div>
+          <div class="resident-actions">
+            ${statusChip}
+            <button class="btn-ghost" id="edit-pet-btn-${pet.id}"><svg class="ic"><use href="#i-edit"/></svg>Edit</button>
+          </div>
         </div>
-        <div style="flex:1;">
-          <div style="font-size:1rem;font-weight:500;color:var(--brand-stone);">${pet.name}</div>
-          <div style="font-size:0.78rem;color:var(--brand-stone);font-weight:300;">${[pet.breed, pet.age].filter(Boolean).join(' · ')}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-          <button id="edit-pet-btn-${pet.id}" style="padding:0.25rem 0.65rem;background:transparent;color:var(--brand-primary);border:1.5px solid var(--brand-primary);border-radius:999px;font-family:var(--font-body);font-size:0.72rem;font-weight:500;cursor:pointer;">Edit</button>
-          <span style="font-size:0.7rem;font-weight:500;padding:0.2rem 0.65rem;border-radius:999px;background:var(--brand-stone-light);color:var(--brand-stone);">Inactive</span>
-        </div>
-      </div>
-      <div style="margin-top:0.75rem;padding:0.6rem 0.85rem;background:var(--brand-sage-light);border-radius:10px;display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:0.8rem;color:var(--brand-bark);font-weight:300;line-height:1.4;">It's been a while since ${pet.name}'s last stay. We'd love to do a trial daycare to make sure we're still a great fit!</span>
-        <button onclick="window.location='mai'+'lto:'+'hello'+'@'+'pawsonlongmeadow.com'+'?subject=Reactivate ${encodeURIComponent(pet.name)}'" style="font-size:0.75rem;font-weight:500;color:var(--brand-primary);background:transparent;text-decoration:none;padding:0.25rem 0.65rem;border:1.5px solid var(--brand-primary);border-radius:999px;cursor:pointer;font-family:var(--font-body);">Send us a message</button>
-      </div>
-    </div>`;
+        <div class="nudge">
+          <p>It's been a while since ${pet.name}'s last stay. We'd love a trial daycare to make sure we're still a great fit.</p>
+          <button class="btn-clay" onclick="window.location='mai'+'lto:'+'hello'+'@'+'pawsonlongmeadow.com'+'?subject=Reactivate ${encodeURIComponent(pet.name)}'"><svg class="ic"><use href="#i-msg"/></svg>Message</button>
+        </div>`;
       container.appendChild(card);
       setTimeout(() => {
         const editBtn = document.getElementById('edit-pet-btn-' + pet.id);
@@ -53,131 +62,96 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
       return;
     }
 
-    // ── Header ──
-    const photoHtml = pet.photoUrl
-      ? `<img src="${pet.photoUrl}" alt="${pet.name}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--brand-sage);">`
-      : `<div style="width:52px;height:52px;border-radius:50%;background:var(--brand-sage-light);border:2px solid var(--brand-sage);display:flex;align-items:center;justify-content:center;color:var(--brand-primary);"><svg class="ic" style="width:24px;height:24px;"><use href="#i-paw"/></svg></div>`;
-
-    const genderIcon = pet.gender || '';
+    // ── Active: full resident card with animated expand ──
     const snBadge = pet.spayedNeutered
-      ? `<span style="font-size:0.68rem;background:var(--brand-sage-light);color:var(--brand-primary);padding:0.15rem 0.45rem;border-radius:999px;font-weight:500;"><svg class="ic" style="width:12px;height:12px;vertical-align:-0.1em;"><use href="#i-check"/></svg> Spayed/Neutered</span>`
+      ? `<span style="font-size:0.68rem;background:var(--green-wash);color:var(--green-deep);padding:0.15rem 0.5rem;border-radius:999px;font-weight:600;"><svg class="ic" style="width:11px;height:11px;vertical-align:-0.1em;"><use href="#i-check"/></svg> Spayed/Neutered</span>`
       : '';
+    const genderText = pet.gender ? ` <span style="font-size:0.78rem;color:var(--muted);font-weight:400;">${pet.gender}</span>` : '';
 
     // ── Doc rows ──
     const REQUIRED_DOCS = ['Rabies Certificate', 'Town License', 'Vaccination Record'];
-    const fmtDate = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
-
     const docRows = REQUIRED_DOCS.map(type => {
-      const validDoc = (pet.docs || []).find(d => d.type === type && !d.expired);
+      const validDoc   = (pet.docs || []).find(d => d.type === type && !d.expired);
       const expiredDoc = (pet.docs || []).find(d => d.type === type && d.expired);
       const doc = validDoc || expiredDoc;
-      const ok = !!validDoc;
-      const expiryText = doc?.expiryDate
+      const ok  = !!validDoc;
+      const cls = ok ? 'ok' : (expiredDoc ? 'expired' : 'miss');
+      const icon = ok ? 'i-check' : 'i-alert';
+      const when = doc?.expiryDate
         ? (ok ? 'Expires ' : 'Expired ') + fmtDate(doc.expiryDate)
         : (ok ? 'On file' : 'Missing');
-
-      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.35rem 0;border-bottom:1px solid var(--brand-stone-light);">
-        <span style="font-size:0.8rem;color:${ok ? 'var(--brand-bark)' : 'var(--brand-warning)'};"><svg class="ic" style="width:14px;height:14px;vertical-align:-0.15em;"><use href="#${ok ? 'i-check' : 'i-alert'}"/></svg> ${type}</span>
-        <span style="font-size:0.72rem;color:${ok ? 'var(--brand-stone)' : 'var(--brand-warning)'};font-weight:300;">${expiryText}</span>
-      </div>`;
+      return `<div class="doc-line ${cls}"><span class="name"><svg class="ic"><use href="#${icon}"/></svg>${type}</span><span class="when">${when}</span></div>`;
     }).join('');
 
     // ── Vet rows ──
-    const primaryVet = pet.vets?.[0];
+    const primaryVet  = pet.vets?.[0];
     const specialists = pet.vets?.slice(1) || [];
-
     const vetHtml = primaryVet
-      ? `<div style="margin-bottom:0.5rem;">
-          <div style="font-size:0.78rem;font-weight:500;color:var(--brand-bark);"><svg class="ic" style="width:14px;height:14px;vertical-align:-0.12em;color:var(--brand-primary);"><use href="#i-vet"/></svg> ${primaryVet.clinic}</div>
-          ${primaryVet.phone ? `<div style="font-size:0.75rem;color:var(--brand-stone);font-weight:300;"><svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;"><use href="#i-phone"/></svg> ${primaryVet.phone}</div>` : ''}
-          ${primaryVet.address ? `<div style="font-size:0.75rem;color:var(--brand-stone);font-weight:300;"><svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;"><use href="#i-pin"/></svg> ${primaryVet.address}</div>` : ''}
-        </div>
-        ${specialists.map(v => `<div style="margin-bottom:0.4rem;padding-left:0.75rem;border-left:2px solid var(--brand-sage);">
-          <div style="font-size:0.75rem;font-weight:500;color:var(--brand-bark);"><svg class="ic" style="width:13px;height:13px;vertical-align:-0.1em;color:var(--brand-primary);"><use href="#i-vet"/></svg> ${v.clinic}</div>
-          ${v.phone ? `<div style="font-size:0.72rem;color:var(--brand-stone);font-weight:300;"><svg class="ic" style="width:12px;height:12px;vertical-align:-0.1em;"><use href="#i-phone"/></svg> ${v.phone}</div>` : ''}
-        </div>`).join('')}`
-      : `<div style="font-size:0.78rem;color:var(--brand-stone);font-weight:300;font-style:italic;">No vet on file</div>`;
+      ? `<div class="detail-row"><svg class="ic"><use href="#i-vet"/></svg><span>${primaryVet.clinic}${primaryVet.phone ? `<br><span class="k">${primaryVet.phone}</span>` : ''}${primaryVet.address ? `<br><span class="k">${primaryVet.address}</span>` : ''}</span></div>
+         ${specialists.map(v => `<div class="detail-row" style="padding-left:0.5rem;border-left:2px solid var(--green-wash);"><svg class="ic"><use href="#i-vet"/></svg><span>${v.clinic}${v.phone ? `<br><span class="k">${v.phone}</span>` : ''}</span></div>`).join('')}`
+      : `<div class="detail-row" style="color:var(--muted);font-style:italic;">No vet on file</div>`;
 
     card.innerHTML = `
-      <div class="pet-card" style="flex-direction:column;align-items:stretch;gap:0;cursor:pointer;" onclick="togglePetCard('${pet.id}')">
-        <div style="display:flex;align-items:center;gap:0.85rem;">
-          ${photoHtml}
-          <div style="flex:1;">
-            <div style="font-size:1rem;font-weight:500;color:var(--brand-bark);">${pet.name}${genderIcon ? ` <span style="font-size:0.78rem;color:var(--brand-stone);font-weight:300;">${genderIcon}</span>` : ''}</div>
-            <div style="font-size:0.78rem;color:var(--brand-stone);font-weight:300;">${[pet.breed || 'Mixed Breed', pet.age].filter(Boolean).join(' · ')}</div>
-            <div style="margin-top:0.25rem;">${snBadge}</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:0.5rem;">
-            <button id="edit-pet-btn-${pet.id}" style="padding:0.25rem 0.65rem;background:transparent;color:var(--brand-primary);border:1.5px solid var(--brand-primary);border-radius:999px;font-family:var(--font-body);font-size:0.72rem;font-weight:500;cursor:pointer;" onclick="event.stopPropagation()">Edit</button>
-            <span style="color:var(--brand-stone);display:inline-flex;" id="pet-toggle-${pet.id}"><svg class="ic" style="width:16px;height:16px;transform:rotate(90deg);"><use href="#i-arrow"/></svg></span>
-          </div>
+      <div class="resident-top" onclick="togglePetCard('${pet.id}')">
+        ${photoHtml}
+        <div class="resident-body">
+          <div class="resident-name">${pet.name}${genderText}</div>
+          <div class="resident-meta">${metaText}</div>
+          ${snBadge ? `<div style="margin-top:0.3rem;">${snBadge}</div>` : ''}
+        </div>
+        <div class="resident-actions">
+          ${statusChip}
+          <button class="btn-ghost" id="edit-pet-btn-${pet.id}" onclick="event.stopPropagation()"><svg class="ic"><use href="#i-edit"/></svg>Edit</button>
+          <svg class="ic chev"><use href="#i-arrow"/></svg>
         </div>
       </div>
 
-      <div id="pet-detail-${pet.id}" style="display:none;padding:0.75rem 0 0.25rem;">
+      <div class="resident-detail"><div class="inner"><div class="detail-pad">
+        ${pet.dob ? `<div class="detail-row"><svg class="ic"><use href="#i-cake"/></svg><span><span class="k">Born</span> ${fmtDate(pet.dob)}</span></div>` : ''}
 
-        ${pet.dob ? `<div style="font-size:0.78rem;color:var(--brand-stone);margin-bottom:0.75rem;"><svg class="ic" style="width:14px;height:14px;vertical-align:-0.12em;color:var(--brand-primary);"><use href="#i-cake"/></svg> Born ${fmtDate(pet.dob)}</div>` : ''}
+        ${pet.notes ? `<div class="info-box" style="margin:0.5rem 0;"><div class="doc-label" style="margin:0 0 0.2rem;">Health Notes</div>${pet.notes}</div>` : ''}
+        ${pet.allergies ? `<div class="detail-row"><span><span class="k">Allergies:</span> ${pet.allergies}</span></div>` : ''}
+        ${pet.medications ? `<div class="detail-row"><span><span class="k">Medications:</span> ${pet.medications}</span></div>` : ''}
+        ${pet.feeding ? `<div class="detail-row"><span><span class="k">Feeding:</span> ${pet.feeding}</span></div>` : ''}
 
-        ${pet.notes ? `<div style="background:var(--brand-gold-light);border-left:3px solid var(--brand-gold);border-radius:0 8px 8px 0;padding:0.6rem 0.8rem;margin-bottom:0.75rem;">
-          <div style="font-size:0.7rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;color:var(--brand-stone);margin-bottom:0.25rem;">Health Notes</div>
-          <div style="font-size:0.8rem;color:var(--brand-bark);font-weight:300;line-height:1.5;">${pet.notes}</div>
-        </div>` : ''}
+        <div class="doc-label">Documents</div>
+        ${docRows}
+        <button class="btn-ghost" id="pet-docs-btn-${pet.id}" style="margin-top:0.6rem;"><svg class="ic"><use href="#i-upload"/></svg>Upload / Update Docs</button>
 
-        ${pet.allergies ? `<div style="font-size:0.78rem;color:var(--brand-bark);margin-bottom:0.5rem;"><span style="font-weight:500;">Allergies:</span> <span style="font-weight:300;">${pet.allergies}</span></div>` : ''}
-        ${pet.medications ? `<div style="font-size:0.78rem;color:var(--brand-bark);margin-bottom:0.5rem;"><span style="font-weight:500;">Medications:</span> <span style="font-weight:300;">${pet.medications}</span></div>` : ''}
-        ${pet.feeding ? `<div style="font-size:0.78rem;color:var(--brand-bark);margin-bottom:0.75rem;"><span style="font-weight:500;">Feeding:</span> <span style="font-weight:300;">${pet.feeding}</span></div>` : ''}
-
-        <div style="margin-bottom:0.75rem;">
-          <div style="font-size:0.7rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;color:var(--brand-stone);margin-bottom:0.4rem;">Documents</div>
-          ${docRows}
-          <button id="pet-docs-btn-${pet.id}" style="margin-top:0.6rem;padding:0.35rem 0.75rem;background:transparent;color:var(--brand-primary);border:1.5px solid var(--brand-primary);border-radius:999px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;">Upload / Update Docs</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:0.85rem 0 0.3rem;">
+          <div class="doc-label" style="margin:0;">Veterinarian</div>
+          <button class="btn-ghost" id="add-vet-btn-${pet.id}" style="padding:0.22rem 0.55rem;"><svg class="ic"><use href="#i-plus"/></svg>Specialist</button>
         </div>
-
-        <div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
-            <div style="font-size:0.7rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;color:var(--brand-stone);">Veterinarians</div>
-            <button id="add-vet-btn-${pet.id}" style="padding:0.25rem 0.6rem;background:transparent;color:var(--brand-primary);border:1.5px solid var(--brand-primary);border-radius:999px;font-family:var(--font-body);font-size:0.72rem;font-weight:500;cursor:pointer;">+ Add Specialist</button>
-          </div>
-          ${vetHtml}
-          <button id="update-vet-btn-${pet.id}" style="margin-top:0.5rem;padding:0.35rem 0.75rem;background:transparent;color:var(--brand-primary);border:1.5px solid var(--brand-primary);border-radius:999px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;cursor:pointer;">${primaryVet ? 'Update Primary Vet' : 'Add Vet'}</button>
-        </div>
-      </div>`;
+        ${vetHtml}
+        <button class="btn-ghost" id="update-vet-btn-${pet.id}" style="margin-top:0.5rem;">${primaryVet ? 'Update Primary Vet' : 'Add Vet'}</button>
+      </div></div></div>`;
 
     container.appendChild(card);
 
     setTimeout(() => {
       const docsBtn = document.getElementById('pet-docs-btn-' + pet.id);
       if (docsBtn) docsBtn.onclick = () => goToStep('docs');
-
       const updateVetBtn = document.getElementById('update-vet-btn-' + pet.id);
       if (updateVetBtn) updateVetBtn.onclick = () => openVetForm(pet, 'primary', clientData, WORKER_URL, clientToken);
-
       const addVetBtn = document.getElementById('add-vet-btn-' + pet.id);
       if (addVetBtn) addVetBtn.onclick = () => openVetForm(pet, 'specialist', clientData, WORKER_URL, clientToken);
-
       const editBtn = document.getElementById('edit-pet-btn-' + pet.id);
       if (editBtn) editBtn.onclick = () => openEditPetForm(pet, clientData, WORKER_URL, clientToken);
     }, 0);
   });
 
   const addBtn = document.createElement('button');
-  addBtn.style.cssText = 'width:100%;padding:0.75rem;background:transparent;color:var(--brand-primary);border:1.5px dashed var(--brand-primary);border-radius:12px;font-family:var(--font-body);font-size:0.875rem;font-weight:500;cursor:pointer;margin-top:0.25rem;';
-  addBtn.textContent = '+ Register a New Pet';
+  addBtn.className = 'add-resident';
+  addBtn.innerHTML = '<svg class="ic"><use href="#i-plus"/></svg>Register a new pet';
   addBtn.onclick = () => goToStep('new-pet');
   container.appendChild(addBtn);
 }
 
 // ── Toggle pet detail ─────────────────────────────────────────────────────────
 window.togglePetCard = function (petId) {
-  const detail = document.getElementById('pet-detail-' + petId);
-  const toggle = document.getElementById('pet-toggle-' + petId);
-  if (!detail) return;
-  const isOpen = detail.style.display !== 'none';
-  detail.style.display = isOpen ? 'none' : 'block';
-  if (toggle) {
-    const chevron = toggle.querySelector('svg');
-    if (chevron) chevron.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(-90deg)';
-  }
+  const card = document.getElementById('pet-card-' + petId);
+  if (!card) return;
+  card.classList.toggle('open');
 };
 
 // ── Vet form ──────────────────────────────────────────────────────────────────
