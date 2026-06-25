@@ -82,13 +82,15 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
         <div class="resident-top" style="cursor:default;">
           ${photoHtml}
           <div class="resident-body">
-            <div class="resident-name">${pet.name}</div>
+            <div class="resident-nameline">
+              <span class="resident-name">${pet.name}</span>
+              ${statusChip}
+            </div>
             ${ageGenderLine ? `<div class="resident-meta">${ageGenderLine}</div>` : ''}
             <div class="resident-breed">${breedLine}</div>
           </div>
           <div class="resident-actions">
-            ${statusChip}
-            <button class="btn-ghost quiet" id="edit-pet-btn-${pet.id}"><svg class="ic"><use href="#i-edit"/></svg>Edit</button>
+            <button class="btn-ghost quiet" id="edit-pet-btn-${pet.id}"><svg class="ic"><use href="#i-edit"/></svg>Update</button>
           </div>
         </div>
         ${nudgeHtml}`;
@@ -128,13 +130,15 @@ export function buildPetCards(clientData, goToStep, WORKER_URL, clientToken) {
       <div class="resident-top" onclick="togglePetCard('${pet.id}')">
         ${photoHtml}
         <div class="resident-body">
-          <div class="resident-name">${pet.name}</div>
+          <div class="resident-nameline">
+            <span class="resident-name">${pet.name}</span>
+            ${statusChip}
+          </div>
           ${ageGenderLine ? `<div class="resident-meta">${ageGenderLine}</div>` : ''}
           <div class="resident-breed">${breedLine}</div>
         </div>
         <div class="resident-actions">
-          ${statusChip}
-          <button class="btn-ghost quiet" id="edit-pet-btn-${pet.id}" onclick="event.stopPropagation()"><svg class="ic"><use href="#i-edit"/></svg>Edit</button>
+          <button class="btn-ghost quiet" id="edit-pet-btn-${pet.id}" onclick="event.stopPropagation()"><svg class="ic"><use href="#i-edit"/></svg>Update</button>
           <svg class="ic chev"><use href="#i-arrow"/></svg>
         </div>
       </div>
@@ -202,7 +206,8 @@ function openVetForm(pet, vetType, clientData, WORKER_URL, clientToken) {
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(44,31,20,0.4);z-index:100;display:flex;align-items:flex-end;justify-content:center;padding:1rem;';
 
   modal.innerHTML = `
-    <div class="modal-scroll" style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:1.75rem 1.5rem 2.5rem;max-height:85vh;overflow-y:auto;">
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;">
+      <div class="modal-scroll" style="overflow-y:auto;flex:1;min-height:0;padding:1.75rem 1.5rem 2.5rem;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
         <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;">${title}</div>
         <button onclick="document.getElementById('vet-form-modal').remove()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--brand-stone);">✕</button>
@@ -229,6 +234,7 @@ function openVetForm(pet, vetType, clientData, WORKER_URL, clientToken) {
         style="width:100%;padding:0.85rem;background:var(--brand-primary);color:#fff;border:none;border-radius:12px;font-family:var(--font-body);font-size:0.95rem;font-weight:500;cursor:pointer;">
         Submit Update
       </button>
+      </div>
     </div>`;
 
   document.body.appendChild(modal);
@@ -400,7 +406,8 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(44,31,20,0.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(2px);';
 
   modal.innerHTML = `
-    <div class="modal-scroll" style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(44,31,20,0.15);">
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:85vh;overflow:hidden;box-shadow:0 -4px 24px rgba(44,31,20,0.15);display:flex;flex-direction:column;">
+      <div class="modal-scroll" style="overflow-y:auto;flex:1;min-height:0;">
       <div style="position:sticky;top:0;background:#fff;padding:1.25rem 1.5rem 0.75rem;border-bottom:1px solid var(--brand-stone-light);z-index:1;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
           <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:600;">Update ${pet.name}</div>
@@ -547,6 +554,7 @@ export function openEditPetForm(pet, clientData, WORKER_URL, clientToken) {
         <button id="ep-submit-btn" style="width:100%;padding:0.85rem;background:var(--brand-primary);color:#fff;border:none;border-radius:12px;font-family:var(--font-body);font-size:0.95rem;font-weight:500;cursor:pointer;">
           Submit Updates
         </button>
+      </div>
       </div>
     </div>`;
 

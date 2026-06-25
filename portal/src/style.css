@@ -388,6 +388,13 @@ body::before {
 .resident.is-active .resident-photo { box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(47,125,82,0.25); }
 
 .resident-body { min-width: 0; }
+.resident-nameline {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.resident-nameline .chip { align-self: center; }
 .resident-name {
   font-family: var(--font-display);
   font-size: 1.5rem;
