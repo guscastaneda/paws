@@ -9,3 +9,6 @@ not_found_handling = "none"
 
 [build]
 command = "cd portal && npm run build"
+
+[triggers]
+crons = ["14 11 * * *"]

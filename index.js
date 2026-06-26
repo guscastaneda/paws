@@ -50,13 +50,14 @@ export default {
     return env.ASSETS.fetch(req);
   },
 
-  // Cron entry point. Wired now so Stage 3 only needs a schedule in wrangler.toml.
-  // In Stage 1 the engine is dry-run only, so this is a safe no-op preview: it
-  // computes the plan and logs it, but sends nothing and writes nothing.
+  // Cron entry point (Stage 3). Runs the reminder engine for real once daily.
+  // It passes send=true so the scheduled run actually emails clients, writes
+  // stages, and sends the owner digest. The bare /run-reminders URL (no send=true)
+  // stays a safe dry-run preview you can hit any time.
   async scheduled(event, env, ctx) {
     ctx.waitUntil(
       handleRunReminders(
-        new Request("https://internal/run-reminders?key=" + (env.REMINDER_KEY || "")),
+        new Request("https://internal/run-reminders?key=" + (env.REMINDER_KEY || "") + "&send=true"),
         env
       )
     );
