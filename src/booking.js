@@ -14,8 +14,8 @@ function serviceConfig(serviceType, halfDayPreference) {
     case 'half-daycare':
       return {
         serviceId: HALF_DAYCARE_SERVICE_ID, category: 'HD', threshold: WAITLIST_THRESHOLD_DAYCARE,
-        startTime: halfDayPreference === 'PM' ? 'Noon (11:30AM–12:30PM)'       : 'Early morning (7:30–9AM)',
-        endTime:   halfDayPreference === 'PM' ? 'Late Afternoon (4:00–5:30PM)' : 'Noon (11:30AM–12:30PM)',
+        startTime: halfDayPreference === 'PM' ? 'Noon (11:30AM–12:30PM)'       : 'Early morning (8:00–9AM)',
+        endTime:   halfDayPreference === 'PM' ? 'Late Afternoon (4:00–4:30PM)' : 'Noon (11:30AM–12:30PM)',
       };
     default:
       return { serviceId: BOARDING_SERVICE_ID, category: 'B', threshold: WAITLIST_THRESHOLD_BOARDING, startTime: null, endTime: null };

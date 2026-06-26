@@ -668,7 +668,7 @@ function buildBeforeVisitCard() {
       '</ul>' +
       '<div style="font-size:0.85rem;font-weight:600;color:var(--ink);margin-bottom:0.3rem;">Drop-off &amp; pickup</div>' +
       '<div style="font-size:0.86rem;color:var(--ink);line-height:1.5;">' +
-        'We schedule drop-off and pickup within these windows: Early morning (7:30–9AM), Noon (11:30AM–12:30PM), or Late Afternoon (4:00–5:30PM). ' +
+        'We schedule drop-off and pickup within these windows: Early morning (8:00–9AM), Noon (11:30AM–12:30PM), or Late Afternoon (4:00–4:30PM). ' +
         'Let us know your preferred window, and tell us about any feeding, medication, or behavior changes since your last visit.' +
       '</div>' +
     '</div>';
