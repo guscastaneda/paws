@@ -226,6 +226,25 @@ function emailWrapper(body, clientToken) {
   </div>`;
 }
 
+// Owner-facing wrapper for the internal digest. Identical masthead/styling to
+// emailWrapper, but the footer links to the Airtable "Reminder Worklist" view
+// (where the owner actually reviews and acts on compliance docs) rather than the
+// client portal, which is meaningless for an internal ops email.
+const OWNER_WORKLIST_URL = "https://airtable.com/appvQb876VInNJlnB/tblRuPAAVBeMjeWSa/viwvGCkaRIZOQEG2g";
+
+function ownerWrapper(body) {
+  return `<div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;padding:2rem;color:#2c1f14;background:#fdfcfb;">
+    <div style="text-align:center;margin-bottom:2rem;">
+      <div style="font-size:1.5rem;letter-spacing:0.15em;font-weight:600;color:#2D5A27;text-transform:uppercase;">Paws on Longmeadow</div>
+      <div style="font-size:0.8rem;color:#7a6a5a;margin-top:0.25rem;">Sharon, Massachusetts</div>
+    </div>
+    ${body}
+    <div style="border-top:1px solid #e8e0d8;margin-top:2.5rem;padding-top:1rem;text-align:center;font-size:0.8rem;color:#7a6a5a;">
+      © Paws on Longmeadow · Sharon, MA · <a href="${OWNER_WORKLIST_URL}" style="color:#2D5A27;">Open Reminder Worklist</a>
+    </div>
+  </div>`;
+}
+
 function summaryTable(rows) {
   return `<div style="background:#f5f0eb;border-radius:12px;padding:1.25rem 1.5rem;margin:1.25rem 0;">
     <table style="width:100%;font-size:0.88rem;line-height:1.9;border-collapse:collapse;">
@@ -380,7 +399,7 @@ async function sendOwnerDigest(env, results, skipped, scanned, today) {
   await sendEmail(env, {
     to: ["hello@pawsonlongmeadow.com"],
     subject: `Compliance reminders — ${sent.length} sent${failed.length ? `, ${failed.length} failed` : ""}`,
-    html: emailWrapper(body, null),
+    html: ownerWrapper(body),
   });
 }
 
