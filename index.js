@@ -16,6 +16,7 @@ import { handleSetupClient }         from './src/setup-client.js';
 import { handlePostPet, handlePostVet, handlePostPetUpdate, handlePostPetBreed } from "./src/pet.js";
 import { handleGetBreeds }           from './src/breeds.js';
 import { handleRunReminders }        from "./src/reminders.js";
+import { handlePostLead }            from "./src/leads.js";
 
 export default {
   async fetch(req, env) {
@@ -47,6 +48,7 @@ export default {
     if (path === '/setup-client') return handleSetupClient(req, env);
     if (path === '/breeds' && req.method === 'GET') return handleGetBreeds(req, env);
     if (path === "/run-reminders") return handleRunReminders(req, env);
+    if (path === "/lead" && method === "POST") return handlePostLead(req, env);
     return env.ASSETS.fetch(req);
   },
 
