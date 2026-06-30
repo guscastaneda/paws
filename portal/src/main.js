@@ -1646,7 +1646,7 @@ window.submitContact = async function() {
       'Email Address':          email,
       'Address':                document.getElementById('c-address').value.trim(),
       'Additional Owner Name':  document.getElementById('c-add-name').value.trim(),
-      'Additional Owner Phone': document.getElementById('c-add-phone').value.trim(),
+      'Additional Owner Phone Number': document.getElementById('c-add-phone').value.trim(),
       'Additional Owner Email': document.getElementById('c-add-email').value.trim(),
     },
     markEmailConfirmed: true,
