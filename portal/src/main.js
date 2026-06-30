@@ -144,7 +144,7 @@ function updateProgressUI(steps) {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
   clientToken = getToken();
-  if (!clientToken) { showView('view-invalid'); return; }
+  if (!clientToken) { showView('view-welcome'); return; }
 
   try {
     const res = await fetch(WORKER_URL + '/client?token=' + encodeURIComponent(clientToken));
@@ -347,6 +347,76 @@ function renderAgreementState() {
 window.goHome   = goHome;
 window.goToStep = goToStep;
 window.showView = showView;
+
+// ── MEET & GREET LEAD FORM ────────────────────────────────────────────────────
+function toggleAggDetails() {
+  const sel = document.getElementById('l-aggression');
+  const wrap = document.getElementById('l-agg-details-wrap');
+  if (sel && wrap) wrap.style.display = sel.value === 'Yes' ? 'block' : 'none';
+}
+window.toggleAggDetails = toggleAggDetails;
+
+async function submitLead() {
+  const owner = document.getElementById('l-owner').value.trim();
+  const phone = document.getElementById('l-phone').value.trim();
+  const email = document.getElementById('l-email').value.trim();
+  const dog   = document.getElementById('l-dog').value.trim();
+
+  // Validation: name + dog required, and at least one contact method.
+  let ok = true;
+  const showErr = (id, on) => { const e = document.getElementById(id); if (e) e.style.display = on ? 'block' : 'none'; };
+  showErr('l-owner-error', false); showErr('l-dog-error', false);
+  showErr('l-phone-error', false); showErr('l-email-error', false);
+  const formErr = document.getElementById('l-form-error');
+  if (formErr) { formErr.textContent = ''; formErr.style.display = 'none'; }
+
+  if (!owner) { showErr('l-owner-error', true); ok = false; }
+  if (!dog)   { showErr('l-dog-error', true);   ok = false; }
+  const emailValid = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!phone && !emailValid) {
+    showErr('l-phone-error', true); showErr('l-email-error', true);
+    if (formErr) { formErr.textContent = 'Please give us a phone number or email so we can reach you.'; formErr.style.display = 'block'; }
+    ok = false;
+  } else if (email && !emailValid) {
+    showErr('l-email-error', true); ok = false;
+  }
+  if (!ok) return;
+
+  const services = Array.from(document.querySelectorAll('#l-services input[type=checkbox]:checked')).map(c => c.value);
+
+  const payload = {
+    ownerName: owner,
+    phone, email,
+    dogName: dog,
+    dogGender: document.getElementById('l-gender').value,
+    breed: document.getElementById('l-breed').value.trim(),
+    dogAge: document.getElementById('l-age').value.trim(),
+    spayedNeutered: document.getElementById('l-altered').value,
+    services,
+    dogSocial: document.getElementById('l-social').value,
+    houseTrained: document.getElementById('l-house').value,
+    priorCare: document.getElementById('l-prior').value,
+    aggression: document.getElementById('l-aggression').value,
+    aggressionDetails: document.getElementById('l-agg-details').value.trim(),
+    mgFormat: document.getElementById('l-format').value,
+    notes: document.getElementById('l-notes').value.trim(),
+  };
+
+  const btn = document.getElementById('l-submit');
+  if (btn) btn.classList.add('loading');
+  try {
+    const res = await fetch(WORKER_URL + '/lead', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Something went wrong'); }
+    showView('view-lead-success');
+  } catch (err) {
+    if (formErr) { formErr.textContent = err.message || 'Could not send your request. Please try again.'; formErr.style.display = 'block'; }
+  } finally {
+    if (btn) btn.classList.remove('loading');
+  }
+}
+window.submitLead = submitLead;
 
 // ── CONTACT INFO ──────────────────────────────────────────────────────────────
 function buildContactCurrentInfo() {

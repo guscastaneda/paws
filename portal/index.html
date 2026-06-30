@@ -70,6 +70,182 @@
     </div>
   </div>
 
+  <!-- ══ NEW-CLIENT WELCOME (tokenless landing) ══ -->
+  <div id="view-welcome" class="view">
+    <div class="greeting-name" style="text-align:center;">Welcome to <em>Paws on Longmeadow</em></div>
+    <p class="greeting-sub" style="margin-top:0.5rem;text-align:center;">Small, home-based dog boarding and daycare in Sharon, Massachusetts.</p>
+
+    <div class="divider"></div>
+
+    <div style="padding:1.1rem 1.25rem;background:var(--surface);border:1px solid var(--line-soft);border-left:3px solid var(--green);border-radius:12px;margin-bottom:1.25rem;">
+      <div style="font-weight:600;color:var(--ink);margin-bottom:0.3rem;">New here?</div>
+      <p style="font-size:0.9rem;color:var(--ink);line-height:1.6;margin-bottom:0.9rem;">Tell us a little about you and your dog and request a meet &amp; greet. It's a chance for us to talk through your dog's needs and whether our home is the right fit. If it feels like a match, the next step is a half-day trial visit.</p>
+      <button class="btn-primary" onclick="showView('view-lead')">
+        <span class="btn-text">Request a meet &amp; greet</span>
+      </button>
+    </div>
+
+    <div style="padding:1.1rem 1.25rem;background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;">
+      <div style="font-weight:600;color:var(--ink);margin-bottom:0.3rem;">Already a client?</div>
+      <p style="font-size:0.9rem;color:var(--ink);line-height:1.6;">Your portal opens from the personal link we texted you. Check your messages for that link, or reach out and we'll resend it.</p>
+    </div>
+  </div>
+
+  <!-- ══ MEET & GREET REQUEST FORM ══ -->
+  <div id="view-lead" class="view">
+    <div class="step-header">
+      <button class="step-back" onclick="showView('view-welcome')"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-arrow"/></svg> Back</button>
+      <div class="step-title">Request a <em>Meet &amp; Greet</em></div>
+      <p class="step-desc">A few quick details so we can have a useful first conversation. We'll reach out to set up a time. Nothing here is a commitment.</p>
+    </div>
+
+    <p class="step-desc" style="margin-bottom:1rem;font-weight:600;color:var(--ink);">About you</p>
+    <div class="form-group">
+      <label>Your Name <span class="req">*</span></label>
+      <input type="text" id="l-owner" placeholder="Your full name"/>
+      <div class="field-error" id="l-owner-error">Please enter your name.</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Phone <span class="req">*</span></label>
+        <input type="tel" id="l-phone" placeholder="(555) 555-5555"/>
+        <div class="field-error" id="l-phone-error">Please enter a phone number.</div>
+      </div>
+      <div class="form-group">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="l-email" placeholder="you@example.com"/>
+        <div class="field-error" id="l-email-error">Please enter a valid email.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <p class="step-desc" style="margin-bottom:1rem;font-weight:600;color:var(--ink);">About your dog</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Dog's Name <span class="req">*</span></label>
+        <input type="text" id="l-dog" placeholder="Your dog's name"/>
+        <div class="field-error" id="l-dog-error">Please enter your dog's name.</div>
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="l-gender">
+          <option value="">Select…</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Breed</label>
+        <input type="text" id="l-breed" placeholder="e.g. Labrador mix"/>
+      </div>
+      <div class="form-group">
+        <label>Age</label>
+        <input type="text" id="l-age" placeholder="e.g. 3 years"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Spayed or Neutered?</label>
+      <select id="l-altered">
+        <option value="">Select…</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+        <option value="Not sure">Not sure</option>
+      </select>
+    </div>
+
+    <div class="divider"></div>
+
+    <p class="step-desc" style="margin-bottom:1rem;font-weight:600;color:var(--ink);">A few quick questions</p>
+    <div class="form-group">
+      <label>Which services are you curious about? <span class="opt">(choose any)</span></label>
+      <div id="l-services" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.4rem;">
+        <label style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.4rem 0.7rem;border:1px solid var(--line-soft);border-radius:999px;font-size:0.85rem;color:var(--ink);cursor:pointer;background:var(--surface);"><input type="checkbox" value="Boarding"/> Boarding</label>
+        <label style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.4rem 0.7rem;border:1px solid var(--line-soft);border-radius:999px;font-size:0.85rem;color:var(--ink);cursor:pointer;background:var(--surface);"><input type="checkbox" value="Daycare"/> Daycare</label>
+        <label style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.4rem 0.7rem;border:1px solid var(--line-soft);border-radius:999px;font-size:0.85rem;color:var(--ink);cursor:pointer;background:var(--surface);"><input type="checkbox" value="Half-Day Daycare"/> Half-Day Daycare</label>
+        <label style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.4rem 0.7rem;border:1px solid var(--line-soft);border-radius:999px;font-size:0.85rem;color:var(--ink);cursor:pointer;background:var(--surface);"><input type="checkbox" value="House Sitting"/> House Sitting</label>
+        <label style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.4rem 0.7rem;border:1px solid var(--line-soft);border-radius:999px;font-size:0.85rem;color:var(--ink);cursor:pointer;background:var(--surface);"><input type="checkbox" value="Drop-In Visits"/> Drop-In Visits</label>
+        <label style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.4rem 0.7rem;border:1px solid var(--line-soft);border-radius:999px;font-size:0.85rem;color:var(--ink);cursor:pointer;background:var(--surface);"><input type="checkbox" value="Group Walks"/> Group Walks</label>
+        <label style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.4rem 0.7rem;border:1px solid var(--line-soft);border-radius:999px;font-size:0.85rem;color:var(--ink);cursor:pointer;background:var(--surface);"><input type="checkbox" value="Pet Taxi"/> Pet Taxi</label>
+        <label style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.4rem 0.7rem;border:1px solid var(--line-soft);border-radius:999px;font-size:0.85rem;color:var(--ink);cursor:pointer;background:var(--surface);"><input type="checkbox" value="Not sure yet"/> Not sure yet</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>How does your dog do around other dogs?</label>
+      <select id="l-social">
+        <option value="">Select…</option>
+        <option value="Loves them">Loves them</option>
+        <option value="Selective">Selective</option>
+        <option value="Nervous">Nervous</option>
+        <option value="Not socialized yet">Not socialized yet</option>
+        <option value="Not sure">Not sure</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>House-trained?</label>
+        <select id="l-house">
+          <option value="">Select…</option>
+          <option value="Yes">Yes</option>
+          <option value="Mostly">Mostly</option>
+          <option value="No">No</option>
+          <option value="Not sure">Not sure</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Been to daycare or boarding before?</label>
+        <select id="l-prior">
+          <option value="">Select…</option>
+          <option value="Yes regularly">Yes, regularly</option>
+          <option value="A little">A little</option>
+          <option value="Never">Never</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Any history of aggression or biting, toward dogs or people?</label>
+      <select id="l-aggression" onchange="toggleAggDetails()">
+        <option value="">Select…</option>
+        <option value="No">No</option>
+        <option value="Yes">Yes</option>
+      </select>
+    </div>
+    <div class="form-group" id="l-agg-details-wrap" style="display:none;">
+      <label>Please tell us a little more</label>
+      <textarea id="l-agg-details" rows="2" placeholder="What happened, and in what situation?"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Preferred meet &amp; greet format</label>
+      <select id="l-format">
+        <option value="">Select…</option>
+        <option value="Zoom">Zoom</option>
+        <option value="In-person">In-person</option>
+        <option value="No preference">No preference</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Anything else you'd like us to know? <span class="opt">(optional)</span></label>
+      <textarea id="l-notes" rows="3" placeholder="Tell us about your dog…"></textarea>
+    </div>
+
+    <div class="form-error" id="l-form-error"></div>
+    <button class="btn-primary" id="l-submit" onclick="submitLead()">
+      <span class="btn-text">Send request</span>
+      <span class="btn-loading">Sending…</span>
+    </button>
+  </div>
+
+  <!-- ══ MEET & GREET SUCCESS ══ -->
+  <div id="view-lead-success" class="view">
+    <div class="invalid-wrap">
+      <div class="invalid-icon" style="color:var(--green);"><svg class="ic"><use href="#i-check"/></svg></div>
+      <h2>Request sent!</h2>
+      <p style="margin-top:0.5rem;">Thanks for reaching out. We'll be in touch soon to set up your meet &amp; greet. If you shared an email, a confirmation is on its way.</p>
+    </div>
+  </div>
+
   <!-- ══ ONBOARDING HOME ══ -->
   <div id="view-onboarding" class="view">
     <div class="greeting-name">Hi, <em id="ob-first-name">there</em></div>
