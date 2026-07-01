@@ -55,7 +55,7 @@ All dogs must have current documentation for the following before their first vi
 - Bordetella (Kennel Cough), within the last 12 months
 - Canine Influenza (strongly recommended)
 
-### Are there other ~~health~~ requirements?
+### Are there other requirements?
 Yes. All dogs must be:
 - At least 6 months old
 - Spayed or neutered (case-by-case exceptions may be considered)

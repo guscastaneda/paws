@@ -42,8 +42,8 @@ Monday through Saturday: 8:00 AM to 4:30 PM
 Sunday: 12:00 PM to 4:30 PM  
 
 **Follow Along**  
-Instagram — @pawsonlongmeadow #todo — confirm handle is live  
-Facebook — @pawsonlongmeadow #todo — confirm handle is live
+Instagram — [@pawsonlongmeadow](https://www.instagram.com/pawsonlongmeadow)  
+Facebook — [Paws on Longmeadow](https://www.facebook.com/profile.php?id=61572108133332)
 
 ---
 

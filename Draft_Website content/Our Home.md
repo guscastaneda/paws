@@ -17,9 +17,9 @@ last_reviewed: 2025-05-13
 
 Most mornings start the same way. Marian is up early, coffee in hand, out on Ollie's Deck before the first dog arrives. She sets the space, checks the water station, takes a breath. It is the quiet before the storm — and she loves it.
 
-By the time the first daycare dog comes through the gate, everything is ready. ~~That is not an accident. It is just how we run things.~~ #todo Find replacement sentence, less corny.
+By the time the first daycare dog comes through the gate, everything is ready.
 
-~~Our home is a garrison colonial on a quiet residential street in Sharon, MA. It is where Gus and Marian live, where their boys are growing up, and where Ollie has spent the last nine years holding court. And on any given weekday morning, it is one of the more purposefully run dog care operations you will find in the South Shore.~~ #todo Find new angle here. Connect to quiet before the storm idea.
+This is a home first. A garrison colonial on a quiet Sharon street where Gus and Marian live, where their boys are growing up, and where Ollie has held court for nine years. The stillness Marian sets each morning is the same stillness the dogs come home to at the end of the day.
 
 ---
 
@@ -44,8 +44,6 @@ The ground is a mix of grass, gravel, and natural mulch cover, giving dogs a var
 Fencing is six feet tall across most of the perimeter, a combination of vinyl and chainlink, with three secure gates that keep arrivals, departures, and yard access organized and controlled at all times.
 
 We treat the yard with organic fertilizer and maintain a regular mosquito and tick spray schedule, using products that are safe for dogs. The yard is cleaned daily. What your dog plays in matters to us.
-
-~~We are actively exploring improvements to the yard including dedicated surface areas and enhanced sanitation systems. Everything we add is designed to raise the standard of care, not the number of dogs.~~
 
 ---
 

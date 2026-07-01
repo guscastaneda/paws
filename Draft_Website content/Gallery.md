@@ -43,8 +43,8 @@ Marian has an eye for the moment just before a dog does something ridiculous, jo
 
 We share regularly on Instagram and Facebook. It is the fastest way to see what is happening at Paws on Longmeadow on any given day.
 
-**[Instagram — @pawsonlongmeadow →]** #todo — confirm handle and add URL  
-**[Facebook — @pawsonlongmeadow →]** #todo — confirm handle and add URL
+**[Instagram — @pawsonlongmeadow](https://www.instagram.com/pawsonlongmeadow)**  
+**[Facebook](https://www.facebook.com/profile.php?id=61572108133332)**
 
 ---
 

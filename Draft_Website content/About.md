@@ -16,7 +16,7 @@ last_reviewed: 2025-05-13
 
 Some businesses start with a business plan. Ours started with a road trip.
 
-In 2017, Gus and Marian closed on their first home, a 1968 garrison colonial on a quiet street in Sharon with the big yard they had always dreamed about. Less than a month later, they were in the car driving to Virginia to pick up a puppy named Ollie. On the way back, they stopped in New York City. Somewhere in Central Park, with Ollie bounding through the grass and the city humming around them, something clicked. ~~This was exactly the life they had been building toward.~~ #todo need alternate ending sentence, less cheesy.
+In 2017, Gus and Marian closed on their first home, a 1968 garrison colonial on a quiet street in Sharon with the big yard they had always dreamed about. Less than a month later, they were in the car driving to Virginia to pick up a puppy named Ollie. On the way back, they stopped in New York City. Somewhere in Central Park, with Ollie bounding through the grass and the city humming around them, something clicked. They didn't have a plan yet. They had Ollie, and that turned out to be enough.
 
 ---
 
@@ -62,7 +62,7 @@ Ollie is the reason any of this exists.
 
 At 9 years old, he has lived an extraordinary life — hundreds of friends made, countless adventures had, and one very serious chapter that tested all of us. A few years ago, Ollie suffered a ruptured disc which caused serious inflammation and compression of the spinal cord and required surgery. His mobility today is limited.
 
-Ollie moves through this house with the quiet authority of someone who knows exactly what he built. ~~He is the first dog every guest meets. He sets the tone.~~ #todo find end sentence, nothing corny.
+Ollie moves through this house with the quiet authority of someone who knows exactly what he built. Every new dog meets him first, and he still takes the job seriously.
 
 See also → [[Ollie's Law]] for why his name matters beyond our own walls.
 

@@ -70,8 +70,6 @@ Every service is provided in or around our home in Sharon, MA.
 
 🚗 **Pet Taxi** *(by request)* — We'll pick up or drop off your pup so you don't have to rearrange your day. Available for daycare, vet visits, grooming appointments and more.
 
-🧹 **Poop Scoop** *(Coming Soon)* — Because someone has to do it. Might as well be us.
-
 **[See full pricing and details →]** → [[Pricing]]
 
 ---
@@ -115,5 +113,5 @@ New to Paws on Longmeadow? Getting started only takes a few minutes.
 
 Paws on Longmeadow | Sharon, MA  
 📞 [Phone] #todo — add phone number  
-[Instagram] | [Facebook]  
+[Instagram](https://www.instagram.com/pawsonlongmeadow) | [Facebook](https://www.facebook.com/profile.php?id=61572108133332)  
 © 2026 Paws on Longmeadow. All paws reserved.

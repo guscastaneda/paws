@@ -98,5 +98,5 @@ This is the internal planning document for the Paws on Longmeadow website projec
 - [x] Confirm footer copyright year (2025 vs 2026) across all pages
 - [x] Confirm social handles (@pawsonlongmeadow) are live on both Instagram and Facebook
 - [ ] Google Business listing URL for testimonials CTA on [[Home]]
-- [ ] Poop Scoop pricing and launch date for [[Pricing]]
+- [x] Poop Scoop not shown on the site (dropped, per Gus)
 - [ ] Annual peak season date update process — who owns this, when does it happen

@@ -214,8 +214,15 @@ decision Gus must make. Draft uses 25% on Home/Book Now/Pricing and 50% on FAQ.
   (mass.gov/info-details/ollies-law-information) and removed the URL `#todo`s. **Gus should
   review the reworded story.**
 
+**Cleanup pass (2026-07-01):** all 7 `~~strikethrough~~` creative placeholders resolved (Gus
+approved); social links added (IG @pawsonlongmeadow, FB profile 61572108133332) on Home/Contact/
+Gallery; Poop Scoop removed from the site; kids de-named on About; Transport add-on stays priced
+(Gus confirmed covered). Phone number deferred (no number yet, not a priority). Remaining `#todo`s
+are all legitimate build/verification tasks (phone, photos, video hosting, map embed, form-to-
+Airtable checks, inline cancellation copy on the booking forms).
+
 Still needs mechanical build-time pass (NOT done in drafts): emoji → sprite icons, full em-dash
-sweep of untouched prose, resolving Gus's `#todo` / `~~strikethrough~~` creative placeholders.
+sweep of untouched prose.
 
 ## Open items (need input)
 - [x] Master Client Agreement received (Version 1.0, eff. June 25, 2026). Cancellation, vaccinations, hours, and vet providers locked to it.

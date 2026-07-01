@@ -14,7 +14,7 @@ last_reviewed: 2025-05-13
 
 ## Our Services
 
-Every service starts the same way: a free Meet & Greet. Before any booking, we spend time with you and your dog to make sure it's a great fit for everyone. ~~It's not just a formality. It's how we do things.~~
+Every service starts the same way: a free Meet & Greet. Before any booking, we spend time with you and your dog to make sure it's a great fit for everyone.
 
 For new clients, or dogs who haven't visited in 12 months or more, a trial stay or daycare is also required before a longer booking. Think of it as a test run — for your dog, and for your peace of mind. Our clients who have done it will tell you it was the best decision they made.
 
@@ -117,14 +117,6 @@ Need a ride to the vet, groomer, or a drop-off? Ask us and we'll let you know if
 Add pickup or drop-off to any boarding or daycare booking.
 
 - Second dog: 50% off the transport fee
-
----
-
-## Poop Scoop *(Coming Soon)*
-
-Because someone has to do it. Might as well be us.
-
-#todo — add Poop Scoop pricing and launch date when determined
 
 ---
 
