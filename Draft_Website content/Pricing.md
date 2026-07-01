@@ -26,7 +26,7 @@ For new clients, or dogs who haven't visited in 12 months or more, a trial stay 
 
 **$85 / night**
 
-Your dog stays with us in our home, not a kennel. Real couch time. Real walks. Real attention from a family that has been doing this since 2017.
+Your dog stays with us in our home, not a kennel. Real couch time. Real walks. Real attention from a family that has been doing this since 2018.
 
 We keep overnight boarding intentionally small, so every guest gets the focus they deserve.
 
@@ -76,8 +76,8 @@ All the good stuff, half the day. Available with certain restrictions — reach 
 We come to you. Your dog stays in their own home, on their own schedule, with their routines intact. 
 
 - Extra dog: +$35/night
-- Extra cat: +$20/night
-- Peak season: +$10/night
+- Extra cat: +$25/night
+- Peak season: +$25/night
 - Mileage: first 5 miles free, then $1.87/mile
 
 ---
@@ -88,8 +88,8 @@ We come to you. Your dog stays in their own home, on their own schedule, with th
 
 A scheduled check-in at your home. We refresh food and water, spend some quality time with your pet, and make sure everything is good. 
 
-- Extra dog: +$10/visit
-- Extra cat: +$5/visit
+- Extra dog: +$15/visit
+- Extra cat: +$10/visit
 - Mileage: first 5 miles free, then $1.87/mile
 
 ---
@@ -151,40 +151,35 @@ Peak season fills fast. We strongly encourage booking early to secure your prefe
 
 #todo — update peak season dates table annually before each new year
 
-For reference Rover:
-### Holiday Rate
-
-Due to the high demand for pet-sitting services during the holiday season, stays that include any of the following dates will be priced at the sitter's Holiday Rate:
-
-- May 22-25, 2026
-- Jun 19-21, 2026
-- Jul 3-5, 2026
-- Sep 4-7, 2026
-- Nov 26-29, 2026
-- Dec 24, 2026 - Jan 3, 2027
 ---
 
 ## Payment
 
-We keep billing simple. We invoice weekly — straightforward and easy to track.
+We keep billing simple. We invoice weekly, straightforward and easy to track.
 
 **New clients** are invoiced following their first stay. No upfront payment required to get started.
 
 **Returning clients** are billed weekly throughout longer stays.
 
-**Peak season reservations** require a 25% deposit to hold your dates. This deposit is applied to your final invoice. Cancellations made 7 or more days before your reservation start date receive a full credit toward a future stay.
+**Peak season reservations** require a 50% deposit to hold your dates. This deposit is applied to your final invoice. If you cancel, it is applied against any amount owed under the peak season cancellation terms, and anything left over is credited or refunded.
 
-We want booking with us to feel easy and trustworthy — from the first visit onward.
+We want requesting a stay with us to feel easy and trustworthy, from the first visit onward.
 
 ---
 
-## Cancellation Policy (Non-Peak)
+## Cancellation Policy
 
-**Daycare** — We ask for at least 24 hours notice to cancel a daycare reservation. Cancellations with less than 24 hours notice are charged 50% of the daycare rate. No-shows are charged the full daycare rate.
+**Grace period.** Cancel within 4 hours of booking and you are never charged, whatever the dates. This overrides every tier below.
 
-**Boarding** — Cancellations with more than 48 hours notice: no charge. Cancellations with less than 48 hours notice: one night's boarding rate applies. No-shows: full reservation charged.
+**Daycare, Half-Day Daycare, Walks, and Drop-In Visits.** 24 or more hours notice: no charge. Less than 24 hours notice, or a no-show: the full session rate.
 
-**A note on flexibility** — We're a small family operation and we understand that life happens. If something comes up, just reach out — we'll always do our best to work with you.
+**Boarding and Multi-Night House Sitting.** 7 or more days notice: no charge. 48 hours to 7 days notice: 50% of the total reservation. Less than 48 hours notice, or a no-show: the full reservation.
+
+**Peak season.** During peak season the boarding and house-sitting windows tighten: 14 or more days notice: no charge. 7 to 14 days: 50%. Less than 7 days, or a no-show: the full reservation.
+
+If a cancellation falls exactly on a cutoff, we apply whichever tier is better for you.
+
+**A note on flexibility.** We're a small family operation and we understand that life happens. If something comes up, just reach out. We'll always do our best to work with you.
 
 See also full FAQ → [[FAQ]]
 

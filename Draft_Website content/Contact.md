@@ -28,7 +28,7 @@ If you are ready to book or get the process going, the links below will get you 
 
 **Already part of the family?** Use your personal booking link to request your next stay. Can't find it? Let us know below and we'll resend it.
 
-**[Book a Stay →]** → [[Book Us]]
+**[Request a Stay →]** → [[Book Us]]
 
 ---
 
@@ -37,8 +37,9 @@ If you are ready to book or get the process going, the links below will get you 
 **Phone** — [Business phone number] #todo — add phone number  
 We do our best to respond to texts within a few hours during business hours.
 
-**Daycare Hours**  
-Monday through Friday: 8:15 AM to 4:45 PM  
+**Hours**  
+Monday through Saturday: 8:00 AM to 4:30 PM  
+Sunday: 12:00 PM to 4:30 PM  
 
 **Follow Along**  
 Instagram — @pawsonlongmeadow #todo — confirm handle is live  
@@ -76,6 +77,6 @@ We are located on a quiet residential street in Sharon, MA, serving families acr
 
 *[Neighborhood-level map — Sharon, MA]*
 
-#todo — embed Google Map widget (neighborhood-level, not exact address) showing Longmeadow Ln, Sharon, MA
+#todo — embed Google Map widget at neighborhood level only (Sharon, MA), never the exact street or address
 
 Curbside drop-off and pickup only. Please do not enter the driveway or property without prior arrangement.

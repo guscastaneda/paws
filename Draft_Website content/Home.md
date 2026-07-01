@@ -25,7 +25,7 @@ last_reviewed: 2025-05-13
 The warmth of a family home and the reliability of a professional team. Boarding, daycare, walks, and more in Sharon, MA.
 
 [Request a Meet & Greet]→ [[Request a Meet & Greet]]
-**[Book a Stay]** → [[Book Now]]  
+**[Request a Stay]** → [[Book Now]]  
 
 
 ---
@@ -100,14 +100,14 @@ Massachusetts pet care regulations exist for a reason, and we take them seriousl
 
 ## BOOKING CTA SECTION
 
-### Ready to Book?
+### Ready to Request a Stay?
 
 Whether it's a weekend away, a long day at work, or just a Tuesday your dog deserves better, we'd love to have them.
 
 New to Paws on Longmeadow? Getting started only takes a few minutes.
 
 [Request a Meet & Greet]→ [[Request a Meet & Greet]]
-**[Book a Stay]** → [[Book Now]]  
+**[Request a Stay]** → [[Book Now]]  
 
 ---
 

@@ -1,5 +1,5 @@
 ---
-title: Book Now
+title: Request a Stay
 type: page
 section:
   - booking
@@ -17,13 +17,13 @@ related:
 last_reviewed: 2025-05-13
 ---
 
-# Book Now
+# Request a Stay
 
 > **Note on this page's role:** This is the primary public-facing booking entry point. New clients are routed to [[Request a Meet & Greet]]. Returning clients are routed to [[Book Us]] via their personal magic link. This page handles the split.
 
 ---
 
-## Looking to Book?
+## Looking to Request a Stay?
 
 **New to Paws on Longmeadow?** Start with a Meet & Greet request. It is free, takes a few minutes to fill out, and is the first step for every new client.
 
@@ -31,7 +31,7 @@ last_reviewed: 2025-05-13
 
 **Already part of the family?** Use your personal booking link to request your next stay. Can't find it? Let us know below and we'll resend it.
 
-**[Book a Stay →]** → [[Book Us]]
+**[Request a Stay →]** → [[Book Us]]
 
 **All dogs** must meet our health and vaccination requirements before their first visit. See the full list on → [[FAQ]].
 
@@ -39,7 +39,7 @@ last_reviewed: 2025-05-13
 
 ## Peak Season Fills Fast
 
-If you're booking around a school vacation, holiday, or summer travel window, don't wait. A 25% deposit is required to hold peak season dates and availability goes quickly.
+If you're booking around a school vacation, holiday, or summer travel window, don't wait. A 50% deposit is required to hold peak season dates and availability goes quickly.
 
 **[See peak season dates →]** → [[Pricing]]
 
@@ -121,7 +121,7 @@ Before your dog's first visit, we require current documentation for:
 - Bordetella — within the last 12 months
 - Canine Influenza — strongly recommended
 
-Please email records to **records@pawsonlongmeadow.com** before your Meet & Greet. If you're unable to, bring printed or digital copies to your appointment.
+Bring a copy to your Meet & Greet, printed or digital, or upload them through your client portal once you're set up.
 
 See also → [[Ollie's Law]] for state documentation requirements.
 

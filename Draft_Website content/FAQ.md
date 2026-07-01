@@ -32,8 +32,8 @@ Just reach out through our [[Request a Meet & Greet]] page or [[Contact]] page a
 ## Hours & Drop-Off
 
 ### What are your hours?
-Monday through Saturday: 7:30 AM to 5:30 PM  
-Sunday: 12:00 PM to 6:00 PM
+Monday through Saturday: 8:00 AM to 4:30 PM  
+Sunday: 12:00 PM to 4:30 PM
 
 ### How does drop-off and pick-up work?
 We use a curbside drop-off and pick-up system. Dogs are transferred at the curb — there is no entry onto the driveway or property for drop-off. This keeps things smooth, safe, and consistent for all the dogs in our care. It becomes second nature after your first visit.
@@ -50,10 +50,10 @@ Our hours are set by our operating permit and we ask that all drop-offs and pick
 ### What vaccinations does my dog need?
 All dogs must have current documentation for the following before their first visit:
 
-- Rabies
+- Rabies (current certificate required under Ollie's Law)
 - DHPP (Distemper, Hepatitis, Parvovirus, Parainfluenza)
-- Bordetella (Kennel Cough) — recommended
-- Canine Influenza — recommended
+- Bordetella (Kennel Cough), within the last 12 months
+- Canine Influenza (strongly recommended)
 
 ### Are there other ~~health~~ requirements?
 Yes. All dogs must be:
@@ -91,9 +91,9 @@ Yes, within reason. We have experience managing daily medications, special diets
 We follow a clear emergency protocol:
 
 1. We contact you immediately.
-2. If you can't be reached, we are authorized through your enrollment agreement to seek emergency veterinary care on your dog's behalf.
-3. For non-emergency situations, we work with Foxboro Animal Hospital (508-543-5350) as our primary veterinary partner.
-4. For after-hours emergencies, we go directly to Tufts Veterinary Emergency Treatment & Specialties in Walpole — one of the top veterinary emergency hospitals in New England — located 15 to 20 minutes from our home.
+2. If you can't be reached, your service agreement authorizes us to seek emergency veterinary care on your dog's behalf, up to a $500 pre-authorized limit per incident by default. You can set a higher limit during onboarding.
+3. Where the situation allows, we reach out to your dog's own veterinarian first, since they know your dog's history best.
+4. Our designated providers are Sharon Veterinary Clinic (781-784-7554) locally, Foxboro Animal Hospital (508-543-5350) for daytime non-emergencies, and Tufts Veterinary Emergency Treatment and Specialties in Walpole (508-668-5454) for 24-hour emergencies, roughly 15 to 20 minutes from our home.
 
 You will never be left out of the loop.
 
@@ -106,18 +106,18 @@ See also → [[Our Home]] for yard details.
 
 ## Booking & Payment
 
-### How do I book a stay?
+### How do I request a stay?
 New clients start with a Meet & Greet → [[Request a Meet & Greet]].  
-Returning clients book directly → [[Book Us]].
+Returning clients request directly through their personal booking link → [[Book Us]].
 
 ### How does payment work?
-~~Clients pay upfront. Returning clients are billed weekly throughout longer stays.~~
-#todo Define how other places do it to get inspiration.
-### Do you require a deposit for bookings?
-Yes. Peak season reservations require a 50% deposit to hold your dates, applied to your final invoice. Cancellations made 7 or more days before your reservation start date receive a full credit toward a future appointment(s) within 6 months.
+We invoice weekly, and payment is due on receipt. New clients are invoiced after their first stay, so there's no upfront payment to get started, aside from a peak season deposit where one applies.
 
-### What is your cancellation policy for regular bookings?
-We ask for at least 48 hours notice. Cancellations with less than 48 hours notice are charged 50% of the appointment rate. No-shows are charged the appointment rate.
+### Do you require a deposit for bookings?
+Yes. Peak season reservations require a 50% deposit to hold your dates, applied to your final invoice. If you cancel, the deposit is applied against any cancellation amount owed under our peak season policy, and anything left over is credited or refunded. See the cancellation policy on [[Pricing]] for the peak season notice windows.
+
+### What is your cancellation policy?
+The short version: cancel daycare 24 or more hours ahead, or boarding 7 or more days ahead, and there is no charge. Cancel inside those windows and a fee applies, partial for boarding, full for daycare, and a no-show is always charged in full. Peak season windows are wider. Cancel within 4 hours of booking and you are never charged. Full terms are on [[Pricing]].
 
 ### When are peak season dates?
 Peak season follows the school calendar and major holidays. See the full schedule on → [[Pricing]].

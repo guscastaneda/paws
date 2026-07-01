@@ -47,14 +47,14 @@ This is the internal planning document for the Paws on Longmeadow website projec
 
 ## Decisions Made
 
-- **Hosting:** GitHub Pages or Netlify (free)
+- **Hosting:** Cloudflare Pages (same ecosystem as the Worker)
 - **API layer:** Cloudflare Worker
 - **Email:** Resend
 - **Booking flow:** Two-path — Meet & Greet for new clients, magic link for returning clients
 - **Phone:** OpenPhone or Google Voice *(to be set up)*
 - **Fridge magnet QR code** pointing to the [[Request a Meet & Greet]] page
 - **Ollie's Deck** as the name; *The Landing* as the functional descriptor
-- **Records email:** records@pawsonlongmeadow.com *(to be confirmed active)*
+- **Records intake:** clients bring a copy to the Meet & Greet or upload through the client portal (no separate records@ inbox)
 
 ---
 
@@ -76,7 +76,7 @@ This is the internal planning document for the Paws on Longmeadow website projec
 - [ ] Magic link flow for returning clients ([[Book Us]])
 - [ ] Airtable field mapping: client first name + dog name pre-fill
 - [ ] OpenPhone or Google Voice number setup
-- [ ] records@ email routing via Resend
+- [x] Records intake via portal upload / bring-a-copy (no records@ inbox needed)
 - [ ] Google Map embed for [[Contact]] page (neighborhood-level, not exact address)
 
 ### Branding

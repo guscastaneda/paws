@@ -16,7 +16,7 @@ last_reviewed: 2025-05-13
 
 Some businesses start with a business plan. Ours started with a road trip.
 
-In 2017, Gus and Marian closed on their first home — a 1968 garrison colonial on Longmeadow Lane with the big yard they had always dreamed about. Less than a month later, they were in the car driving to Virginia to pick up a puppy named Ollie. On the way back, they stopped in New York City. Somewhere in Central Park, with Ollie bounding through the grass and the city humming around them, something clicked. ~~This was exactly the life they had been building toward.~~ #todo need alternate ending sentence, less cheesy.
+In 2017, Gus and Marian closed on their first home, a 1968 garrison colonial on a quiet street in Sharon with the big yard they had always dreamed about. Less than a month later, they were in the car driving to Virginia to pick up a puppy named Ollie. On the way back, they stopped in New York City. Somewhere in Central Park, with Ollie bounding through the grass and the city humming around them, something clicked. ~~This was exactly the life they had been building toward.~~ #todo need alternate ending sentence, less cheesy.
 
 ---
 
@@ -73,7 +73,7 @@ See also → [[Ollie's Law]] for why his name matters beyond our own walls.
 
 - **We are a home, not a facility.** Your dog lives with a family, not in a run.
 - **Someone is always here.** Marian and Gus's day-to-day presence means there is always a familiar face in the house.
-- **We've been doing this since 2017.** Long before it was a business, it was just something we loved.
+- **We've been doing this since 2018.** Long before it was a business, it was just something we loved.
 - **Small by design.** We keep our numbers intentional so every dog gets  attention. And our neighbors happy!
 - **Ollie approves every guest.** That's not a joke. He's very particular.
 

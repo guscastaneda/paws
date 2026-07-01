@@ -1,5 +1,5 @@
 ---
-title: Book a Stay
+title: Request a Stay
 type: page
 section: [booking]
 tags: [type/page, section/booking, status/ready]
@@ -28,7 +28,7 @@ If your plans changed, your dates shifted, or you just need to talk it through f
 
 ## A Few Things to Keep in Mind
 
-**Peak season fills fast.** If your request overlaps a school vacation, holiday, or summer window, don't wait. A 25% deposit is required to hold peak season dates.
+**Peak season fills fast.** If your request overlaps a school vacation, holiday, or summer window, don't wait. A 50% deposit is required to hold peak season dates.
 
 **[See peak season dates →]** → [[Pricing]]
 
@@ -100,7 +100,7 @@ Is there anything different about this stay we should be aware of? A new medicat
 
 1. We review your request and check availability
 2. We follow up within 24 hours by phone or text to confirm
-3. For peak season stays, we'll ask for the 25% deposit to hold your dates
+3. For peak season stays, we'll ask for the 50% deposit to hold your dates
 4. You're all set
 
 *See you soon.*

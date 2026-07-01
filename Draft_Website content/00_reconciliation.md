@@ -192,6 +192,22 @@ decision Gus must make. Draft uses 25% on Home/Book Now/Pricing and 50% on FAQ.
 
 ---
 
+## Applied to the draft pages (2026-07-01)
+- **FAQ:** hours fixed; Bordetella now required; payment answer written from agreement; deposit
+  answer aligned to 50% + peak terms; cancellation answer rewritten to §15 summary; emergency
+  protocol updated to the 3 designated vets + $500 pre-auth; "book" → "request".
+- **Pricing:** cancellation section replaced with full §15 terms; deposit 25% → 50% with §15.4
+  credit language; House Sitting peak +$25 and extra cat +$25; Drop-In extra dog +$15 and cat
+  +$10; internal Rover block removed; "since 2017" → 2018.
+- **Home / Contact / Book Now / Book Us:** "Book a Stay" → "Request a Stay", page titles/headings
+  de-"Book"-ed; Contact hours fixed; all 25% deposit callouts → 50%.
+- **Request a Meet & Greet / Book Now:** records@ instruction replaced with bring-a-copy / portal upload.
+- **About:** street name removed (now "a quiet street in Sharon"); "since 2017" → 2018.
+- **Next Steps:** hosting → Cloudflare Pages; records@ items dropped.
+
+Still needs mechanical build-time pass (NOT done in drafts): emoji → sprite icons, full em-dash
+sweep of untouched prose, resolving Gus's `#todo` / `~~strikethrough~~` creative placeholders.
+
 ## Open items (need input)
 - [x] Master Client Agreement received (Version 1.0, eff. June 25, 2026). Cancellation, vaccinations, hours, and vet providers locked to it.
 - [x] Pricing pulled from Airtable (Services + Pricing Rules). Base rates verified; modifier discrepancies logged above.

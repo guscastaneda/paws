@@ -110,7 +110,7 @@ Before your dog's first visit, we require current documentation for:
 - Bordetella, within the last 12 months
 - Canine Influenza, strongly recommended
 
-Please email records to **records@pawsonlongmeadow.com** ahead of your Meet & Greet. If you're unable to, bring printed or digital copies to your appointment.
+Bring a copy to your Meet & Greet, printed or digital, or upload them through your client portal once you're set up.
 
 See → [[Ollie's Law]] for documentation requirements under Massachusetts law.
 
