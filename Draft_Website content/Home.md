@@ -62,13 +62,13 @@ Every service is provided in or around our home in Sharon, MA.
 
 🌤️ **Half-Day Daycare** — All the good stuff, half the day. Perfect for dogs who need a social outlet without a full-day commitment.
 
-🏠 **House Sitting** — We come to you. Your dog stays in their own home, on their own schedule, with their own routines intact.
+🏠 **House Sitting** *(by request)* — We come to you. Your dog stays in their own home, on their own schedule, with their own routines intact.
 
-🐾 **Drop-In Visit** — A scheduled check-in at your home covering feeding, play, and a potty break. Great for busy days when your dog just needs a little company.
+🐾 **Drop-In Visit** *(by request)* — A scheduled check-in at your home covering feeding, play, and a potty break. Great for busy days when your dog just needs a little company.
 
-🦮 **Group Walk** — Fresh air, good company, and real exercise. Your dog gets out into the world with a small group and comes home ready to rest.
+🦮 **Group Walk** *(by request)* — Fresh air, good company, and real exercise. Your dog gets out into the world with a small group and comes home ready to rest.
 
-🚗 **Pet Taxi** — We'll pick up or drop off your pup so you don't have to rearrange your day. Available for daycare, vet visits, grooming appointments and more.
+🚗 **Pet Taxi** *(by request)* — We'll pick up or drop off your pup so you don't have to rearrange your day. Available for daycare, vet visits, grooming appointments and more.
 
 🧹 **Poop Scoop** *(Coming Soon)* — Because someone has to do it. Might as well be us.
 

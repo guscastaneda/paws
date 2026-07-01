@@ -126,12 +126,16 @@ The FAQ currently lists only Foxboro and Tufts (no Tufts phone) and omits the Sh
 
 ---
 
-## Services: advertise vs. book
-The site advertises 7 services; the portal currently books 3 (Daycare, Half-Daycare, Boarding).
-House Sitting, Drop-In, Group Walk are handled manually; **Pet Taxi is parked pending commercial
-auto insurance.** Decision needed: advertise all but only accept online requests for the live 3
-(others route to Meet & Greet / direct contact), and **do not publish Pet Taxi pricing until the
-insurance is resolved.**
+## Services: advertise vs. book (DECIDED 2026-07-01)
+- List all services, with a status label on the ones not bookable online. Applied on Home:
+  House Sitting, Drop-In, Group Walk, Pet Taxi tagged *(by request)*; Poop Scoop stays *(Coming Soon)*.
+- **Pet Taxi: listed with NO price** (insurance pending). Pricing page now says "available by
+  request, ask us," no rate.
+- Peak surcharges kept simple: amounts shown on Boarding (+$10) and House Sitting (+$25); the
+  general Peak Season section covers the rest. No full matrix.
+- OPEN: the **Transport add-on** ($5/$10, still priced on the Pricing page) involves driving
+  client dogs too, so the same commercial-auto-insurance question as Pet Taxi applies. Confirm
+  whether Transport should also be held/relabeled, or if it's covered.
 
 ---
 
@@ -204,6 +208,11 @@ decision Gus must make. Draft uses 25% on Home/Book Now/Pricing and 50% on FAQ.
 - **Request a Meet & Greet / Book Now:** records@ instruction replaced with bring-a-copy / portal upload.
 - **About:** street name removed (now "a quiet street in Sharon"); "since 2017" → 2018.
 - **Next Steps:** hosting → Cloudflare Pages; records@ items dropped.
+- **Ollie's Law:** corrected the namesake story to the verified facts (2020, seven-month-old
+  labradoodle, mauled by other dogs, died two months later of his injuries; signed 2024). The
+  draft's "2023 Golden Retriever" version was wrong. Inserted the real URL
+  (mass.gov/info-details/ollies-law-information) and removed the URL `#todo`s. **Gus should
+  review the reworded story.**
 
 Still needs mechanical build-time pass (NOT done in drafts): emoji → sprite icons, full em-dash
 sweep of untouched prose, resolving Gus's `#todo` / `~~strikethrough~~` creative placeholders.

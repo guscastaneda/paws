@@ -104,13 +104,9 @@ Your dog gets out into the neighborhood with a small group of familiar faces. Fr
 
 ## Pet Taxi
 
-**$20 base**
+*Available by request*
 
-Need a ride to the vet, groomer, or a drop-off? We've got it.
-
-- First 5 miles free, then $1.87/mile
-- Extra pet: +$5 per direction
-- Available one way or round trip
+Need a ride to the vet, groomer, or a drop-off? Ask us and we'll let you know if we can help, and share pricing then. Available one way or round trip.
 
 ---
 

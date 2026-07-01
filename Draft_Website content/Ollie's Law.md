@@ -16,7 +16,7 @@ last_reviewed: 2025-05-13
 
 Ollie's Law is named after a dog.
 
-In 2023, a Golden Retriever named Ollie died after a stay at a Massachusetts boarding facility. His death — and the circumstances around it — exposed gaps in how the state regulated pet care operations. His owner fought for change. The Massachusetts legislature listened.
+In 2020, a seven-month-old labradoodle named Ollie was severely injured by other dogs at a Massachusetts boarding facility. He spent two months in veterinary care before he died of his injuries, and his owner was never given a clear answer about how it happened. Her fight for accountability became Ollie's Law, which Governor Healey signed in 2024.
 
 We take that seriously. Not because we are required to, but because it is exactly the kind of accountability that should exist in this industry. We have a dog named Ollie too. We know what it means to love one.
 
@@ -44,9 +44,7 @@ On September 20, 2024, Governor Maura Healey signed the Act to Increase Kennel S
 
 **Collar & Tags** — All dogs must wear a collar or harness while in our care, and it must display both a current Rabies tag and an inscribed municipal dog tag.
 
-**Questions?** For more detail on the law, visit the state's official Ollie's Law page at [mass.gov](https://mass.gov), or reach out to your local Animal Control Officer with any specific questions. As always, thank you for trusting us with your furry family members.
-
-#todo — verify the mass.gov Ollie's Law URL is live and linking correctly before launch
+**Questions?** For more detail on the law, visit the state's official Ollie's Law page at [mass.gov](https://www.mass.gov/info-details/ollies-law-information), or reach out to your local Animal Control Officer with any specific questions. As always, thank you for trusting us with your furry family members.
 
 ---
 
@@ -56,5 +54,5 @@ Our dog's name is Ollie too. He is nine years old, a little slower than he used 
 
 ---
 
-**[Learn more at mass.gov →]** #todo — insert direct URL  
+**[Learn more at mass.gov →]**(https://www.mass.gov/info-details/ollies-law-information)  
 **[Questions? Contact us →]** → [[Contact]]
