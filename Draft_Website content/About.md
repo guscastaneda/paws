@@ -52,7 +52,7 @@ See more about the space → [[Our Home]]
 
 **Marian** is, in many ways, the heartbeat of the day-to-day. With a background in design and a remote work schedule that keeps her home, she is a constant presence — greeting nearly every dog who walks through the door and saying goodbye to each one when they leave. She handles some walks, drives dogs home, and together with Gus, always makes sure every pup feels seen. She also takes the best photos and videos, a fact that becomes obvious the moment you see them. 
 
-**Thomas & Julian**, have grown up in the middle of all of this. They have never known a home without dogs in it. The pups know it too.
+**Their two boys** have grown up in the middle of all of this. They have never known a home without dogs in it. The pups know it too.
 
 ---
 

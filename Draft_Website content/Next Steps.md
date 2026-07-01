@@ -94,7 +94,7 @@ This is the internal planning document for the Paws on Longmeadow website projec
 - [ ] Client story permissions — contact Tiffany M., Burgwell H., Kathleen G. re: [[Gallery]] feature
 
 ### Miscellaneous
-- [ ] Confirm Thomas's age and whether to name him publicly on [[About]] (privacy consideration)
+- [x] Kids not named publicly on [[About]] (privacy) — now "their two boys"
 - [x] Confirm footer copyright year (2025 vs 2026) across all pages
 - [x] Confirm social handles (@pawsonlongmeadow) are live on both Instagram and Facebook
 - [ ] Google Business listing URL for testimonials CTA on [[Home]]
