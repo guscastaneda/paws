@@ -65,8 +65,23 @@
   <div id="view-invalid" class="view">
     <div class="invalid-wrap">
       <div class="invalid-icon"><svg class="ic"><use href="#i-lock"/></svg></div>
-      <h2>Link not recognized</h2>
-      <p style="margin-top:0.5rem;">This link doesn't match any account. Please use the personal link sent to you, or reach out directly.</p>
+      <h2>This link didn't work</h2>
+      <p style="margin-top:0.5rem;">The access link you used has expired or isn't recognized. Your personal link is in the text message we sent you, opening that again is the quickest way in.</p>
+    </div>
+
+    <div style="max-width:340px;margin:1.5rem auto 0;">
+      <div style="padding:1.1rem 1.25rem;background:var(--surface);border:1px solid var(--line-soft);border-left:3px solid var(--green);border-radius:12px;margin-bottom:0.9rem;">
+        <div style="font-weight:600;color:var(--ink);margin-bottom:0.3rem;">Already a client?</div>
+        <p style="font-size:0.9rem;color:var(--ink);line-height:1.6;margin-bottom:0.75rem;">Reopen the link from your texts, or reach out and we'll resend it.</p>
+        <a href="mailto:hello@pawsonlongmeadow.com?subject=Portal%20access%20link" class="btn-primary" style="display:block;text-align:center;text-decoration:none;">
+          <span class="btn-text">Email us for a new link</span>
+        </a>
+      </div>
+      <div style="padding:1.1rem 1.25rem;background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;">
+        <div style="font-weight:600;color:var(--ink);margin-bottom:0.3rem;">New here?</div>
+        <p style="font-size:0.9rem;color:var(--ink);line-height:1.6;margin-bottom:0.75rem;">If you don't have an account yet, you can request a meet &amp; greet to get started.</p>
+        <button onclick="showView('view-lead')" style="width:100%;padding:0.7rem 1rem;background:transparent;border:1.5px solid var(--green);border-radius:10px;color:var(--green-deep);font-family:var(--font-body);font-size:0.92rem;font-weight:600;cursor:pointer;">Request a meet &amp; greet</button>
+      </div>
     </div>
   </div>
 
@@ -101,18 +116,18 @@
 
     <p class="step-desc" style="margin-bottom:1rem;font-weight:600;color:var(--ink);">About you</p>
     <div class="form-group">
-      <label>Your Name <span class="req">*</span></label>
+      <label for="l-owner">Your Name <span class="req">*</span></label>
       <input type="text" id="l-owner" placeholder="Your full name"/>
       <div class="field-error" id="l-owner-error">Please enter your name.</div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>Phone <span class="req">*</span></label>
+        <label for="l-phone">Phone <span class="req">*</span></label>
         <input type="tel" id="l-phone" placeholder="(555) 555-5555"/>
         <div class="field-error" id="l-phone-error">Please enter a phone number.</div>
       </div>
       <div class="form-group">
-        <label>Email <span class="req">*</span></label>
+        <label for="l-email">Email <span class="req">*</span></label>
         <input type="email" id="l-email" placeholder="you@example.com"/>
         <div class="field-error" id="l-email-error">Please enter a valid email.</div>
       </div>
@@ -123,12 +138,12 @@
     <p class="step-desc" style="margin-bottom:1rem;font-weight:600;color:var(--ink);">About your dog</p>
     <div class="form-row">
       <div class="form-group">
-        <label>Dog's Name <span class="req">*</span></label>
+        <label for="l-dog">Dog's Name <span class="req">*</span></label>
         <input type="text" id="l-dog" placeholder="Your dog's name"/>
         <div class="field-error" id="l-dog-error">Please enter your dog's name.</div>
       </div>
       <div class="form-group">
-        <label>Gender</label>
+        <label for="l-gender">Gender</label>
         <select id="l-gender">
           <option value="">Select…</option>
           <option value="Male">Male</option>
@@ -138,16 +153,16 @@
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>Breed</label>
+        <label for="l-breed">Breed</label>
         <input type="text" id="l-breed" placeholder="e.g. Labrador mix"/>
       </div>
       <div class="form-group">
-        <label>Age</label>
+        <label for="l-age">Age</label>
         <input type="text" id="l-age" placeholder="e.g. 3 years"/>
       </div>
     </div>
     <div class="form-group">
-      <label>Spayed or Neutered?</label>
+      <label for="l-altered">Spayed or Neutered?</label>
       <select id="l-altered">
         <option value="">Select…</option>
         <option value="Yes">Yes</option>
@@ -173,7 +188,7 @@
       </div>
     </div>
     <div class="form-group">
-      <label>How does your dog do around other dogs?</label>
+      <label for="l-social">How does your dog do around other dogs?</label>
       <select id="l-social">
         <option value="">Select…</option>
         <option value="Loves them">Loves them</option>
@@ -185,7 +200,7 @@
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>House-trained?</label>
+        <label for="l-house">House-trained?</label>
         <select id="l-house">
           <option value="">Select…</option>
           <option value="Yes">Yes</option>
@@ -195,7 +210,7 @@
         </select>
       </div>
       <div class="form-group">
-        <label>Been to daycare or boarding before?</label>
+        <label for="l-prior">Been to daycare or boarding before?</label>
         <select id="l-prior">
           <option value="">Select…</option>
           <option value="Yes regularly">Yes, regularly</option>
@@ -205,7 +220,7 @@
       </div>
     </div>
     <div class="form-group">
-      <label>Any history of aggression or biting, toward dogs or people?</label>
+      <label for="l-aggression">Any history of aggression or biting, toward dogs or people?</label>
       <select id="l-aggression" onchange="toggleAggDetails()">
         <option value="">Select…</option>
         <option value="No">No</option>
@@ -213,11 +228,11 @@
       </select>
     </div>
     <div class="form-group" id="l-agg-details-wrap" style="display:none;">
-      <label>Please tell us a little more</label>
+      <label for="l-agg-details">Please tell us a little more</label>
       <textarea id="l-agg-details" rows="2" placeholder="What happened, and in what situation?"></textarea>
     </div>
     <div class="form-group">
-      <label>Preferred meet &amp; greet format</label>
+      <label for="l-format">Preferred meet &amp; greet format</label>
       <select id="l-format">
         <option value="">Select…</option>
         <option value="Zoom">Zoom</option>
@@ -226,7 +241,7 @@
       </select>
     </div>
     <div class="form-group">
-      <label>Anything else you'd like us to know? <span class="opt">(optional)</span></label>
+      <label for="l-notes">Anything else you'd like us to know? <span class="opt">(optional)</span></label>
       <textarea id="l-notes" rows="3" placeholder="Tell us about your dog…"></textarea>
     </div>
 
@@ -358,24 +373,24 @@
     <div id="contact-current-info" style="margin-bottom:1.25rem;padding:0.95rem 1.1rem;background:var(--surface);border:1px solid var(--line-soft);border-left:3px solid var(--green);border-radius:12px;font-size:0.82rem;line-height:1.8;color:var(--ink);"></div>
 
     <div class="form-group">
-      <label>Full Name <span class="req">*</span></label>
+      <label for="c-name">Full Name <span class="req">*</span></label>
       <input type="text" id="c-name" placeholder="Your full name"/>
       <div class="field-error" id="c-name-error">Please enter your name.</div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>Phone <span class="req">*</span></label>
+        <label for="c-phone">Phone <span class="req">*</span></label>
         <input type="tel" id="c-phone" placeholder="(555) 555-5555"/>
         <div class="field-error" id="c-phone-error">Please enter a phone number.</div>
       </div>
       <div class="form-group">
-        <label>Email <span class="req">*</span></label>
+        <label for="c-email">Email <span class="req">*</span></label>
         <input type="email" id="c-email" placeholder="you@example.com"/>
         <div class="field-error" id="c-email-error">Please enter a valid email.</div>
       </div>
     </div>
     <div class="form-group">
-      <label>Address <span class="opt">(optional)</span></label>
+      <label for="c-address">Address <span class="opt">(optional)</span></label>
       <input type="text" id="c-address" placeholder="123 Main St, Sharon MA"/>
     </div>
 
@@ -384,16 +399,16 @@
     <p class="step-desc" style="margin-bottom:1rem;">Additional owner <span style="font-weight:300;color:var(--brand-stone);">(optional)</span></p>
     <div class="form-row">
       <div class="form-group">
-        <label>Name</label>
+        <label for="c-add-name">Name</label>
         <input type="text" id="c-add-name" placeholder="Partner or co-owner"/>
       </div>
       <div class="form-group">
-        <label>Phone</label>
+        <label for="c-add-phone">Phone</label>
         <input type="tel" id="c-add-phone" placeholder="(555) 555-5555"/>
       </div>
     </div>
     <div class="form-group">
-      <label>Email</label>
+      <label for="c-add-email">Email</label>
       <input type="email" id="c-add-email" placeholder="partner@example.com"/>
     </div>
 
@@ -413,18 +428,18 @@
     </div>
 
     <div class="form-group">
-      <label>Full Name <span class="req">*</span></label>
+      <label for="e-name">Full Name <span class="req">*</span></label>
       <input type="text" id="e-name" placeholder="Emergency contact's name"/>
       <div class="field-error" id="e-name-error">Please enter a name.</div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>Phone <span class="req">*</span></label>
+        <label for="e-phone">Phone <span class="req">*</span></label>
         <input type="tel" id="e-phone" placeholder="(555) 555-5555"/>
         <div class="field-error" id="e-phone-error">Please enter a phone number.</div>
       </div>
       <div class="form-group">
-        <label>Relationship <span class="req">*</span></label>
+        <label for="e-relationship">Relationship <span class="req">*</span></label>
         <input type="text" id="e-relationship" placeholder="Sister, neighbor, friend…"/>
         <div class="field-error" id="e-rel-error">Please enter the relationship.</div>
       </div>
@@ -434,16 +449,16 @@
       <div class="alt-caregiver-head">Alternate Caregiver</div>
       <p class="step-desc" style="margin:0 0 1rem;">The person who would take your dog home if we couldn't reach you at the end of a stay. Must live locally and be willing to care for your dog. Ideally not the same person as your emergency contact.</p>
       <div class="form-group">
-        <label>Full Name</label>
+        <label for="alt-name">Full Name</label>
         <input type="text" id="alt-name" placeholder="Alternate caregiver's name"/>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Phone</label>
+          <label for="alt-phone">Phone</label>
           <input type="tel" id="alt-phone" placeholder="(555) 555-5555"/>
         </div>
         <div class="form-group">
-          <label>Relationship</label>
+          <label for="alt-relationship">Relationship</label>
           <input type="text" id="alt-relationship" placeholder="Spouse, neighbor, friend…"/>
         </div>
       </div>
@@ -479,19 +494,19 @@
     </div>
 
     <div class="form-group" id="docs-expiry-group">
-      <label>Expiration Date <span class="opt">(if applicable)</span></label>
+      <label for="docs-expiry">Expiration Date <span class="opt">(if applicable)</span></label>
       <input type="date" id="docs-expiry"/>
       <div class="info-box">Leave blank for documents that don't expire.</div>
     </div>
 
     <div class="form-group" id="docs-license-year-group" style="display:none;">
-      <label>License Year <span class="req">*</span></label>
+      <label for="docs-license-year">License Year <span class="req">*</span></label>
       <select id="docs-license-year"></select>
       <div class="info-box">Town dog licenses run by calendar year (Jan 1 - Dec 31). Select the year this license covers.</div>
     </div>
 
     <div class="form-group">
-      <label>Document File <span class="req">*</span></label>
+      <label for="docs-file-input">Document File <span class="req">*</span></label>
       <div class="file-drop" id="docs-file-drop">
         <input type="file" id="docs-file-input" accept=".pdf,.jpg,.jpeg,.png,.heic,.heif,.webp"/>
         <div class="file-drop-icon"><svg class="ic"><use href="#i-upload"/></svg></div>
@@ -621,7 +636,7 @@
 
     <div id="agreement-sign-form">
     <div class="form-group" style="margin-bottom:1rem;">
-      <label>Type your full name to sign <span class="req">*</span></label>
+      <label for="agree-name">Type your full name to sign <span class="req">*</span></label>
       <input type="text" id="agree-name" placeholder="Your full legal name" style="border-radius:10px;" minlength="3"/>
       <div class="field-hint">Type your name as your legal signature.</div>
       <div class="field-error" id="agree-name-error">Please enter your full name to sign (at least 3 characters).</div>
@@ -662,7 +677,7 @@
 
     <!-- Service selector -->
     <div class="form-group">
-      <label>Service <span class="req">*</span></label>
+      <label for="bs-boarding">Service <span class="req">*</span></label>
       <div class="doc-pills" id="booking-service-pills">
         <input type="radio" name="booking-service" class="doc-pill-input" id="bs-boarding" value="boarding" checked/>
         <label for="bs-boarding"><svg class="ic"><use href="#i-home"/></svg> Boarding</label>
@@ -676,7 +691,7 @@
     <!-- Frequency toggle — only shown for Daycare / Half-Day -->
     <div id="booking-frequency-row" style="display:none;">
       <div class="form-group">
-        <label>Frequency <span class="req">*</span></label>
+        <label for="bf-onetime">Frequency <span class="req">*</span></label>
         <div class="doc-pills">
           <input type="radio" name="booking-frequency" class="doc-pill-input" id="bf-onetime" value="one-time" checked/>
           <label for="bf-onetime">One-time</label>
@@ -697,12 +712,12 @@
     <div id="booking-start-row">
       <div class="form-row">
         <div class="form-group">
-          <label id="booking-start-date-label">Start Date <span class="req">*</span></label>
+          <label for="booking-start-date" id="booking-start-date-label">Start Date <span class="req">*</span></label>
           <input type="date" id="booking-start-date"/>
           <div class="field-error" id="booking-start-date-error">Please select a date.</div>
         </div>
         <div class="form-group">
-          <label id="booking-start-time-label">Start Time <span class="req">*</span></label>
+          <label for="booking-start-time" id="booking-start-time-label">Start Time <span class="req">*</span></label>
           <select id="booking-start-time">
             <option value="">Select time...</option>
             <option value="Early morning (8:00–9AM)">Early morning (8:00–9AM)</option>
@@ -717,7 +732,7 @@
     <!-- Daycare / Half-Day one-time: date only -->
     <div id="booking-date-only-row" style="display:none;">
       <div class="form-group">
-        <label>Date <span class="req">*</span></label>
+        <label for="booking-single-date">Date <span class="req">*</span></label>
         <input type="date" id="booking-single-date"/>
         <div class="field-error" id="booking-single-date-error">Please select a date.</div>
       </div>
@@ -726,7 +741,7 @@
     <!-- Half-Day preference (one-time or recurring) -->
     <div id="booking-halfday-pref" style="display:none;">
       <div class="form-group">
-        <label>Preference <span class="req">*</span></label>
+        <label for="hd-am">Preference <span class="req">*</span></label>
         <div class="doc-pills">
           <input type="radio" name="halfday-pref" class="doc-pill-input" id="hd-am" value="AM" checked/>
           <label for="hd-am"><svg class="ic"><use href="#i-sunrise"/></svg> Morning</label>
@@ -739,7 +754,7 @@
     <!-- Recurring: day picker -->
     <div id="booking-recurring-days" style="display:none;">
       <div class="form-group">
-        <label>Days of the Week <span class="req">*</span></label>
+        <label for="rd-mon">Days of the Week <span class="req">*</span></label>
         <div class="doc-pills">
           <input type="checkbox" name="recurring-day" class="doc-pill-input" id="rd-mon" value="Monday"/>
           <label for="rd-mon">Mon</label>
@@ -761,12 +776,12 @@
     <div id="booking-pickup-row">
       <div class="form-row">
         <div class="form-group">
-          <label>End Date <span class="req">*</span></label>
+          <label for="booking-end-date">End Date <span class="req">*</span></label>
           <input type="date" id="booking-end-date"/>
           <div class="field-error" id="booking-end-date-error">Please select a date.</div>
         </div>
         <div class="form-group">
-          <label>End Time <span class="req">*</span></label>
+          <label for="booking-end-time">End Time <span class="req">*</span></label>
           <select id="booking-end-time">
             <option value="">Select time...</option>
             <option value="Early morning (8:00–9AM)">Early morning (8:00–9AM)</option>
@@ -780,7 +795,7 @@
 
     <!-- Transport -->
     <div class="form-group">
-      <label>Transport <span class="req">*</span></label>
+      <label for="bt-none">Transport <span class="req">*</span></label>
       <div class="doc-pills" id="booking-transport-pills">
         <input type="radio" name="booking-transport" class="doc-pill-input" id="bt-none" value="None"/>
         <label for="bt-none">No transport needed</label>
@@ -796,7 +811,7 @@
 
     <!-- Notes -->
     <div class="form-group">
-      <label>Notes <span class="opt">(optional)</span></label>
+      <label for="booking-notes">Notes <span class="opt">(optional)</span></label>
       <textarea id="booking-notes" placeholder="Anything we should know — feeding schedule, medications, special instructions..."></textarea>
     </div>
 
