@@ -28,7 +28,8 @@ and an Airtable-based pricing engine.
 - **Approve before writes.** Get explicit approval before any Airtable data write, especially
   financial records. Explain decisions before implementing.
 - Provide **`git commit` commands/messages** after every round of changes without being asked.
-  Do NOT include a `Co-Authored-By` trailer. Gus pushes manually (do not push for him).
+  Do NOT include a `Co-Authored-By` trailer. Include `git push` in the same command block so
+  Gus can commit + push together; he runs git himself (don't run commit or push for him).
 - Test on **real iPhone + desktop**. Gus catches UX issues by direct testing.
 - Prefers precise, targeted in-place edits. (This project now runs in Claude Code, which edits
   the real repo directly, so in-place edits are the norm. The old paste-files-back-and-forth
@@ -73,6 +74,12 @@ Worker: `index.js` (router), `src/{constants,helpers,client,profile,agreement,ca
 cancellation-confirmed,compliance,booking,message,pet,recurring,breeds,admin,reminders,leads,
 setup-client}.js`.
 Frontend: `portal/src/main.js`, `portal/src/style.css`, `portal/index.html`, `portal/src/views/pets.js`.
+Airtable automation scripts (mirrored, NOT part of the Worker build): `airtable-scripts/pricing-engine.js`
+(PricingEngine v2.2). Airtable is the source of truth for the running copy; when the script changes in
+Airtable, paste the new copy here and commit. Uses Airtable scripting globals + top-level await, so
+`node --check` will not pass on it (expected).
+Website content drafts + copy reconciliation: `Draft_Website content/` (see `00_reconciliation.md`,
+which pins every page's copy to the master agreement + verified Airtable pricing).
 
 ### Shared helpers
 - `helpers.js` exports `cors`, `errRes`, `jsonRes`, `atFetch`. `atFetch(env, path, opts)` wraps
