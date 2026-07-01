@@ -23,15 +23,6 @@
 // - Client Pricing table override: custom base rates per client/service.
 // - hasCustomBasePrice flag: skips standard discounts when a custom base
 //   rate is set. Holiday immunity still applies.
-//
-// ---------------------------------------------------------------------
-// REPO MIRROR NOTE (not executed here):
-// The live copy of this script runs as an Airtable Automation on base
-// appvQb876VInNJlnB. Airtable is the source of truth for the RUNNING
-// version. This file is a version-controlled mirror — when you edit the
-// script in Airtable, paste the updated copy here and commit it. It uses
-// Airtable's scripting globals (input, base, output) and top-level await,
-// so `node --check` will not pass on it; that is expected.
 // =====================================================================
 
 let inputConfig = input.config();

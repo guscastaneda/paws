@@ -74,10 +74,11 @@ Worker: `index.js` (router), `src/{constants,helpers,client,profile,agreement,ca
 cancellation-confirmed,compliance,booking,message,pet,recurring,breeds,admin,reminders,leads,
 setup-client}.js`.
 Frontend: `portal/src/main.js`, `portal/src/style.css`, `portal/index.html`, `portal/src/views/pets.js`.
-Airtable automation scripts (mirrored, NOT part of the Worker build): `airtable-scripts/pricing-engine.js`
-(PricingEngine v2.2). Airtable is the source of truth for the running copy; when the script changes in
-Airtable, paste the new copy here and commit. Uses Airtable scripting globals + top-level await, so
-`node --check` will not pass on it (expected).
+Airtable automation scripts (mirrored, NOT part of the Worker build): `airtable-scripts/` holds
+version-controlled copies of the Airtable Automations; see `airtable-scripts/README.md` for the
+current list and each script's trigger/purpose. Airtable is the source of truth for the running
+copy; when a script changes in Airtable, paste the new copy here and commit. They use Airtable
+scripting globals + top-level await/return, so `node --check` will not pass on them (expected).
 Website content drafts + copy reconciliation: `Draft_Website content/` (see `00_reconciliation.md`,
 which pins every page's copy to the master agreement + verified Airtable pricing).
 
@@ -191,8 +192,12 @@ Reminder Worklist (Compliance) view `viwvGCkaRIZOQEG2g` — the owner digest lin
 - **Profile write policy:** contact info (name, phone, email, address, additional owner,
   emergency contact, alternate caregiver) writes DIRECTLY to Clients. Vet / insurance / health
   (meds, allergies, feeding, temperament, fears, vet clinic) goes to the **Pending Updates**
-  queue for manual review. Approving a Pending Update is a manual to-do — there is intentionally
-  NO auto-apply automation.
+  queue for manual review. Review (approval) is still a manual human decision, but APPLICATION is
+  now automated: an Airtable automation (`airtable-scripts/apply-pending-update.js`) fires when a
+  Pending Update enters the Status = "Approved 🟢" view and writes the New Value to the correct
+  Clients or Pets field. EXCEPTION: vet updates (Primary Vet / Specialist Vet) are skipped by the
+  automation and still require manual handling. Pet updates use the "PetName — FieldName" (em dash)
+  Field Name convention.
 - **Reminder engine gates (all three required):** pet active + not deceased; client active + has
   email; document Accepted + remindable type (Rabies / Vaccination / Town License) + in date
   window. "No email on file" = client not yet onboarded (onboarding happens via texted magic
