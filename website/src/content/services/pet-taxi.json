@@ -1,0 +1,8 @@
+{
+  "name": "Pet Taxi",
+  "order": 7,
+  "status": "by-request",
+  "modifiers": [],
+  "blurb": "We'll pick up or drop off your pup so you don't have to rearrange your day. Ask us for details and pricing.",
+  "icon": "i-car"
+}

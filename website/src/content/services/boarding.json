@@ -1,0 +1,13 @@
+{
+  "name": "Boarding",
+  "order": 1,
+  "status": "bookable",
+  "price": "$85 / night",
+  "modifiers": [
+    "Multi-night discounts from 12 nights",
+    "Second dog $15 off per night",
+    "Peak season +$10 per night"
+  ],
+  "blurb": "Your dog stays overnight with us, in our home. Full access to the house, the yard, and the family.",
+  "icon": "i-home"
+}

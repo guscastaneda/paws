@@ -1,0 +1,23 @@
+---
+interface Props {
+  heading: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+const { heading, ctaLabel, ctaHref } = Astro.props;
+---
+
+<section class="feature">
+  <div class="container">
+    <h2>{heading}</h2>
+    <div class="prose"><slot /></div>
+    {ctaLabel && ctaHref && <a class="btn btn-ghost" href={ctaHref}>{ctaLabel}</a>}
+  </div>
+</section>
+
+<style>
+  .feature h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 1rem; }
+  .prose { max-width: 62ch; }
+  .prose :global(p) { margin-bottom: 1rem; }
+  .feature .btn { margin-top: 0.5rem; }
+</style>

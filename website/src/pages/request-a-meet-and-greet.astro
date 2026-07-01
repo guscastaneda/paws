@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import LeadForm from '../components/LeadForm.astro';
+---
+
+<BaseLayout title="Request a Meet & Greet — Paws on Longmeadow">
+  <Hero
+    title="Every Great Stay Starts Here"
+    subtitle="Before any booking, every new client starts with a free Meet & Greet. It's relaxed, and it's the most important step we take together."
+  />
+  <section>
+    <div class="container">
+      <LeadForm />
+    </div>
+  </section>
+</BaseLayout>

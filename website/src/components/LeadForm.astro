@@ -1,0 +1,54 @@
+---
+// Meet & Greet intake. Posts to the existing Worker /lead endpoint (see src/leads.js).
+// STUB: the fields below are a minimal subset. The full multi-step field list is in
+// "Draft_Website content/Request a Meet & Greet.md". During the build, map these names to
+// the /lead payload (Leads table fields) and confirm CORS from the pawsonlongmeadow.com origin.
+const LEAD_ENDPOINT = 'https://client.pawsonlongmeadow.com/lead';
+---
+
+<form id="lead-form" class="lead-form">
+  <label>Full name<input name="ownerName" required /></label>
+  <label>Email<input name="email" type="email" required /></label>
+  <label>Phone<input name="phone" required /></label>
+  <label>Dog's name<input name="dogName" required /></label>
+  <button class="btn btn-primary" type="submit">Request My Meet &amp; Greet</button>
+  <p class="status" role="status" hidden></p>
+</form>
+
+<script define:vars={{ LEAD_ENDPOINT }}>
+  const form = document.getElementById('lead-form');
+  const status = form.querySelector('.status');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = Object.fromEntries(new FormData(form).entries());
+    try {
+      const res = await fetch(LEAD_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      status.hidden = false;
+      status.textContent = res.ok
+        ? 'Thanks! We will reach out within 24 hours.'
+        : 'Something went wrong. Please try again, or email hello@pawsonlongmeadow.com.';
+    } catch {
+      status.hidden = false;
+      status.textContent = 'Network error. Please try again.';
+    }
+  });
+</script>
+
+<style>
+  .lead-form { display: grid; gap: 0.9rem; max-width: 30rem; }
+  .lead-form label { display: grid; gap: 0.3rem; font-size: 0.85rem; color: var(--muted); }
+  .lead-form input {
+    font: inherit;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    background: var(--card);
+    color: var(--ink);
+  }
+  .lead-form input:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
+  .status { font-size: 0.9rem; color: var(--green-deep); }
+</style>

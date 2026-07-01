@@ -1,0 +1,94 @@
+/* Paws on Longmeadow — shared design tokens.
+   Ported from the client portal (portal/src/style.css v2.0) so the public site and
+   the portal read as one brand. Core principle: green is an ACCENT (rule, checkmark,
+   icon), never a flat panel fill. No emoji in the UI. */
+:root {
+  /* Greens — fresh pine */
+  --brand-primary:       #2F7D52;
+  --brand-primary-light: #41A368;
+  --brand-primary-dark:  #1F5538;
+  --brand-sage-light:    #E8F3EC;   /* green wash */
+
+  /* Warm neutrals — oat paper */
+  --brand-cream:         #F7F4EE;
+  --brand-bark:          #23201B;
+  --brand-stone:         #857C6E;
+  --brand-stone-light:   #E6E0D6;
+
+  /* Clay accent */
+  --brand-gold:          #C8643C;
+  --brand-gold-light:    #F6E7DF;
+
+  /* Status */
+  --brand-warning:       #B4690E;
+
+  /* Aliases used by components */
+  --green:        var(--brand-primary);
+  --green-bright: var(--brand-primary-light);
+  --green-deep:   var(--brand-primary-dark);
+  --green-wash:   var(--brand-sage-light);
+  --paper:        var(--brand-cream);
+  --card:         #FFFFFF;
+  --ink:          var(--brand-bark);
+  --muted:        var(--brand-stone);
+  --line:         var(--brand-stone-light);
+  --line-soft:    #EFEAE0;
+  --clay:         var(--brand-gold);
+  --clay-wash:    var(--brand-gold-light);
+  --warn:         var(--brand-warning);
+  --surface:      #FBF9F5;
+  --surface-sunk: #F4F1EA;
+
+  /* Type */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+
+  /* Radii + shadow + motion */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --card-shadow: 0 1px 2px rgba(35,32,27,0.04), 0 6px 20px rgba(35,32,27,0.06);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Layout */
+  --maxw: 1080px;
+  --gap: clamp(1rem, 3vw, 2rem);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 17px; }
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+a { color: var(--green); }
+img { max-width: 100%; display: block; }
+
+.container { max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gap); }
+section { padding-block: clamp(2.5rem, 6vw, 5rem); }
+
+.btn {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-weight: 600;
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.btn-primary { background: var(--green); color: #fff; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(47,125,82,0.25); }
+.btn-ghost { background: transparent; color: var(--green); border-color: var(--line); }
+.btn-ghost:hover { border-color: var(--green); }

@@ -1,0 +1,23 @@
+---
+interface Props {
+  title: string;
+  subtitle?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+const { title, subtitle, ctaLabel, ctaHref } = Astro.props;
+---
+
+<section class="hero">
+  <div class="container">
+    <h1>{title}</h1>
+    {subtitle && <p class="sub">{subtitle}</p>}
+    {ctaLabel && ctaHref && <a class="btn btn-primary" href={ctaHref}>{ctaLabel}</a>}
+    <slot />
+  </div>
+</section>
+
+<style>
+  .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); max-width: 18ch; }
+  .hero .sub { color: var(--muted); font-size: 1.15rem; margin: 1rem 0 1.6rem; max-width: 46ch; }
+</style>

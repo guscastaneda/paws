@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+
+const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+const label: Record<string, string> = { 'by-request': 'by request', 'coming-soon': 'coming soon' };
+---
+
+<section class="services">
+  <div class="container">
+    <h2>What We Offer</h2>
+    <div class="grid">
+      {
+        services.map(({ data }) => (
+          <article class="card">
+            <div class="head">
+              <h3>{data.name}</h3>
+              {data.status !== 'bookable' && <span class="tag">{label[data.status]}</span>}
+            </div>
+            {data.price && <p class="price">{data.price}</p>}
+            <p class="blurb">{data.blurb}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .services h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 1.5rem; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 1.25rem;
+    box-shadow: var(--card-shadow);
+  }
+  .head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; }
+  .card h3 { font-size: 1.1rem; }
+  .tag {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--clay);
+    border: 1px solid var(--clay);
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+  }
+  .price { color: var(--green-deep); font-weight: 600; margin-bottom: 0.4rem; }
+  .blurb { color: var(--muted); font-size: 0.9rem; }
+</style>

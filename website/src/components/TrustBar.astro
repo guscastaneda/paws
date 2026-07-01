@@ -1,0 +1,24 @@
+---
+interface Props {
+  items: string[];
+}
+const { items } = Astro.props;
+---
+
+<div class="trustbar">
+  <div class="container row">
+    {items.map((t) => <span>{t}</span>)}
+  </div>
+</div>
+
+<style>
+  .trustbar { border-block: 1px solid var(--line); background: var(--surface); }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding-block: 0.9rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+</style>

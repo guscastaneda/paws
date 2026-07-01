@@ -1,0 +1,28 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <p class="brand">Paws on Longmeadow</p>
+    <p class="loc">Sharon, Massachusetts</p>
+    <p class="social">
+      <a href="https://www.instagram.com/pawsonlongmeadow">Instagram</a>
+      <a href="https://www.facebook.com/profile.php?id=61572108133332">Facebook</a>
+    </p>
+    <p class="legal">© {year} Paws on Longmeadow. All paws reserved.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    padding-block: 2.5rem;
+    margin-top: 3rem;
+  }
+  .brand { font-family: var(--font-display); color: var(--green-deep); font-size: 1.05rem; }
+  .loc, .legal { color: var(--muted); font-size: 0.85rem; }
+  .social { display: flex; gap: 1rem; margin: 0.6rem 0; }
+  .social a { font-size: 0.9rem; }
+</style>

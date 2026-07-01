@@ -1,0 +1,13 @@
+{
+  "name": "House Sitting",
+  "order": 4,
+  "status": "by-request",
+  "price": "$105 / night",
+  "modifiers": [
+    "Extra dog +$35 per night",
+    "Extra cat +$25 per night",
+    "Peak season +$25 per night"
+  ],
+  "blurb": "We come to you. Your dog stays in their own home, on their own schedule, with their own routines intact.",
+  "icon": "i-key"
+}

@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+
+const testimonials = await getCollection('testimonials');
+---
+
+<section class="tst">
+  <div class="container">
+    <h2>What Families Are Saying</h2>
+    <div class="grid">
+      {
+        testimonials.map(({ data }) => (
+          <figure class="quote">
+            <blockquote>{data.quote}</blockquote>
+            <figcaption>
+              {data.name}
+              {data.service && <span> · {data.service}</span>}
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .tst h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 1.5rem; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+  /* green as an accent: a thin left rail, not a fill */
+  .quote { border-left: 3px solid var(--green); padding-left: 1rem; }
+  blockquote { font-family: var(--font-display); font-size: 1.05rem; }
+  figcaption { color: var(--muted); font-size: 0.85rem; margin-top: 0.6rem; }
+</style>

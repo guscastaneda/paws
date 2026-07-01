@@ -1,0 +1,9 @@
+{
+  "name": "Full-Day Daycare",
+  "order": 2,
+  "status": "bookable",
+  "price": "$50 / day",
+  "modifiers": [],
+  "blurb": "A full day of play, socialization, and supervised fun. Drop off in the morning, pick up in the evening, tired and happy.",
+  "icon": "i-sun"
+}

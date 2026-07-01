@@ -1,0 +1,33 @@
+---
+interface Props {
+  heading: string;
+  text?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+const { heading, text, ctaLabel, ctaHref } = Astro.props;
+---
+
+<section class="callout">
+  <div class="container inner">
+    <div>
+      <h2>{heading}</h2>
+      {text && <p>{text}</p>}
+    </div>
+    {ctaLabel && ctaHref && <a class="btn btn-primary" href={ctaHref}>{ctaLabel}</a>}
+  </div>
+</section>
+
+<style>
+  /* green as an accent: a thin left rail, not a flat fill */
+  .callout { background: var(--card); border-block: 1px solid var(--line); border-left: 4px solid var(--green); }
+  .inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .callout h2 { font-size: clamp(1.4rem, 3vw, 2rem); }
+  .callout p { color: var(--muted); margin-top: 0.5rem; max-width: 48ch; }
+</style>

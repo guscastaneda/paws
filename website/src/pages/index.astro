@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import TrustBar from '../components/TrustBar.astro';
+import FeatureBlock from '../components/FeatureBlock.astro';
+import ServiceCards from '../components/ServiceCards.astro';
+import Testimonials from '../components/Testimonials.astro';
+import CalloutBand from '../components/CalloutBand.astro';
+---
+
+<BaseLayout title="Paws on Longmeadow — Dog Boarding & Daycare in Sharon, MA">
+  <Hero
+    title="Where Your Dog Gets the Best of Both Worlds"
+    subtitle="The warmth of a family home and the reliability of a professional team. Boarding, daycare, walks, and more in Sharon, MA."
+    ctaLabel="Request a Meet & Greet"
+    ctaHref="/request-a-meet-and-greet"
+  />
+
+  <TrustBar
+    items={[
+      'Family-run since 2018',
+      'Sharon, MA',
+      'Regular photos & updates',
+      'Actively accepting new clients',
+    ]}
+  />
+
+  <FeatureBlock heading="Why Paws on Longmeadow?" ctaLabel="Meet the family" ctaHref="/about">
+    <p>
+      There are a lot of places to leave your dog. What sets us apart isn't just what we do. It's
+      where and how we do it.
+    </p>
+    <p>
+      Paws on Longmeadow is based in a home on a quiet street in Sharon. When your dog stays with
+      us, they get the warmth of a family home and the confidence of a team that has been doing
+      this since 2018.
+    </p>
+  </FeatureBlock>
+
+  <ServiceCards />
+
+  <Testimonials />
+
+  <CalloutBand
+    heading="Safety Isn't Optional. It's the Standard."
+    text="Learn about Ollie's Law and what it means for every dog in our care."
+    ctaLabel="Learn about Ollie's Law"
+    ctaHref="/ollies-law"
+  />
+
+  <CalloutBand
+    heading="Ready to Request a Stay?"
+    text="New to Paws on Longmeadow? Getting started only takes a few minutes."
+    ctaLabel="Request a Meet & Greet"
+    ctaHref="/request-a-meet-and-greet"
+  />
+</BaseLayout>
