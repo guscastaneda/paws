@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import FAQAccordion from '../components/FAQAccordion.astro';
+import CalloutBand from '../components/CalloutBand.astro';
+---
+
+<BaseLayout title="FAQ — Paws on Longmeadow">
+  <Hero
+    title="Frequently Asked Questions"
+    subtitle="The things families ask most. Anything we missed, just reach out."
+  />
+  <section>
+    <FAQAccordion />
+  </section>
+  <CalloutBand
+    heading="Have a question that isn't here?"
+    text="We would love to hear from you."
+    ctaLabel="Contact us"
+    ctaHref="/contact"
+  />
+</BaseLayout>

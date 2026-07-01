@@ -1,16 +1,78 @@
 ---
-// Meet & Greet intake. Posts to the existing Worker /lead endpoint (see src/leads.js).
-// STUB: the fields below are a minimal subset. The full multi-step field list is in
-// "Draft_Website content/Request a Meet & Greet.md". During the build, map these names to
-// the /lead payload (Leads table fields) and confirm CORS from the pawsonlongmeadow.com origin.
+// Meet & Greet intake. Posts to the Worker /lead endpoint (src/leads.js), which writes the
+// Leads table and emails owner + prospect. Field names and the allowed option values below match
+// that handler exactly. Only ownerName + dogName + (phone OR email) are required by the Worker.
+// Multi-step layout and the fuller question set (temperament, house-trained, etc.) are a design
+// enhancement; this single-page form captures the essentials and is fully functional.
 const LEAD_ENDPOINT = 'https://client.pawsonlongmeadow.com/lead';
+
+// Values MUST match SERVICES_V in src/leads.js; labels can be friendlier.
+const serviceOptions = [
+  { value: 'Boarding', label: 'Boarding' },
+  { value: 'Daycare', label: 'Full-Day Daycare' },
+  { value: 'Half-Day Daycare', label: 'Half-Day Daycare' },
+  { value: 'House Sitting', label: 'House Sitting' },
+  { value: 'Drop-In Visits', label: 'Drop-In Visit' },
+  { value: 'Group Walks', label: 'Group Walk' },
+  { value: 'Pet Taxi', label: 'Pet Taxi' },
+  { value: 'Not sure yet', label: 'Not sure yet' },
+];
 ---
 
 <form id="lead-form" class="lead-form">
-  <label>Full name<input name="ownerName" required /></label>
-  <label>Email<input name="email" type="email" required /></label>
-  <label>Phone<input name="phone" required /></label>
-  <label>Dog's name<input name="dogName" required /></label>
+  <fieldset>
+    <legend>About you</legend>
+    <label>Full name<input name="ownerName" required /></label>
+    <div class="two">
+      <label>Email<input name="email" type="email" /></label>
+      <label>Phone<input name="phone" /></label>
+    </div>
+    <p class="hint">Give us at least one way to reach you.</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>About your dog</legend>
+    <div class="two">
+      <label>Dog's name<input name="dogName" required /></label>
+      <label>Breed<input name="breed" /></label>
+    </div>
+    <div class="two">
+      <label>Age<input name="dogAge" /></label>
+      <label>Gender
+        <select name="dogGender">
+          <option value="">Select</option>
+          <option>Male</option>
+          <option>Female</option>
+        </select>
+      </label>
+    </div>
+    <label>Spayed or neutered?
+      <select name="spayedNeutered">
+        <option value="">Select</option>
+        <option>Yes</option>
+        <option>No</option>
+        <option value="Not sure">Not sure</option>
+      </select>
+    </label>
+  </fieldset>
+
+  <fieldset>
+    <legend>What you're interested in</legend>
+    <div class="checks">
+      {serviceOptions.map((o) => (
+        <label class="check"><input type="checkbox" name="services" value={o.value} /> {o.label}</label>
+      ))}
+    </div>
+    <label>Meet &amp; Greet preference
+      <select name="mgFormat">
+        <option value="">No preference</option>
+        <option>Zoom</option>
+        <option value="In-person">In person</option>
+      </select>
+    </label>
+    <label>Anything else we should know?<textarea name="notes" rows="3"></textarea></label>
+  </fieldset>
+
   <button class="btn btn-primary" type="submit">Request My Meet &amp; Greet</button>
   <p class="status" role="status" hidden></p>
 </form>
@@ -20,35 +82,57 @@ const LEAD_ENDPOINT = 'https://client.pawsonlongmeadow.com/lead';
   const status = form.querySelector('.status');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const payload = Object.fromEntries(new FormData(form).entries());
+    const fd = new FormData(form);
+    const payload = {
+      ownerName: fd.get('ownerName'),
+      email: fd.get('email'),
+      phone: fd.get('phone'),
+      dogName: fd.get('dogName'),
+      breed: fd.get('breed'),
+      dogAge: fd.get('dogAge'),
+      dogGender: fd.get('dogGender'),
+      spayedNeutered: fd.get('spayedNeutered'),
+      services: fd.getAll('services'),
+      mgFormat: fd.get('mgFormat'),
+      notes: fd.get('notes'),
+    };
+    status.hidden = false;
+    status.textContent = 'Sending...';
     try {
       const res = await fetch(LEAD_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      status.hidden = false;
       status.textContent = res.ok
-        ? 'Thanks! We will reach out within 24 hours.'
+        ? 'Thanks! We got your request and will reach out within 24 hours.'
         : 'Something went wrong. Please try again, or email hello@pawsonlongmeadow.com.';
+      if (res.ok) form.reset();
     } catch {
-      status.hidden = false;
       status.textContent = 'Network error. Please try again.';
     }
   });
 </script>
 
 <style>
-  .lead-form { display: grid; gap: 0.9rem; max-width: 30rem; }
-  .lead-form label { display: grid; gap: 0.3rem; font-size: 0.85rem; color: var(--muted); }
-  .lead-form input {
+  .lead-form { display: grid; gap: 1.5rem; max-width: 34rem; }
+  fieldset { border: 1px solid var(--line); border-radius: var(--r-md); padding: 1.1rem 1.2rem; display: grid; gap: 0.8rem; }
+  legend { font-family: var(--font-display); font-size: 1.05rem; color: var(--green-deep); padding-inline: 0.4rem; }
+  label { display: grid; gap: 0.3rem; font-size: 0.85rem; color: var(--muted); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+  input, select, textarea {
     font: inherit;
-    padding: 0.6rem 0.75rem;
+    padding: 0.55rem 0.7rem;
     border: 1px solid var(--line);
     border-radius: var(--r-sm);
     background: var(--card);
     color: var(--ink);
   }
-  .lead-form input:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
+  .checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 0.4rem; }
+  .check { flex-direction: row; align-items: center; gap: 0.5rem; color: var(--ink); font-size: 0.9rem; }
+  .check input { width: auto; }
+  .hint { font-size: 0.8rem; color: var(--muted); }
   .status { font-size: 0.9rem; color: var(--green-deep); }
+  @media (max-width: 480px) { .two { grid-template-columns: 1fr; } }
 </style>

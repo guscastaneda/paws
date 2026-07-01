@@ -1,0 +1,37 @@
+---
+interface Props {
+  heading: string;
+  plain?: string; // optional "short version" callout
+}
+const { heading, plain } = Astro.props;
+---
+
+<section class="policy">
+  <div class="container">
+    <h2>{heading}</h2>
+    {
+      plain && (
+        <p class="plain">
+          <strong>The short version.</strong> {plain}
+        </p>
+      )
+    }
+    <div class="terms"><slot /></div>
+  </div>
+</section>
+
+<style>
+  .policy h2 { font-size: clamp(1.4rem, 3vw, 2rem); margin-bottom: 1rem; }
+  /* green as an accent rail, not a fill */
+  .plain {
+    border-left: 3px solid var(--green);
+    background: var(--surface);
+    padding: 0.8rem 1rem;
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    margin-bottom: 1.25rem;
+    max-width: 64ch;
+  }
+  .terms { max-width: 64ch; }
+  .terms :global(p) { margin-bottom: 0.9rem; }
+  .terms :global(h3) { font-size: 1.05rem; margin: 1.2rem 0 0.4rem; }
+</style>

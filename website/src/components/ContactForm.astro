@@ -1,0 +1,43 @@
+---
+// General message form. There is no Worker endpoint for general messages (only /lead for meet &
+// greet requests), so v1 composes a mailto to hello@ from the fields. Swap for a real endpoint
+// (or a form service) if volume warrants.
+const CONTACT_EMAIL = 'hello@pawsonlongmeadow.com';
+---
+
+<form id="contact-form" class="contact-form">
+  <label>Name<input name="name" required /></label>
+  <div class="two">
+    <label>Email<input name="email" type="email" /></label>
+    <label>Phone<input name="phone" /></label>
+  </div>
+  <label>Message<textarea name="message" rows="4" required></textarea></label>
+  <button class="btn btn-primary" type="submit">Send Message</button>
+</form>
+
+<script define:vars={{ CONTACT_EMAIL }}>
+  const form = document.getElementById('contact-form');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const body = `Name: ${fd.get('name')}\nEmail: ${fd.get('email')}\nPhone: ${fd.get('phone')}\n\n${fd.get('message')}`;
+    const href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Website inquiry')}&body=${encodeURIComponent(body)}`;
+    window.location.href = href;
+  });
+</script>
+
+<style>
+  .contact-form { display: grid; gap: 0.9rem; max-width: 32rem; }
+  .contact-form label { display: grid; gap: 0.3rem; font-size: 0.85rem; color: var(--muted); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+  input, textarea {
+    font: inherit;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    background: var(--card);
+    color: var(--ink);
+  }
+  input:focus-visible, textarea:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
+  @media (max-width: 480px) { .two { grid-template-columns: 1fr; } }
+</style>

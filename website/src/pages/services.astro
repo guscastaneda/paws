@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import PricingList from '../components/PricingList.astro';
+import PolicyBlock from '../components/PolicyBlock.astro';
+import CalloutBand from '../components/CalloutBand.astro';
+---
+
+<BaseLayout title="Services & Pricing — Paws on Longmeadow">
+  <Hero
+    title="Services & Pricing"
+    subtitle="Every service starts the same way: a free Meet & Greet. For new dogs, a trial visit comes before any longer booking."
+    ctaLabel="Request a Meet & Greet"
+    ctaHref="/request-a-meet-and-greet"
+  />
+
+  <section>
+    <PricingList />
+  </section>
+
+  <PolicyBlock
+    heading="Cancellation Policy"
+    plain="Cancel daycare 24 or more hours ahead, or boarding 7 or more days ahead, for no charge. Inside those windows a fee applies, partial for boarding and full for daycare, and a no-show is always charged in full. Peak windows are wider. Cancel within 4 hours of booking and you are never charged."
+  >
+    <p>
+      <strong>Daycare, Half-Day Daycare, Walks, and Drop-In Visits.</strong> 24 or more hours notice:
+      no charge. Less than 24 hours, or a no-show: the full session rate.
+    </p>
+    <p>
+      <strong>Boarding and Multi-Night House Sitting.</strong> 7 or more days notice: no charge. 48
+      hours to 7 days: 50% of the total reservation. Less than 48 hours, or a no-show: the full
+      reservation.
+    </p>
+    <p>
+      <strong>Peak season.</strong> The overnight windows tighten: 14 or more days notice, no charge;
+      7 to 14 days, 50%; less than 7 days or a no-show, the full reservation. If a cancellation falls
+      exactly on a cutoff, we apply whichever tier is better for you.
+    </p>
+  </PolicyBlock>
+
+  <PolicyBlock heading="Payment">
+    <p>
+      We invoice weekly, and payment is due on receipt. New clients are invoiced after their first
+      stay, so there is no upfront payment to get started, aside from a peak season deposit where one
+      applies.
+    </p>
+    <p>Peak season reservations require a 50% deposit to hold your dates, applied to your final invoice.</p>
+  </PolicyBlock>
+
+  <CalloutBand
+    heading="Ready to Get Started?"
+    text="Every new client begins with a free Meet & Greet."
+    ctaLabel="Request a Meet & Greet"
+    ctaHref="/request-a-meet-and-greet"
+  />
+</BaseLayout>

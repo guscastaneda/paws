@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import PolicyBlock from '../components/PolicyBlock.astro';
+import CalloutBand from '../components/CalloutBand.astro';
+---
+
+<BaseLayout title="Ollie's Law — Paws on Longmeadow">
+  <Hero
+    title="Safety Isn't Optional. It's the Standard."
+    subtitle="Massachusetts pet care regulations exist for a reason, and we take them seriously."
+  />
+
+  <PolicyBlock heading="Why this law exists">
+    <p>
+      Ollie's Law is named after a dog. In 2020, a seven-month-old labradoodle named Ollie was
+      severely injured by other dogs at a Massachusetts boarding facility. He spent two months in
+      veterinary care before he died of his injuries, and his owner was never given a clear answer
+      about how it happened. Her fight for accountability became Ollie's Law, which Governor Healey
+      signed in 2024.
+    </p>
+    <p>
+      We take that seriously. Not because we are required to, but because it is the kind of
+      accountability this industry should have. We have a dog named Ollie too. We know what it means
+      to love one.
+    </p>
+  </PolicyBlock>
+
+  <PolicyBlock heading="What it means for us">
+    <p>
+      Paws on Longmeadow is fully compliant with Ollie's Law. We operate under a Special Permit from
+      the Town of Sharon Zoning Board of Appeals, hold a valid kennel license, and keep complete
+      health and compliance records for every dog in our care. Our property is inspected annually by
+      the Town of Sharon Animal Control Officer.
+    </p>
+  </PolicyBlock>
+
+  <PolicyBlock heading="What it means for you">
+    <p>
+      <strong>Rabies certificate.</strong> We keep a current Rabies vaccination certificate on file
+      for every dog. A note with only the date and expiration is no longer enough; we need the full
+      certificate.
+    </p>
+    <p>
+      <strong>Dog license.</strong> Massachusetts requires all dogs over six months to be licensed
+      with their city or town, and we keep a record of that valid license.
+    </p>
+    <p>
+      <strong>Collar and tags.</strong> Dogs wear a collar or harness with a current Rabies tag and
+      an inscribed municipal dog tag.
+    </p>
+    <p>
+      For more detail, visit the state's official
+      <a href="https://www.mass.gov/info-details/ollies-law-information">Ollie's Law page at mass.gov</a>.
+    </p>
+  </PolicyBlock>
+
+  <CalloutBand heading="Questions?" text="Reach out any time." ctaLabel="Contact us" ctaHref="/contact" />
+</BaseLayout>

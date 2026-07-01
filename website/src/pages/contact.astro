@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import ContactForm from '../components/ContactForm.astro';
+import CalloutBand from '../components/CalloutBand.astro';
+---
+
+<BaseLayout title="Contact — Paws on Longmeadow">
+  <Hero
+    title="We Would Love to Hear From You"
+    subtitle="A question about our services, or ready to get started? Here's where to begin."
+  />
+
+  <section>
+    <div class="container info">
+      <div>
+        <h2>New to Paws on Longmeadow?</h2>
+        <p>Start with a Meet & Greet request. It is free and takes a few minutes.</p>
+        <a class="btn btn-primary" href="/request-a-meet-and-greet">Request a Meet & Greet</a>
+      </div>
+      <div>
+        <h2>Where to find us</h2>
+        <p>We are on a quiet residential street in Sharon, MA, serving families across the South Shore and Greater Boston. Curbside drop-off and pickup only.</p>
+        <p class="social">
+          <a href="https://www.instagram.com/pawsonlongmeadow">Instagram</a>
+          <a href="https://www.facebook.com/profile.php?id=61572108133332">Facebook</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>Send us a message</h2>
+      <p class="lead">For general questions, soft inquiries, or anything that isn't a booking request.</p>
+      <ContactForm />
+    </div>
+  </section>
+
+  <CalloutBand
+    heading="Already part of the family?"
+    text="Use your personal booking link to request your next stay."
+    ctaLabel="Request a Stay"
+    ctaHref="/request-a-meet-and-greet"
+  />
+</BaseLayout>
+
+<style>
+  .info { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .info h2 { font-size: 1.3rem; margin-bottom: 0.6rem; }
+  .info p { color: var(--muted); margin-bottom: 0.9rem; max-width: 44ch; }
+  .social { display: flex; gap: 1rem; }
+  .lead { color: var(--muted); margin-bottom: 1.2rem; }
+  @media (max-width: 700px) { .info { grid-template-columns: 1fr; } }
+</style>

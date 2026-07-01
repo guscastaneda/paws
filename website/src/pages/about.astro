@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import FeatureBlock from '../components/FeatureBlock.astro';
+import CalloutBand from '../components/CalloutBand.astro';
+---
+
+<BaseLayout title="About — Paws on Longmeadow">
+  <Hero
+    title="It Started With Ollie"
+    subtitle="Some businesses start with a business plan. Ours started with a road trip."
+  />
+
+  <FeatureBlock heading="From one dog to many">
+    <p>
+      In 2017, Gus and Marian closed on their first home, a garrison colonial on a quiet street in
+      Sharon with the big yard they had always dreamed about. Weeks later they drove to Virginia for
+      a puppy named Ollie. They didn't have a plan yet. They had Ollie, and that turned out to be
+      enough.
+    </p>
+    <p>
+      When a friend needed help with his dog, watching Ollie play alongside another dog in a safe,
+      familiar place was unlike anything they had seen. The next day, Gus opened a Rover profile. For
+      years it ran quietly and part-time, word spreading the way it does in a neighborhood. In 2024,
+      Gus left his career as a creative project manager and committed to it full-time.
+    </p>
+  </FeatureBlock>
+
+  <FeatureBlock heading="This is our home" ctaLabel="See the space" ctaHref="/our-home">
+    <p>
+      That is not a tagline. Paws on Longmeadow is not a facility or a kennel. It is the home where
+      Gus and Marian live, where their kids are growing up, and where Ollie, now nine, holds court
+      from his favorite spot. When your dog stays with us, they are sleeping where we sleep and
+      playing where our family plays.
+    </p>
+  </FeatureBlock>
+
+  <FeatureBlock heading="The people behind the paws">
+    <p>
+      <strong>Gus</strong> ran creative projects for years before making this his full-time life in
+      2024. That shows in the attention to detail and the consistency he works to give every family.
+    </p>
+    <p>
+      <strong>Marian</strong> is the heartbeat of the day-to-day. She greets nearly every dog who
+      walks through the door and says goodbye to each one. She handles some walks, drives dogs home,
+      and takes the photos and videos, a fact that becomes obvious the moment you see them.
+    </p>
+    <p>
+      <strong>Their two boys</strong> have grown up in the middle of all of this. They have never
+      known a home without dogs in it. The pups know it too.
+    </p>
+  </FeatureBlock>
+
+  <FeatureBlock heading="Why families choose us">
+    <ul>
+      <li>We are a home, not a facility. Your dog lives with a family, not in a run.</li>
+      <li>Someone is always here. There is a familiar face in the house.</li>
+      <li>We have been doing this since 2018, long before it was a business.</li>
+      <li>Small by design, so every dog gets attention.</li>
+      <li>Ollie approves every guest. That is not a joke. He is very particular.</li>
+    </ul>
+  </FeatureBlock>
+
+  <CalloutBand
+    heading="Come meet us"
+    text="The best way to understand this place is to experience it."
+    ctaLabel="Request a Meet & Greet"
+    ctaHref="/request-a-meet-and-greet"
+  />
+</BaseLayout>
+
+<style>
+  ul { display: grid; gap: 0.5rem; padding-left: 1.1rem; color: var(--ink); }
+</style>

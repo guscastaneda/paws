@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import FeatureBlock from '../components/FeatureBlock.astro';
+import CalloutBand from '../components/CalloutBand.astro';
+---
+
+<BaseLayout title="Our Home — Paws on Longmeadow">
+  <Hero
+    title="Our Home"
+    subtitle="Most mornings start the same way. Marian is up early, coffee in hand, setting the space before the first dog arrives. The quiet before the storm, and she loves it."
+  />
+
+  <FeatureBlock heading="Ollie's Deck">
+    <p>
+      Every dog lands here first. Ollie's Deck is a large outdoor space between the house, the yard,
+      and the street, where dogs arrive, decompress, and move between the parts of their day. It has
+      Kuranda elevated beds, a water station, and plenty of shade. Three access points keep arrivals,
+      departures, and yard time organized and controlled.
+    </p>
+  </FeatureBlock>
+
+  <FeatureBlock heading="The yard">
+    <p>
+      The backyard is fully fenced, about 12,000 square feet, with a mix of grass, gravel, and
+      natural mulch to explore. Mature trees give shade, and there is always somewhere cool to
+      settle. Fencing is six feet tall across most of the perimeter with three secure gates. We treat
+      the yard with dog-safe products, keep a regular mosquito and tick schedule, and clean it daily.
+    </p>
+  </FeatureBlock>
+
+  <FeatureBlock heading="The inside">
+    <p>
+      During the day dogs have the run of the main level, the living room and kitchen, the places a
+      family actually lives. A baby gate keeps things to the first floor. Dogs sleep wherever they
+      are most comfortable, from elevated beds to a very popular couch. Boarding dogs are fed
+      separately, inside a crate or behind an x-pen, a simple practice that keeps mealtimes calm and
+      safe.
+    </p>
+  </FeatureBlock>
+
+  <FeatureBlock heading="How arrivals work" ctaLabel="See hours and details" ctaHref="/faq">
+    <p>
+      Drop-off and pickup are curbside. Text us when you are on your way and again when you arrive,
+      and we will meet you at the curb. For boarding, bring your dog's food, a blanket, and a familiar
+      item or two. We introduce new arrivals to the group slowly and pay attention to how every dog
+      enters a space.
+    </p>
+  </FeatureBlock>
+
+  <CalloutBand
+    heading="See it for yourself"
+    text="Your Meet & Greet happens right here on Ollie's Deck, so you see exactly where your dog will be."
+    ctaLabel="Request a Meet & Greet"
+    ctaHref="/request-a-meet-and-greet"
+  />
+</BaseLayout>

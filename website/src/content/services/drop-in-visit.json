@@ -1,0 +1,9 @@
+{
+  "name": "Drop-In Visit",
+  "order": 5,
+  "status": "by-request",
+  "price": "$35 / visit",
+  "modifiers": ["Extra dog +$15 per visit", "Extra cat +$10 per visit"],
+  "blurb": "A scheduled check-in at your home covering feeding, play, and a potty break.",
+  "icon": "i-door"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Half-Day Daycare",
+  "order": 3,
+  "status": "bookable",
+  "price": "$35 / half-day",
+  "modifiers": [],
+  "blurb": "All the good stuff, half the day. Available with certain restrictions, so reach out to confirm it's the right fit.",
+  "icon": "i-cloud-sun"
+}

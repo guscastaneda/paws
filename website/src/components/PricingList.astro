@@ -1,0 +1,49 @@
+---
+import { getCollection } from 'astro:content';
+
+const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+const label: Record<string, string> = { 'by-request': 'by request', 'coming-soon': 'coming soon' };
+---
+
+<div class="pricing container">
+  {
+    services.map(({ data }) => (
+      <article class="row">
+        <div class="top">
+          <h3>{data.name}</h3>
+          {data.status !== 'bookable' && <span class="tag">{label[data.status]}</span>}
+          <span class="price">{data.price ?? 'Ask us'}</span>
+        </div>
+        <p class="blurb">{data.blurb}</p>
+        {data.modifiers.length > 0 && (
+          <ul>
+            {data.modifiers.map((m) => (
+              <li>{m}</li>
+            ))}
+          </ul>
+        )}
+      </article>
+    ))
+  }
+</div>
+
+<style>
+  .pricing { display: grid; gap: 0.5rem; }
+  .row { padding: 1.1rem 0; border-bottom: 1px solid var(--line); }
+  .top { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+  .top h3 { font-size: 1.2rem; }
+  .price { margin-left: auto; color: var(--green-deep); font-weight: 600; }
+  .tag {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--clay);
+    border: 1px solid var(--clay);
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+  }
+  .blurb { color: var(--muted); margin: 0.35rem 0; max-width: 60ch; }
+  ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; }
+  li { font-size: 0.85rem; color: var(--muted); position: relative; padding-left: 0.9rem; }
+  li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+</style>

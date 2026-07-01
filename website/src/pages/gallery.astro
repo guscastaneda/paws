@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import GalleryGrid from '../components/GalleryGrid.astro';
+import Testimonials from '../components/Testimonials.astro';
+---
+
+<BaseLayout title="Gallery — Paws on Longmeadow">
+  <Hero
+    title="Every Dog Has a Story Here"
+    subtitle="A first-timer figuring out the yard. A regular who has claimed the same couch spot for weeks. Two dogs who met on a Monday and were inseparable by Friday."
+  />
+  <GalleryGrid />
+  <Testimonials />
+</BaseLayout>

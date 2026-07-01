@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import LeadForm from '../components/LeadForm.astro';
+import Steps from '../components/Steps.astro';
 ---
 
 <BaseLayout title="Request a Meet & Greet — Paws on Longmeadow">
@@ -14,4 +15,13 @@ import LeadForm from '../components/LeadForm.astro';
       <LeadForm />
     </div>
   </section>
+  <Steps
+    heading="What happens after you submit"
+    steps={[
+      'We review your request and reach out within 24 hours to schedule your Meet & Greet.',
+      'We meet at our place or yours, depending on the service.',
+      "If it's a great fit, we schedule a trial visit.",
+      "After the trial, you're all set and your personal booking link is waiting in your inbox.",
+    ]}
+  />
 </BaseLayout>
